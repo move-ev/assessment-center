@@ -14,6 +14,10 @@ datasource db {
   provider = "postgresql"
 }
 
+// ---------------------------------------------------------------------------
+// Auth models (Better Auth — do not modify structure)
+// ---------------------------------------------------------------------------
+
 model Post {
   id        String   @id @default(cuid())
   name      String
@@ -27,16 +31,22 @@ model Post {
 }
 
 model User {
-  id            String    @id
+  id            String     @id
   name          String //@db.Text
   email         String
-  emailVerified Boolean   @default(false)
+  emailVerified Boolean    @default(false)
   image         String? //@db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @default(now()) @updatedAt
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @default(now()) @updatedAt
   sessions      Session[]
   accounts      Account[]
   posts         Post[]
+  reviewers     Reviewer[]
+
+  role       String?
+  banned     Boolean?  @default(false)
+  banReason  String?
+  banExpires DateTime?
 
   @@unique([email])
   @@map("user")
@@ -53,8 +63,11 @@ model Session {
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  impersonatedBy String?
+
   @@unique([token])
   @@map("session")
+  @@index([userId])
 }
 
 model Account {
@@ -74,6 +87,7 @@ model Account {
   updatedAt             DateTime  @updatedAt
 
   @@map("account")
+  @@index([userId])
 }
 
 model Verification {
@@ -85,4 +99,280 @@ model Verification {
   updatedAt  DateTime @default(now()) @updatedAt
 
   @@map("verification")
+  @@index([identifier])
+}
+
+// ---------------------------------------------------------------------------
+// Assessment Center domain
+// ---------------------------------------------------------------------------
+
+/// The top-level event. All domain entities are scoped to an AssessmentCenter.
+
+model AssessmentCenter {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  days         AssessmentDay[]
+  groups       ParticipantGroup[]
+  participants Participant[]
+  reviewers    Reviewer[]
+  tasks        Task[]
+}
+
+/// A calendar date on which the AC takes place.
+/// A group may attend on one or more days.
+
+model AssessmentDay {
+  id                 String           @id @default(cuid())
+  assessmentCenterId String
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  date               DateTime         @db.Date
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  scheduleEntries ScheduleEntry[]
+
+  @@unique([assessmentCenterId, date])
+  @@index([assessmentCenterId])
+}
+
+/// A named group of participants within an AC.
+/// Groups are assigned tasks via the schedule.
+
+model ParticipantGroup {
+  id                 String           @id @default(cuid())
+  assessmentCenterId String
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  name               String
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  memberships      ParticipantGroupMembership[]
+  scheduleEntries  ScheduleEntry[]
+  teamObservations TeamTaskObservation[]
+
+  @@index([assessmentCenterId])
+}
+
+/// Junction between a Participant and a ParticipantGroup.
+/// A participant belongs to exactly one group per AC — enforced at the application layer
+/// because a DB-level constraint would require a cross-table check.
+
+model ParticipantGroupMembership {
+  id            String           @id @default(cuid())
+  participantId String
+  participant   Participant      @relation(fields: [participantId], references: [id])
+  groupId       String
+  group         ParticipantGroup @relation(fields: [groupId], references: [id])
+  createdAt     DateTime         @default(now())
+
+  @@unique([participantId, groupId])
+  @@index([groupId])
+}
+
+/// A person being assessed. Intentionally separate from User —
+/// participants do not log into the system.
+
+model Participant {
+  id                 String           @id @default(cuid())
+  assessmentCenterId String
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  name               String
+  email              String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+
+  groupMemberships    ParticipantGroupMembership[]
+  reviewerAssignments ReviewerAssignment[]
+
+  @@index([assessmentCenterId])
+}
+
+/// A system User acting as a reviewer within a specific AC.
+
+model Reviewer {
+  id                 String           @id @default(cuid())
+  assessmentCenterId String
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  userId             String
+  user               User             @relation(fields: [userId], references: [id])
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  assignments      ReviewerAssignment[]
+  teamObservations TeamTaskObservation[]
+
+  @@unique([assessmentCenterId, userId])
+  @@index([userId])
+}
+
+/// A task that participants perform during the AC.
+/// isTeamTask indicates that participants solve this task as a group.
+
+model Task {
+  id                 String           @id @default(cuid())
+  assessmentCenterId String
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  name               String
+  description        String?
+  isTeamTask         Boolean          @default(false)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+  deletedAt          DateTime?
+
+  criteria            ReviewCriteria[]
+  scheduleEntries     ScheduleEntry[]
+  reviewerAssignments ReviewerAssignment[]
+  teamObservations    TeamTaskObservation[]
+
+  @@index([assessmentCenterId])
+}
+
+/// Defines which group performs which task on which day, and in what order.
+/// This is the authoritative schedule for the AC.
+
+model ScheduleEntry {
+  id         String           @id @default(cuid())
+  dayId      String
+  day        AssessmentDay    @relation(fields: [dayId], references: [id])
+  groupId    String
+  group      ParticipantGroup @relation(fields: [groupId], references: [id])
+  taskId     String
+  task       Task             @relation(fields: [taskId], references: [id])
+  orderIndex Int              @default(0)
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  @@unique([dayId, groupId, taskId])
+  @@index([groupId])
+  @@index([taskId])
+}
+
+/// A criterion used to evaluate participants on a specific task.
+///
+/// DB-level constraint (applied via migration SQL, not expressible in Prisma):
+///   CHECK (type = 'QUALITATIVE' OR weight IS NOT NULL)
+///
+/// Application layer must enforce:
+///   - weight > 0 for QUANTITATIVE criteria
+///   - weight IS NULL for QUALITATIVE criteria
+
+model ReviewCriteria {
+  id          String       @id @default(cuid())
+  taskId      String
+  task        Task         @relation(fields: [taskId], references: [id])
+  name        String
+  description String?
+  type        CriteriaType
+  /// Required when type = QUANTITATIVE. Must be > 0.
+  /// Null when type = QUALITATIVE.
+  weight      Float?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  deletedAt   DateTime?
+
+  quantitativeRatings QuantitativeRating[]
+  qualitativeRatings  QualitativeRating[]
+
+  @@index([taskId])
+}
+
+enum CriteriaType {
+  QUANTITATIVE
+  QUALITATIVE
+}
+
+/// Links a specific reviewer to a specific participant for a specific task.
+/// Multiple reviewers can be assigned to the same participant+task pair.
+/// Each reviewer submits their own independent ratings via this record.
+
+model ReviewerAssignment {
+  id            String      @id @default(cuid())
+  reviewerId    String
+  reviewer      Reviewer    @relation(fields: [reviewerId], references: [id])
+  participantId String
+  participant   Participant @relation(fields: [participantId], references: [id])
+  taskId        String
+  task          Task        @relation(fields: [taskId], references: [id])
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  quantitativeRatings QuantitativeRating[]
+  qualitativeRatings  QualitativeRating[]
+
+  @@unique([reviewerId, participantId, taskId])
+  @@index([participantId, taskId])
+  @@index([reviewerId])
+}
+
+/// A numeric rating (0–5) for a QUANTITATIVE criterion.
+///
+/// DB-level constraint (applied via migration SQL):
+///   CHECK (value >= 0 AND value <= 5)
+///
+/// notes is optional — use it to add context to the numeric score.
+/// Soft-deleted to preserve history when a reviewer corrects an entry during a live AC.
+
+model QuantitativeRating {
+  id                   String             @id @default(cuid())
+  reviewerAssignmentId String
+  reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id])
+  criteriaId           String
+  criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id])
+  /// Integer in range [0, 5]. Enforced via check constraint in migration.
+  value                Int
+  notes                String?
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
+
+  @@unique([reviewerAssignmentId, criteriaId])
+  @@index([criteriaId])
+}
+
+/// A free-text rating for a QUALITATIVE criterion.
+/// text is always required — no default, no nullable.
+/// Soft-deleted to preserve history when a reviewer corrects an entry during a live AC.
+
+model QualitativeRating {
+  id                   String             @id @default(cuid())
+  reviewerAssignmentId String
+  reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id])
+  criteriaId           String
+  criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id])
+  text                 String
+  createdAt            DateTime           @default(now())
+  updatedAt            DateTime           @updatedAt
+  deletedAt            DateTime?
+
+  @@unique([reviewerAssignmentId, criteriaId])
+  @@index([criteriaId])
+}
+
+/// An optional note on the group dynamic during a team task.
+/// Written by a reviewer who observed the team — not tied to any individual participant.
+/// Only created when the reviewer actually writes something (notes is nullable at the DB level
+/// so a record can be saved incrementally during a live AC, but application logic should
+/// require a non-empty string before persisting).
+
+model TeamTaskObservation {
+  id         String           @id @default(cuid())
+  taskId     String
+  task       Task             @relation(fields: [taskId], references: [id])
+  groupId    String
+  group      ParticipantGroup @relation(fields: [groupId], references: [id])
+  reviewerId String
+  reviewer   Reviewer         @relation(fields: [reviewerId], references: [id])
+  notes      String?
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+  deletedAt  DateTime?
+
+  @@unique([taskId, groupId, reviewerId])
+  @@index([groupId, taskId])
 }

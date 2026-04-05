@@ -9,7 +9,9 @@
 * 🟢 You can import this file directly.
 */
 
+export const CriteriaType = {
+  QUANTITATIVE: 'QUANTITATIVE',
+  QUALITATIVE: 'QUALITATIVE'
+} as const
 
-
-// This file is empty because there are no enums in the schema.
-export {}
+export type CriteriaType = (typeof CriteriaType)[keyof typeof CriteriaType]

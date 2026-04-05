@@ -55,7 +55,20 @@ export const ModelName = {
   User: 'User',
   Session: 'Session',
   Account: 'Account',
-  Verification: 'Verification'
+  Verification: 'Verification',
+  AssessmentCenter: 'AssessmentCenter',
+  AssessmentDay: 'AssessmentDay',
+  ParticipantGroup: 'ParticipantGroup',
+  ParticipantGroupMembership: 'ParticipantGroupMembership',
+  Participant: 'Participant',
+  Reviewer: 'Reviewer',
+  Task: 'Task',
+  ScheduleEntry: 'ScheduleEntry',
+  ReviewCriteria: 'ReviewCriteria',
+  ReviewerAssignment: 'ReviewerAssignment',
+  QuantitativeRating: 'QuantitativeRating',
+  QualitativeRating: 'QualitativeRating',
+  TeamTaskObservation: 'TeamTaskObservation'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -92,7 +105,11 @@ export const UserScalarFieldEnum = {
   emailVerified: 'emailVerified',
   image: 'image',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  role: 'role',
+  banned: 'banned',
+  banReason: 'banReason',
+  banExpires: 'banExpires'
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -106,7 +123,8 @@ export const SessionScalarFieldEnum = {
   updatedAt: 'updatedAt',
   ipAddress: 'ipAddress',
   userAgent: 'userAgent',
-  userId: 'userId'
+  userId: 'userId',
+  impersonatedBy: 'impersonatedBy'
 } as const
 
 export type SessionScalarFieldEnum = (typeof SessionScalarFieldEnum)[keyof typeof SessionScalarFieldEnum]
@@ -141,6 +159,169 @@ export const VerificationScalarFieldEnum = {
 } as const
 
 export type VerificationScalarFieldEnum = (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum]
+
+
+export const AssessmentCenterScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type AssessmentCenterScalarFieldEnum = (typeof AssessmentCenterScalarFieldEnum)[keyof typeof AssessmentCenterScalarFieldEnum]
+
+
+export const AssessmentDayScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  date: 'date',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AssessmentDayScalarFieldEnum = (typeof AssessmentDayScalarFieldEnum)[keyof typeof AssessmentDayScalarFieldEnum]
+
+
+export const ParticipantGroupScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ParticipantGroupScalarFieldEnum = (typeof ParticipantGroupScalarFieldEnum)[keyof typeof ParticipantGroupScalarFieldEnum]
+
+
+export const ParticipantGroupMembershipScalarFieldEnum = {
+  id: 'id',
+  participantId: 'participantId',
+  groupId: 'groupId',
+  createdAt: 'createdAt'
+} as const
+
+export type ParticipantGroupMembershipScalarFieldEnum = (typeof ParticipantGroupMembershipScalarFieldEnum)[keyof typeof ParticipantGroupMembershipScalarFieldEnum]
+
+
+export const ParticipantScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  name: 'name',
+  email: 'email',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ParticipantScalarFieldEnum = (typeof ParticipantScalarFieldEnum)[keyof typeof ParticipantScalarFieldEnum]
+
+
+export const ReviewerScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  userId: 'userId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewerScalarFieldEnum = (typeof ReviewerScalarFieldEnum)[keyof typeof ReviewerScalarFieldEnum]
+
+
+export const TaskScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  name: 'name',
+  description: 'description',
+  isTeamTask: 'isTeamTask',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type TaskScalarFieldEnum = (typeof TaskScalarFieldEnum)[keyof typeof TaskScalarFieldEnum]
+
+
+export const ScheduleEntryScalarFieldEnum = {
+  id: 'id',
+  dayId: 'dayId',
+  groupId: 'groupId',
+  taskId: 'taskId',
+  orderIndex: 'orderIndex',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ScheduleEntryScalarFieldEnum = (typeof ScheduleEntryScalarFieldEnum)[keyof typeof ScheduleEntryScalarFieldEnum]
+
+
+export const ReviewCriteriaScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  name: 'name',
+  description: 'description',
+  type: 'type',
+  weight: 'weight',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ReviewCriteriaScalarFieldEnum = (typeof ReviewCriteriaScalarFieldEnum)[keyof typeof ReviewCriteriaScalarFieldEnum]
+
+
+export const ReviewerAssignmentScalarFieldEnum = {
+  id: 'id',
+  reviewerId: 'reviewerId',
+  participantId: 'participantId',
+  taskId: 'taskId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ReviewerAssignmentScalarFieldEnum = (typeof ReviewerAssignmentScalarFieldEnum)[keyof typeof ReviewerAssignmentScalarFieldEnum]
+
+
+export const QuantitativeRatingScalarFieldEnum = {
+  id: 'id',
+  reviewerAssignmentId: 'reviewerAssignmentId',
+  criteriaId: 'criteriaId',
+  value: 'value',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type QuantitativeRatingScalarFieldEnum = (typeof QuantitativeRatingScalarFieldEnum)[keyof typeof QuantitativeRatingScalarFieldEnum]
+
+
+export const QualitativeRatingScalarFieldEnum = {
+  id: 'id',
+  reviewerAssignmentId: 'reviewerAssignmentId',
+  criteriaId: 'criteriaId',
+  text: 'text',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type QualitativeRatingScalarFieldEnum = (typeof QualitativeRatingScalarFieldEnum)[keyof typeof QualitativeRatingScalarFieldEnum]
+
+
+export const TeamTaskObservationScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  groupId: 'groupId',
+  reviewerId: 'reviewerId',
+  notes: 'notes',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type TeamTaskObservationScalarFieldEnum = (typeof TeamTaskObservationScalarFieldEnum)[keyof typeof TeamTaskObservationScalarFieldEnum]
 
 
 export const SortOrder = {

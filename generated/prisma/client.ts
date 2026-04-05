@@ -66,3 +66,68 @@ export type Account = Prisma.AccountModel
  * 
  */
 export type Verification = Prisma.VerificationModel
+/**
+ * Model AssessmentCenter
+ * 
+ */
+export type AssessmentCenter = Prisma.AssessmentCenterModel
+/**
+ * Model AssessmentDay
+ * 
+ */
+export type AssessmentDay = Prisma.AssessmentDayModel
+/**
+ * Model ParticipantGroup
+ * 
+ */
+export type ParticipantGroup = Prisma.ParticipantGroupModel
+/**
+ * Model ParticipantGroupMembership
+ * 
+ */
+export type ParticipantGroupMembership = Prisma.ParticipantGroupMembershipModel
+/**
+ * Model Participant
+ * 
+ */
+export type Participant = Prisma.ParticipantModel
+/**
+ * Model Reviewer
+ * 
+ */
+export type Reviewer = Prisma.ReviewerModel
+/**
+ * Model Task
+ * 
+ */
+export type Task = Prisma.TaskModel
+/**
+ * Model ScheduleEntry
+ * 
+ */
+export type ScheduleEntry = Prisma.ScheduleEntryModel
+/**
+ * Model ReviewCriteria
+ * 
+ */
+export type ReviewCriteria = Prisma.ReviewCriteriaModel
+/**
+ * Model ReviewerAssignment
+ * 
+ */
+export type ReviewerAssignment = Prisma.ReviewerAssignmentModel
+/**
+ * Model QuantitativeRating
+ * 
+ */
+export type QuantitativeRating = Prisma.QuantitativeRatingModel
+/**
+ * Model QualitativeRating
+ * 
+ */
+export type QualitativeRating = Prisma.QualitativeRatingModel
+/**
+ * Model TeamTaskObservation
+ * 
+ */
+export type TeamTaskObservation = Prisma.TeamTaskObservationModel
