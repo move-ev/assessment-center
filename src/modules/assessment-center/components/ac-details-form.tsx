@@ -1,8 +1,9 @@
 "use client";
 
+import { Trash2Icon } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Trash2Icon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
 	Field,
@@ -11,8 +12,8 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
 
 type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
@@ -43,7 +44,7 @@ function AcDetailsForm({ acId }: Props) {
 		return null;
 	}
 
-	return <AcDetailsFormContent acId={acId} ac={ac} utils={utils} />;
+	return <AcDetailsFormContent ac={ac} acId={acId} utils={utils} />;
 }
 
 type ContentProps = {
@@ -102,14 +103,15 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 		addDayMutation.mutate({ acId, date: newDate });
 	}
 
-	const zodErrors = updateMutation.error?.data?.zodError
-		?.fieldErrors as Record<string, string[]> | undefined;
+	const zodErrors = updateMutation.error?.data?.zodError?.fieldErrors as
+		| Record<string, string[]>
+		| undefined;
 
 	return (
 		<div className="max-w-xl space-y-8">
 			<div>
-				<h2 className="text-base font-medium">Details</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h2 className="font-medium text-base">Details</h2>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Name und Beschreibung des Assessment Centers.
 				</p>
 			</div>
@@ -119,28 +121,32 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 					<Field>
 						<FieldLabel htmlFor="ac-name">Name</FieldLabel>
 						<Input
-							id="ac-name"
-							value={name}
-							onChange={(e) => setName(e.target.value)}
-							disabled={isReadOnly || updateMutation.isPending}
 							aria-invalid={!!zodErrors?.name?.length}
+							disabled={isReadOnly || updateMutation.isPending}
+							id="ac-name"
+							onChange={(e) => setName(e.target.value)}
 							required
+							value={name}
 						/>
 						{zodErrors?.name && (
-							<FieldError errors={zodErrors.name.map((m) => ({ message: m }))} />
+							<FieldError
+								errors={zodErrors.name.map((m) => ({ message: m }))}
+							/>
 						)}
 					</Field>
 
 					<Field>
 						<FieldLabel htmlFor="ac-description">
 							Beschreibung{" "}
-							<span className="font-normal text-muted-foreground">(optional)</span>
+							<span className="font-normal text-muted-foreground">
+								(optional)
+							</span>
 						</FieldLabel>
 						<Textarea
-							id="ac-description"
-							value={description}
-							onChange={(e) => setDescription(e.target.value)}
 							disabled={isReadOnly || updateMutation.isPending}
+							id="ac-description"
+							onChange={(e) => setDescription(e.target.value)}
+							value={description}
 						/>
 					</Field>
 				</FieldGroup>
@@ -148,8 +154,8 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 				{!isReadOnly && (
 					<div className="mt-6">
 						<Button
-							type="submit"
 							disabled={updateMutation.isPending || name.trim() === ""}
+							type="submit"
 						>
 							{updateMutation.isPending ? "Speichert..." : "Speichern"}
 						</Button>
@@ -162,13 +168,13 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 			<DaysSection
 				acId={acId}
 				days={ac.days}
-				isReadOnly={isReadOnly}
-				newDate={newDate}
-				onNewDateChange={setNewDate}
-				onAddDay={handleAddDay}
-				onRemoveDay={(id) => removeDayMutation.mutate({ id })}
 				isAddingDay={addDayMutation.isPending}
+				isReadOnly={isReadOnly}
 				isRemovingDay={removeDayMutation.isPending}
+				newDate={newDate}
+				onAddDay={handleAddDay}
+				onNewDateChange={setNewDate}
+				onRemoveDay={(id) => removeDayMutation.mutate({ id })}
 			/>
 
 			<Separator />
@@ -203,22 +209,24 @@ function DaysSection({
 	return (
 		<div className="space-y-4">
 			<div>
-				<h3 className="text-sm font-medium">Tage</h3>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h3 className="font-medium text-sm">Tage</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
 					An welchen Tagen findet das Assessment Center statt?
 				</p>
 			</div>
 
 			{days.length === 0 && (
-				<p className="text-sm text-muted-foreground">Noch keine Tage hinzugefügt.</p>
+				<p className="text-muted-foreground text-sm">
+					Noch keine Tage hinzugefügt.
+				</p>
 			)}
 
 			{days.length > 0 && (
 				<ul className="space-y-2">
 					{days.map((day) => (
 						<li
-							key={day.id}
 							className="flex items-center justify-between rounded-lg border px-3 py-2 text-sm"
+							key={day.id}
 						>
 							<span>
 								{day.date.toLocaleDateString("de-DE", {
@@ -230,12 +238,12 @@ function DaysSection({
 							</span>
 							{!isReadOnly && (
 								<Button
-									type="button"
-									variant="ghost"
-									size="icon-sm"
+									aria-label="Tag entfernen"
 									disabled={isRemovingDay}
 									onClick={() => onRemoveDay(day.id)}
-									aria-label="Tag entfernen"
+									size="icon-sm"
+									type="button"
+									variant="ghost"
 								>
 									<Trash2Icon className="h-4 w-4" />
 								</Button>
@@ -246,19 +254,19 @@ function DaysSection({
 			)}
 
 			{!isReadOnly && (
-				<form onSubmit={onAddDay} className="flex gap-2">
+				<form className="flex gap-2" onSubmit={onAddDay}>
 					<Input
+						aria-label="Neues Datum"
+						className="w-auto"
+						disabled={isAddingDay}
+						onChange={(e) => onNewDateChange(e.target.value)}
 						type="date"
 						value={newDate}
-						onChange={(e) => onNewDateChange(e.target.value)}
-						disabled={isAddingDay}
-						className="w-auto"
-						aria-label="Neues Datum"
 					/>
 					<Button
+						disabled={isAddingDay || !newDate}
 						type="submit"
 						variant="outline"
-						disabled={isAddingDay || !newDate}
 					>
 						{isAddingDay ? "Hinzufügen..." : "Tag hinzufügen"}
 					</Button>
@@ -275,18 +283,30 @@ type StatusSectionProps = {
 };
 
 function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
+	const router = useRouter();
 	const { data: progress } = api.assessmentCenter.getSetupProgress.useQuery(
 		{ acId },
 		{ enabled: currentStatus === "DRAFT" },
 	);
 
-	const transitionMutation = api.assessmentCenter.transitionToActive.useMutation({
-		onSuccess: async () => {
-			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
-			toast.success("Assessment Center wurde aktiviert");
-		},
-		onError: (error) => toast.error(error.message),
-	});
+	const transitionMutation =
+		api.assessmentCenter.transitionToActive.useMutation({
+			onSuccess: async () => {
+				await utils.assessmentCenter.getDetails.invalidate({ id: acId });
+				router.refresh();
+				toast.success("Assessment Center wurde aktiviert");
+			},
+			onError: (error) => toast.error(error.message),
+		});
+	const completeMutation =
+		api.assessmentCenter.transitionToCompleted.useMutation({
+			onSuccess: async () => {
+				await utils.assessmentCenter.getDetails.invalidate({ id: acId });
+				router.refresh();
+				toast.success("Assessment Center wurde abgeschlossen");
+			},
+			onError: (error) => toast.error(error.message),
+		});
 
 	const STATUS_LABEL: Record<AcStatus, string> = {
 		DRAFT: "Entwurf",
@@ -294,15 +314,39 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 		COMPLETED: "Abgeschlossen",
 	};
 
-	if (currentStatus !== "DRAFT") {
+	if (currentStatus === "COMPLETED") {
 		return (
 			<div className="space-y-2">
-				<h3 className="text-sm font-medium">Status</h3>
-				<p className="text-sm text-muted-foreground">
+				<h3 className="font-medium text-sm">Status</h3>
+				<p className="text-muted-foreground text-sm">
 					Das Assessment Center ist{" "}
-					<strong className="text-foreground">{STATUS_LABEL[currentStatus]}</strong>{" "}
+					<strong className="text-foreground">
+						{STATUS_LABEL[currentStatus]}
+					</strong>{" "}
 					und kann nicht mehr bearbeitet werden.
 				</p>
+			</div>
+		);
+	}
+
+	if (currentStatus === "ACTIVE") {
+		return (
+			<div className="space-y-4">
+				<div>
+					<h3 className="font-medium text-sm">Abschließen</h3>
+					<p className="mt-1 text-muted-foreground text-sm">
+						Sobald das Assessment Center beendet ist, kann es abgeschlossen und
+						in die Ergebnisse überführt werden.
+					</p>
+				</div>
+				<Button
+					disabled={completeMutation.isPending}
+					onClick={() => completeMutation.mutate({ id: acId })}
+				>
+					{completeMutation.isPending
+						? "Wird abgeschlossen..."
+						: "AC abschließen"}
+				</Button>
 			</div>
 		);
 	}
@@ -320,20 +364,20 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 	return (
 		<div className="space-y-4">
 			<div>
-				<h3 className="text-sm font-medium">Aktivieren</h3>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h3 className="font-medium text-sm">Aktivieren</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Sobald alle Einrichtungsschritte abgeschlossen sind, kann das AC
 					aktiviert werden.
 				</p>
 			</div>
 			<Button
-				onClick={() => transitionMutation.mutate({ id: acId })}
 				disabled={!allStepsComplete || transitionMutation.isPending}
+				onClick={() => transitionMutation.mutate({ id: acId })}
 			>
 				{transitionMutation.isPending ? "Aktiviert..." : "AC aktivieren"}
 			</Button>
 			{!allStepsComplete && progress !== undefined && (
-				<p className="text-sm text-muted-foreground">
+				<p className="text-muted-foreground text-sm">
 					Schließe alle 7 Einrichtungsschritte ab, um das AC zu aktivieren.
 				</p>
 			)}

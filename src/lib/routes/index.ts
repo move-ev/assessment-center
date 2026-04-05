@@ -20,6 +20,8 @@ export const ROUTES = {
 		`/assessment-centers/${id}/setup/assignments`,
 	acOverview: (id: string) => `/assessment-centers/${id}/overview`,
 	acResults: (id: string) => `/assessment-centers/${id}/results`,
+	acResultsParticipant: (id: string, participantId: string) =>
+		`/assessment-centers/${id}/results/${participantId}`,
 	acReview: (id: string) => `/assessment-centers/${id}/review`,
 	acReviewTask: (id: string, taskId: string) =>
 		`/assessment-centers/${id}/review/${taskId}`,

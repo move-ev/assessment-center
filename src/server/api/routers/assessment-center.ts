@@ -375,4 +375,39 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: { status: "ACTIVE" },
 			});
 		}),
+
+	transitionToCompleted: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können den Status ändern",
+				});
+			}
+
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id, deletedAt: null },
+				select: { id: true, status: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			if (ac.status !== "ACTIVE") {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: "Nur aktive Assessment Center können abgeschlossen werden",
+				});
+			}
+
+			await ctx.db.assessmentCenter.update({
+				where: { id: input.id },
+				data: { status: "COMPLETED" },
+			});
+		}),
 });
