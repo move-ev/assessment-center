@@ -2,11 +2,11 @@ import "@/styles/globals.css";
 
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
-
-import { TRPCReactProvider } from "@/trpc/react";
+import { Toaster } from "@/components/ui/sonner";
 import { cn } from "@/lib/utils";
+import { TRPCReactProvider } from "@/trpc/react";
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'});
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
 	title: "Create T3 App",
@@ -26,6 +26,7 @@ export default function RootLayout({
 		<html className={cn(geist.variable, "font-sans", inter.variable)} lang="en">
 			<body>
 				<TRPCReactProvider>{children}</TRPCReactProvider>
+				<Toaster />
 			</body>
 		</html>
 	);
