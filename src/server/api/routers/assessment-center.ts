@@ -3,6 +3,40 @@ import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 export const assessmentCenterRouter = createTRPCRouter({
+	listForUser: protectedProcedure.query(async ({ ctx }) => {
+		const { id: userId, role } = ctx.session.user;
+		const isAdmin = role === "admin";
+
+		if (isAdmin) {
+			return ctx.db.assessmentCenter.findMany({
+				where: { deletedAt: null },
+				select: {
+					id: true,
+					name: true,
+					description: true,
+					status: true,
+					createdAt: true,
+				},
+				orderBy: { createdAt: "desc" },
+			});
+		}
+
+		return ctx.db.assessmentCenter.findMany({
+			where: {
+				deletedAt: null,
+				reviewers: { some: { userId } },
+			},
+			select: {
+				id: true,
+				name: true,
+				description: true,
+				status: true,
+				createdAt: true,
+			},
+			orderBy: { createdAt: "desc" },
+		});
+	}),
+
 	getById: protectedProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
@@ -203,7 +237,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			const date = new Date(input.date + "T00:00:00.000Z");
+			const date = new Date(`${input.date}T00:00:00.000Z`);
 
 			return ctx.db.assessmentDay.upsert({
 				where: {

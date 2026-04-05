@@ -10,12 +10,14 @@ for how the application is organised.
 
 | Role | Who | Access |
 |---|---|---|
-| **Admin** | The person who creates and manages an AC | Full access: setup, live overview, results |
+| **Admin** | Any system user with `role = "admin"` (managed via better-auth) | Full access to all ACs: setup, live overview, results |
 | **Reviewer** | A system User assigned as reviewer within a specific AC | Review workspace only |
 
-Role is **contextual per AC**. A user is a reviewer for AC #1 if a `Reviewer`
-record links their `User` to that AC. Admin rights are derived from AC
-ownership (the user who created the AC).
+Admin is a **global role** granted via the better-auth admin plugin (`User.role = "admin"`).
+Admins have access to every Assessment Center in the system.
+
+Reviewer access is **contextual per AC**: a user is a reviewer for AC #1 if a `Reviewer`
+record links their `User` to that AC.
 
 ---
 
