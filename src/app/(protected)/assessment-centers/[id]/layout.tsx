@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import { AcHeader, AcNav } from "@/modules/assessment-center";
 import { ROUTES } from "@/lib/routes";
+import { AcHeader, AcNav } from "@/modules/assessment-center";
 import { getSession } from "@/server/better-auth/server";
 import { db } from "@/server/db";
 
@@ -25,12 +25,13 @@ export default async function AcLayout({ children, params }: Props) {
 	}
 
 	const isAdmin = session?.user.role === "admin";
-	const isReviewer =
-		!isAdmin &&
-		(await db.reviewer.findFirst({
-			where: { assessmentCenterId: id, userId: session?.user.id ?? "" },
-			select: { id: true },
-		})) !== null;
+	const reviewer = isAdmin
+		? null
+		: await db.reviewer.findFirst({
+				where: { assessmentCenterId: id, userId: session?.user.id ?? "" },
+				select: { id: true },
+			});
+	const isReviewer = reviewer !== null;
 
 	if (!isAdmin && !isReviewer) {
 		redirect(ROUTES.dashboard());
@@ -39,7 +40,7 @@ export default async function AcLayout({ children, params }: Props) {
 	return (
 		<div className="flex min-h-screen flex-col">
 			<AcHeader id={id} name={ac.name} status={ac.status} />
-			<AcNav acId={id} isAdmin={isAdmin} acStatus={ac.status} />
+			<AcNav acId={id} acStatus={ac.status} isAdmin={isAdmin} />
 			<div className="flex flex-1 flex-col">{children}</div>
 		</div>
 	);
