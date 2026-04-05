@@ -1,4 +1,5 @@
 import { notFound, redirect } from "next/navigation";
+import { AcHeader, AcNav } from "@/modules/assessment-center";
 import { ROUTES } from "@/lib/routes";
 import { getSession } from "@/server/better-auth/server";
 import { db } from "@/server/db";
@@ -15,7 +16,7 @@ export default async function AcLayout({ children, params }: Props) {
 		getSession(),
 		db.assessmentCenter.findFirst({
 			where: { id, deletedAt: null },
-			select: { id: true },
+			select: { id: true, name: true, status: true },
 		}),
 	]);
 
@@ -35,5 +36,11 @@ export default async function AcLayout({ children, params }: Props) {
 		redirect(ROUTES.dashboard());
 	}
 
-	return <>{children}</>;
+	return (
+		<div className="flex min-h-screen flex-col">
+			<AcHeader id={id} name={ac.name} status={ac.status} />
+			<AcNav acId={id} isAdmin={isAdmin} acStatus={ac.status} />
+			<div className="flex flex-1 flex-col">{children}</div>
+		</div>
+	);
 }

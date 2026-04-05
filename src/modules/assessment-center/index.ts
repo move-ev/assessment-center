@@ -1,1 +1,9 @@
-export { AcCreateForm, AcDetailsPage } from "./components";
+export {
+	AcCreateForm,
+	AcDetailsForm,
+	AcGroupsEditor,
+	AcHeader,
+	AcNav,
+	AcParticipantsTable,
+	AcSetupHub,
+} from "./components";

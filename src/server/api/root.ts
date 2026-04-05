@@ -1,4 +1,6 @@
 import { assessmentCenterRouter } from "@/server/api/routers/assessment-center";
+import { groupRouter } from "@/server/api/routers/group";
+import { participantRouter } from "@/server/api/routers/participant";
 import { postRouter } from "@/server/api/routers/post";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
@@ -9,6 +11,8 @@ import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
  */
 export const appRouter = createTRPCRouter({
 	assessmentCenter: assessmentCenterRouter,
+	participant: participantRouter,
+	group: groupRouter,
 	post: postRouter,
 });
 
