@@ -1,7 +1,12 @@
+export { AcAssignmentsMatrix } from "./ac-assignments-matrix";
 export { AcCreateForm } from "./ac-create-form";
 export { AcDetailsForm } from "./ac-details-form";
 export { AcGroupsEditor } from "./ac-groups-editor";
 export { AcHeader } from "./ac-header";
 export { AcNav } from "./ac-nav";
 export { AcParticipantsTable } from "./ac-participants-table";
+export { AcReviewersTable } from "./ac-reviewers-table";
+export { AcScheduleBuilder } from "./ac-schedule-builder";
 export { AcSetupHub } from "./ac-setup-hub";
+export { AcTaskDetail } from "./ac-task-detail";
+export { AcTasksTable } from "./ac-tasks-table";

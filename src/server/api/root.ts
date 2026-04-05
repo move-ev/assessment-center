@@ -1,7 +1,11 @@
 import { assessmentCenterRouter } from "@/server/api/routers/assessment-center";
+import { assignmentRouter } from "@/server/api/routers/assignment";
 import { groupRouter } from "@/server/api/routers/group";
 import { participantRouter } from "@/server/api/routers/participant";
 import { postRouter } from "@/server/api/routers/post";
+import { reviewerRouter } from "@/server/api/routers/reviewer";
+import { scheduleRouter } from "@/server/api/routers/schedule";
+import { taskRouter } from "@/server/api/routers/task";
 import { createCallerFactory, createTRPCRouter } from "@/server/api/trpc";
 
 /**
@@ -13,6 +17,10 @@ export const appRouter = createTRPCRouter({
 	assessmentCenter: assessmentCenterRouter,
 	participant: participantRouter,
 	group: groupRouter,
+	task: taskRouter,
+	schedule: scheduleRouter,
+	reviewer: reviewerRouter,
+	assignment: assignmentRouter,
 	post: postRouter,
 });
 

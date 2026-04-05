@@ -1,10 +1,10 @@
 "use client";
 
+import { CheckIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { CheckIcon, LockIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
 type SetupProgress = {
@@ -58,16 +58,15 @@ const STEPS: StepConfig[] = [
 		route: ROUTES.acSetupTasks,
 		isAvailable: () => true,
 		isComplete: (p) => p.taskCount > 0,
-		isImplemented: false,
+		isImplemented: true,
 	},
 	{
 		key: "schedule",
 		label: "Zeitplan",
 		route: ROUTES.acSetupSchedule,
-		isAvailable: (p) =>
-			p.groupCount > 0 && p.taskCount > 0 && p.dayCount > 0,
+		isAvailable: (p) => p.groupCount > 0 && p.taskCount > 0 && p.dayCount > 0,
 		isComplete: (p) => p.scheduleEntryCount > 0,
-		isImplemented: false,
+		isImplemented: true,
 	},
 	{
 		key: "reviewers",
@@ -75,7 +74,7 @@ const STEPS: StepConfig[] = [
 		route: ROUTES.acSetupReviewers,
 		isAvailable: () => true,
 		isComplete: (p) => p.reviewerCount > 0,
-		isImplemented: false,
+		isImplemented: true,
 	},
 	{
 		key: "assignments",
@@ -84,7 +83,7 @@ const STEPS: StepConfig[] = [
 		isAvailable: (p) =>
 			p.participantCount > 0 && p.taskCount > 0 && p.reviewerCount > 0,
 		isComplete: (p) => p.assignmentCount > 0,
-		isImplemented: false,
+		isImplemented: true,
 	},
 ];
 
@@ -103,7 +102,7 @@ function AcSetupHub({ acId, isReadOnly, children }: Props) {
 	return (
 		<div className="flex flex-1">
 			<aside className="w-56 shrink-0 border-r bg-background p-4">
-				<p className="mb-3 px-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+				<p className="mb-3 px-2 font-semibold text-muted-foreground text-xs uppercase tracking-wider">
 					Einrichtung
 				</p>
 				<ol className="flex flex-col gap-0.5">
@@ -117,12 +116,12 @@ function AcSetupHub({ acId, isReadOnly, children }: Props) {
 							<li key={step.key}>
 								<StepLink
 									href={href}
-									label={step.label}
 									index={index}
 									isActive={isActive}
 									isAvailable={available && step.isImplemented}
 									isComplete={complete}
 									isImplemented={step.isImplemented}
+									label={step.label}
 								/>
 							</li>
 						);
@@ -131,7 +130,7 @@ function AcSetupHub({ acId, isReadOnly, children }: Props) {
 			</aside>
 			<main className="flex-1 overflow-auto p-6">
 				{isReadOnly && (
-					<div className="mb-6 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
+					<div className="mb-6 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 text-sm dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
 						<LockIcon className="h-4 w-4 shrink-0" />
 						Das Assessment Center ist aktiviert. Die Einrichtung kann nur noch
 						eingesehen, nicht mehr bearbeitet werden.
