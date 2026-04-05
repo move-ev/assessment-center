@@ -106,12 +106,22 @@ model Verification {
 // Assessment Center domain
 // ---------------------------------------------------------------------------
 
+enum AcStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+}
+
 /// The top-level event. All domain entities are scoped to an AssessmentCenter.
+/// Admin access is granted to users with role = "admin" (better-auth admin plugin).
+/// Reviewer access is granted to users with a Reviewer record for this AC.
+/// Status gates which sections are accessible (DRAFT → setup, ACTIVE → overview, COMPLETED → results).
 
 model AssessmentCenter {
   id          String    @id @default(cuid())
   name        String
   description String?
+  status      AcStatus  @default(DRAFT)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?

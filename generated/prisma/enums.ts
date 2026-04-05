@@ -9,6 +9,15 @@
 * 🟢 You can import this file directly.
 */
 
+export const AcStatus = {
+  DRAFT: 'DRAFT',
+  ACTIVE: 'ACTIVE',
+  COMPLETED: 'COMPLETED'
+} as const
+
+export type AcStatus = (typeof AcStatus)[keyof typeof AcStatus]
+
+
 export const CriteriaType = {
   QUANTITATIVE: 'QUANTITATIVE',
   QUALITATIVE: 'QUALITATIVE'

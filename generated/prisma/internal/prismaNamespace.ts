@@ -1870,6 +1870,7 @@ export const AssessmentCenterScalarFieldEnum = {
   id: 'id',
   name: 'name',
   description: 'description',
+  status: 'status',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -2091,6 +2092,20 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
  * Reference to a field of type 'Boolean'
  */
 export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
+ * Reference to a field of type 'AcStatus'
+ */
+export type EnumAcStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AcStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'AcStatus[]'
+ */
+export type ListEnumAcStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'AcStatus[]'>
     
 
 

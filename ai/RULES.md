@@ -58,6 +58,67 @@ Do not introduce architectural changes unless explicitly requested.
 - The repository contains documentation about the architecture and design decisions
 - Follow the architecture and design decisions documented under /docs/**
 
+### 4.2 Module Barrel Exports
+
+Each module under `src/modules/` exposes a public API through barrel exports. Only
+what is needed outside the module (i.e. in `src/app/`) should be exported.
+
+- `src/modules/<name>/components/index.ts` — re-exports all public components
+- `src/modules/<name>/index.ts` — re-exports everything from `./components` (and
+  other sub-folders if the module grows)
+- Internal helpers, sub-components, and utilities that are only used within the
+  module must **not** be exported from the barrel
+
+```ts
+// src/modules/example/components/index.ts
+export { ExamplePage } from "./example-page";
+// internal-helper.ts is not exported — it stays private to the module
+
+// src/modules/example/index.ts
+export { ExamplePage } from "./components";
+```
+
+Consumers in `src/app/` always import from the module root, never from deep paths:
+
+```ts
+// correct
+import { ExamplePage } from "@/modules/example";
+
+// forbidden
+import { ExamplePage } from "@/modules/example/components/example-page";
+```
+
+### 4.3 Page Design Pattern
+
+Pages are thin orchestrators. A page file must only:
+
+- Resolve route params
+- Fetch data (server-side queries, DB calls)
+- Check access / authorization and redirect or call `notFound()` if needed
+- Pass data as props to a single root component and return it
+
+Pages must not contain any JSX markup of their own beyond returning one component.
+All layout, structure, and UI logic belong in the component, not the page.
+
+```ts
+// correct
+export default async function ExamplePage({ params }: Props) {
+  const { id } = await params;
+  const data = await fetchData(id);
+  if (!data) notFound();
+  return <ExampleComponent data={data} />;
+}
+
+// forbidden — JSX content in the page itself
+export default async function ExamplePage() {
+  return (
+    <main>
+      <h1>Title</h1>
+    </main>
+  );
+}
+```
+
 ---
 
 ## 5. Error Handling & Edge Cases

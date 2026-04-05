@@ -3,6 +3,7 @@ import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Geist, Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { TRPCReactProvider } from "@/trpc/react";
 
@@ -25,7 +26,9 @@ export default function RootLayout({
 	return (
 		<html className={cn(geist.variable, "font-sans", inter.variable)} lang="en">
 			<body>
-				<TRPCReactProvider>{children}</TRPCReactProvider>
+				<TRPCReactProvider>
+					<TooltipProvider>{children}</TooltipProvider>
+				</TRPCReactProvider>
 				<Toaster />
 			</body>
 		</html>
