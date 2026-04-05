@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { LogoutButton } from "@/components/logout-button";
 import { buttonVariants } from "@/components/ui/button";
 import { ROUTES } from "@/lib/routes";
 
@@ -28,6 +29,7 @@ function DashboardLayout({ userName, isAdmin, children }: Props) {
 							</Link>
 						)}
 						<span className="text-muted-foreground text-sm">{userName}</span>
+						<LogoutButton variant="outline" />
 					</div>
 				</div>
 			</header>
