@@ -29,6 +29,8 @@ export type ParticipantMinAggregateOutputType = {
   assessmentCenterId: string | null
   name: string | null
   email: string | null
+  avatarUrl: string | null
+  avatarFileKey: string | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -39,6 +41,8 @@ export type ParticipantMaxAggregateOutputType = {
   assessmentCenterId: string | null
   name: string | null
   email: string | null
+  avatarUrl: string | null
+  avatarFileKey: string | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -49,6 +53,8 @@ export type ParticipantCountAggregateOutputType = {
   assessmentCenterId: number
   name: number
   email: number
+  avatarUrl: number
+  avatarFileKey: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -61,6 +67,8 @@ export type ParticipantMinAggregateInputType = {
   assessmentCenterId?: true
   name?: true
   email?: true
+  avatarUrl?: true
+  avatarFileKey?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -71,6 +79,8 @@ export type ParticipantMaxAggregateInputType = {
   assessmentCenterId?: true
   name?: true
   email?: true
+  avatarUrl?: true
+  avatarFileKey?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -81,6 +91,8 @@ export type ParticipantCountAggregateInputType = {
   assessmentCenterId?: true
   name?: true
   email?: true
+  avatarUrl?: true
+  avatarFileKey?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -164,6 +176,8 @@ export type ParticipantGroupByOutputType = {
   assessmentCenterId: string
   name: string
   email: string | null
+  avatarUrl: string | null
+  avatarFileKey: string | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -195,6 +209,8 @@ export type ParticipantWhereInput = {
   assessmentCenterId?: Prisma.StringFilter<"Participant"> | string
   name?: Prisma.StringFilter<"Participant"> | string
   email?: Prisma.StringNullableFilter<"Participant"> | string | null
+  avatarUrl?: Prisma.StringNullableFilter<"Participant"> | string | null
+  avatarFileKey?: Prisma.StringNullableFilter<"Participant"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
@@ -208,6 +224,8 @@ export type ParticipantOrderByWithRelationInput = {
   assessmentCenterId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarFileKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -224,6 +242,8 @@ export type ParticipantWhereUniqueInput = Prisma.AtLeast<{
   assessmentCenterId?: Prisma.StringFilter<"Participant"> | string
   name?: Prisma.StringFilter<"Participant"> | string
   email?: Prisma.StringNullableFilter<"Participant"> | string | null
+  avatarUrl?: Prisma.StringNullableFilter<"Participant"> | string | null
+  avatarFileKey?: Prisma.StringNullableFilter<"Participant"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
@@ -237,6 +257,8 @@ export type ParticipantOrderByWithAggregationInput = {
   assessmentCenterId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
+  avatarFileKey?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -253,6 +275,8 @@ export type ParticipantScalarWhereWithAggregatesInput = {
   assessmentCenterId?: Prisma.StringWithAggregatesFilter<"Participant"> | string
   name?: Prisma.StringWithAggregatesFilter<"Participant"> | string
   email?: Prisma.StringNullableWithAggregatesFilter<"Participant"> | string | null
+  avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"Participant"> | string | null
+  avatarFileKey?: Prisma.StringNullableWithAggregatesFilter<"Participant"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Participant"> | Date | string | null
@@ -262,6 +286,8 @@ export type ParticipantCreateInput = {
   id?: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -275,6 +301,8 @@ export type ParticipantUncheckedCreateInput = {
   assessmentCenterId: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -286,6 +314,8 @@ export type ParticipantUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -299,6 +329,8 @@ export type ParticipantUncheckedUpdateInput = {
   assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -311,6 +343,8 @@ export type ParticipantCreateManyInput = {
   assessmentCenterId: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -320,6 +354,8 @@ export type ParticipantUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -330,6 +366,8 @@ export type ParticipantUncheckedUpdateManyInput = {
   assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -355,6 +393,8 @@ export type ParticipantCountOrderByAggregateInput = {
   assessmentCenterId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
+  avatarFileKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -365,6 +405,8 @@ export type ParticipantMaxOrderByAggregateInput = {
   assessmentCenterId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
+  avatarFileKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -375,6 +417,8 @@ export type ParticipantMinOrderByAggregateInput = {
   assessmentCenterId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  avatarUrl?: Prisma.SortOrder
+  avatarFileKey?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -454,6 +498,8 @@ export type ParticipantCreateWithoutAssessmentCenterInput = {
   id?: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -465,6 +511,8 @@ export type ParticipantUncheckedCreateWithoutAssessmentCenterInput = {
   id?: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -506,6 +554,8 @@ export type ParticipantScalarWhereInput = {
   assessmentCenterId?: Prisma.StringFilter<"Participant"> | string
   name?: Prisma.StringFilter<"Participant"> | string
   email?: Prisma.StringNullableFilter<"Participant"> | string | null
+  avatarUrl?: Prisma.StringNullableFilter<"Participant"> | string | null
+  avatarFileKey?: Prisma.StringNullableFilter<"Participant"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
@@ -515,6 +565,8 @@ export type ParticipantCreateWithoutGroupMembershipsInput = {
   id?: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -527,6 +579,8 @@ export type ParticipantUncheckedCreateWithoutGroupMembershipsInput = {
   assessmentCenterId: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -553,6 +607,8 @@ export type ParticipantUpdateWithoutGroupMembershipsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -565,6 +621,8 @@ export type ParticipantUncheckedUpdateWithoutGroupMembershipsInput = {
   assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -575,6 +633,8 @@ export type ParticipantCreateWithoutReviewerAssignmentsInput = {
   id?: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -587,6 +647,8 @@ export type ParticipantUncheckedCreateWithoutReviewerAssignmentsInput = {
   assessmentCenterId: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -613,6 +675,8 @@ export type ParticipantUpdateWithoutReviewerAssignmentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -625,6 +689,8 @@ export type ParticipantUncheckedUpdateWithoutReviewerAssignmentsInput = {
   assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -635,6 +701,8 @@ export type ParticipantCreateManyAssessmentCenterInput = {
   id?: string
   name: string
   email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -644,6 +712,8 @@ export type ParticipantUpdateWithoutAssessmentCenterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -655,6 +725,8 @@ export type ParticipantUncheckedUpdateWithoutAssessmentCenterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -666,6 +738,8 @@ export type ParticipantUncheckedUpdateManyWithoutAssessmentCenterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -716,6 +790,8 @@ export type ParticipantSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   assessmentCenterId?: boolean
   name?: boolean
   email?: boolean
+  avatarUrl?: boolean
+  avatarFileKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -730,6 +806,8 @@ export type ParticipantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   assessmentCenterId?: boolean
   name?: boolean
   email?: boolean
+  avatarUrl?: boolean
+  avatarFileKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -741,6 +819,8 @@ export type ParticipantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   assessmentCenterId?: boolean
   name?: boolean
   email?: boolean
+  avatarUrl?: boolean
+  avatarFileKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -752,12 +832,14 @@ export type ParticipantSelectScalar = {
   assessmentCenterId?: boolean
   name?: boolean
   email?: boolean
+  avatarUrl?: boolean
+  avatarFileKey?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type ParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "email" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["participant"]>
+export type ParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "email" | "avatarUrl" | "avatarFileKey" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["participant"]>
 export type ParticipantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
   groupMemberships?: boolean | Prisma.Participant$groupMembershipsArgs<ExtArgs>
@@ -783,6 +865,8 @@ export type $ParticipantPayload<ExtArgs extends runtime.Types.Extensions.Interna
     assessmentCenterId: string
     name: string
     email: string | null
+    avatarUrl: string | null
+    avatarFileKey: string | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1216,6 +1300,8 @@ export interface ParticipantFieldRefs {
   readonly assessmentCenterId: Prisma.FieldRef<"Participant", 'String'>
   readonly name: Prisma.FieldRef<"Participant", 'String'>
   readonly email: Prisma.FieldRef<"Participant", 'String'>
+  readonly avatarUrl: Prisma.FieldRef<"Participant", 'String'>
+  readonly avatarFileKey: Prisma.FieldRef<"Participant", 'String'>
   readonly createdAt: Prisma.FieldRef<"Participant", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Participant", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Participant", 'DateTime'>

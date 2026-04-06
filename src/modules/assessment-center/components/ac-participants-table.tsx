@@ -1,9 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { CameraIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
-import { PlusIcon, Trash2Icon, PencilIcon } from "lucide-react";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	Field,
 	FieldError,
@@ -19,27 +37,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	AlertDialog,
-	AlertDialogAction,
-	AlertDialogCancel,
-	AlertDialogContent,
-	AlertDialogDescription,
-	AlertDialogFooter,
-	AlertDialogHeader,
-	AlertDialogTitle,
-	AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
-	Dialog,
-	DialogContent,
-	DialogFooter,
-	DialogHeader,
-	DialogTitle,
-} from "@/components/ui/dialog";
+import { useUploadThing } from "@/lib/uploadthing";
 import { api } from "@/trpc/react";
+import { ParticipantAvatar } from "./participant-avatar";
 
-type Participant = { id: string; name: string; email: string | null };
+type Participant = {
+	id: string;
+	name: string;
+	email: string | null;
+	avatarUrl: string | null;
+};
 
 type Props = {
 	acId: string;
@@ -67,8 +74,8 @@ function AcParticipantsTable({ acId }: Props) {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-base font-medium">Teilnehmer</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h2 className="font-medium text-base">Teilnehmer</h2>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Personen, die am Assessment Center teilnehmen.
 				</p>
 			</div>
@@ -77,10 +84,10 @@ function AcParticipantsTable({ acId }: Props) {
 				<ParticipantsTableSkeleton />
 			) : (
 				<ParticipantsTableContent
-					participants={participants}
 					acId={acId}
-					onRemove={handleRemove}
 					isRemoving={removeMutation.isPending}
+					onRemove={handleRemove}
+					participants={participants}
 					utils={utils}
 				/>
 			)}
@@ -105,12 +112,15 @@ function ParticipantsTableContent({
 	isRemoving,
 	utils,
 }: TableContentProps) {
-	const [editingParticipant, setEditingParticipant] =
-		useState<Participant | null>(null);
+	const [editingId, setEditingId] = useState<string | null>(null);
+
+	const currentEditingParticipant = editingId
+		? (participants.find((p) => p.id === editingId) ?? null)
+		: null;
 
 	if (participants.length === 0) {
 		return (
-			<p className="text-sm text-muted-foreground">
+			<p className="text-muted-foreground text-sm">
 				Noch keine Teilnehmer hinzugefügt.
 			</p>
 		);
@@ -129,17 +139,26 @@ function ParticipantsTableContent({
 				<TableBody>
 					{participants.map((p) => (
 						<TableRow key={p.id}>
-							<TableCell className="font-medium">{p.name}</TableCell>
+							<TableCell>
+								<div className="flex items-center gap-3">
+									<ParticipantAvatar
+										avatarUrl={p.avatarUrl}
+										name={p.name}
+										size="sm"
+									/>
+									<span className="font-medium">{p.name}</span>
+								</div>
+							</TableCell>
 							<TableCell className="text-muted-foreground">
 								{p.email ?? "–"}
 							</TableCell>
 							<TableCell>
 								<div className="flex justify-end gap-1">
 									<Button
-										variant="ghost"
-										size="icon-sm"
-										onClick={() => setEditingParticipant(p)}
 										aria-label="Bearbeiten"
+										onClick={() => setEditingId(p.id)}
+										size="icon-sm"
+										variant="ghost"
 									>
 										<PencilIcon className="h-4 w-4" />
 									</Button>
@@ -147,10 +166,10 @@ function ParticipantsTableContent({
 										<AlertDialogTrigger
 											render={
 												<Button
-													variant="ghost"
-													size="icon-sm"
-													disabled={isRemoving}
 													aria-label="Löschen"
+													disabled={isRemoving}
+													size="icon-sm"
+													variant="ghost"
 												>
 													<Trash2Icon className="h-4 w-4" />
 												</Button>
@@ -158,7 +177,9 @@ function ParticipantsTableContent({
 										/>
 										<AlertDialogContent size="sm">
 											<AlertDialogHeader>
-												<AlertDialogTitle>Teilnehmer entfernen?</AlertDialogTitle>
+												<AlertDialogTitle>
+													Teilnehmer entfernen?
+												</AlertDialogTitle>
 												<AlertDialogDescription>
 													{p.name} wird dauerhaft aus diesem Assessment Center
 													entfernt.
@@ -167,8 +188,8 @@ function ParticipantsTableContent({
 											<AlertDialogFooter>
 												<AlertDialogCancel>Abbrechen</AlertDialogCancel>
 												<AlertDialogAction
-													variant="destructive"
 													onClick={() => onRemove(p.id)}
+													variant="destructive"
 												>
 													Entfernen
 												</AlertDialogAction>
@@ -182,11 +203,11 @@ function ParticipantsTableContent({
 				</TableBody>
 			</Table>
 
-			{editingParticipant && (
+			{currentEditingParticipant && (
 				<EditParticipantDialog
-					participant={editingParticipant}
 					acId={acId}
-					onClose={() => setEditingParticipant(null)}
+					onClose={() => setEditingId(null)}
+					participant={currentEditingParticipant}
 					utils={utils}
 				/>
 			)}
@@ -219,8 +240,9 @@ function EditParticipantDialog({
 		onError: (error) => toast.error(error.message),
 	});
 
-	const zodErrors = updateMutation.error?.data?.zodError
-		?.fieldErrors as Record<string, string[]> | undefined;
+	const zodErrors = updateMutation.error?.data?.zodError?.fieldErrors as
+		| Record<string, string[]>
+		| undefined;
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -233,21 +255,33 @@ function EditParticipantDialog({
 	}
 
 	return (
-		<Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
+		<Dialog
+			onOpenChange={(open) => {
+				if (!open) onClose();
+			}}
+			open
+		>
 			<DialogContent>
 				<DialogHeader>
 					<DialogTitle>Teilnehmer bearbeiten</DialogTitle>
 				</DialogHeader>
+				<div className="flex flex-col items-center py-2">
+					<AvatarUploadControl
+						acId={acId}
+						participant={participant}
+						utils={utils}
+					/>
+				</div>
 				<form id="edit-participant-form" onSubmit={handleSubmit}>
 					<FieldGroup>
 						<Field>
 							<FieldLabel htmlFor="edit-name">Name</FieldLabel>
 							<Input
-								id="edit-name"
-								value={name}
-								onChange={(e) => setName(e.target.value)}
 								disabled={updateMutation.isPending}
+								id="edit-name"
+								onChange={(e) => setName(e.target.value)}
 								required
+								value={name}
 							/>
 							{zodErrors?.name && (
 								<FieldError
@@ -263,29 +297,133 @@ function EditParticipantDialog({
 								</span>
 							</FieldLabel>
 							<Input
+								disabled={updateMutation.isPending}
 								id="edit-email"
+								onChange={(e) => setEmail(e.target.value)}
 								type="email"
 								value={email}
-								onChange={(e) => setEmail(e.target.value)}
-								disabled={updateMutation.isPending}
 							/>
 						</Field>
 					</FieldGroup>
 				</form>
 				<DialogFooter>
-					<Button variant="outline" type="button" onClick={onClose}>
+					<Button onClick={onClose} type="button" variant="outline">
 						Abbrechen
 					</Button>
 					<Button
+						disabled={updateMutation.isPending || name.trim() === ""}
 						form="edit-participant-form"
 						type="submit"
-						disabled={updateMutation.isPending || name.trim() === ""}
 					>
 						{updateMutation.isPending ? "Speichert..." : "Speichern"}
 					</Button>
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+type AvatarUploadControlProps = {
+	participant: Participant;
+	acId: string;
+	utils: ReturnType<typeof api.useUtils>;
+};
+
+function AvatarUploadControl({
+	participant,
+	acId,
+	utils,
+}: AvatarUploadControlProps) {
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const { startUpload, isUploading } = useUploadThing("participantAvatar");
+
+	const removeAvatarMutation = api.participant.removeAvatar.useMutation({
+		onSuccess: async () => {
+			await utils.participant.listByAc.invalidate({ acId });
+			toast.success("Avatar entfernt");
+		},
+		onError: (error) => toast.error(error.message),
+	});
+
+	const isLoading = isUploading || removeAvatarMutation.isPending;
+
+	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		// Reset input so the same file can be re-selected after removal
+		e.target.value = "";
+
+		try {
+			const result = await startUpload([file], {
+				participantId: participant.id,
+				acId,
+			});
+
+			if (!result) {
+				toast.error("Upload fehlgeschlagen");
+				return;
+			}
+
+			await utils.participant.listByAc.invalidate({ acId });
+			toast.success("Avatar gespeichert");
+		} catch {
+			toast.error("Upload fehlgeschlagen");
+		}
+	}
+
+	function handleRemove() {
+		removeAvatarMutation.mutate({ id: participant.id, acId });
+	}
+
+	return (
+		<div className="flex flex-col items-center gap-2">
+			<button
+				aria-label="Foto ändern"
+				className="group relative cursor-pointer rounded-full disabled:cursor-not-allowed"
+				disabled={isLoading}
+				onClick={() => fileInputRef.current?.click()}
+				type="button"
+			>
+				<ParticipantAvatar
+					avatarUrl={participant.avatarUrl}
+					name={participant.name}
+					size="lg"
+				/>
+				<div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-0">
+					<CameraIcon className="h-4 w-4 text-white" />
+				</div>
+			</button>
+			<input
+				accept="image/*"
+				className="sr-only"
+				disabled={isLoading}
+				onChange={handleFileChange}
+				ref={fileInputRef}
+				type="file"
+			/>
+			<div className="flex gap-3 text-xs">
+				<button
+					className="text-primary underline underline-offset-2 disabled:opacity-50"
+					disabled={isLoading}
+					onClick={() => fileInputRef.current?.click()}
+					type="button"
+				>
+					{isUploading ? "Lädt hoch..." : "Foto ändern"}
+				</button>
+				{participant.avatarUrl && (
+					<button
+						className="text-muted-foreground underline underline-offset-2 disabled:opacity-50"
+						disabled={isLoading}
+						onClick={handleRemove}
+						type="button"
+					>
+						Entfernen
+					</button>
+				)}
+			</div>
+		</div>
 	);
 }
 
@@ -310,8 +448,9 @@ function AddParticipantForm({ acId, utils }: AddFormProps) {
 		onError: (error) => toast.error(error.message),
 	});
 
-	const zodErrors = createMutation.error?.data?.zodError
-		?.fieldErrors as Record<string, string[]> | undefined;
+	const zodErrors = createMutation.error?.data?.zodError?.fieldErrors as
+		| Record<string, string[]>
+		| undefined;
 
 	function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
 		e.preventDefault();
@@ -324,11 +463,7 @@ function AddParticipantForm({ acId, utils }: AddFormProps) {
 
 	if (!showForm) {
 		return (
-			<Button
-				type="button"
-				variant="outline"
-				onClick={() => setShowForm(true)}
-			>
+			<Button onClick={() => setShowForm(true)} type="button" variant="outline">
 				<PlusIcon className="mr-2 h-4 w-4" />
 				Teilnehmer hinzufügen
 			</Button>
@@ -336,18 +471,18 @@ function AddParticipantForm({ acId, utils }: AddFormProps) {
 	}
 
 	return (
-		<form onSubmit={handleSubmit} className="rounded-lg border bg-muted/30 p-4">
-			<p className="mb-4 text-sm font-medium">Neuer Teilnehmer</p>
+		<form className="rounded-lg border bg-muted/30 p-4" onSubmit={handleSubmit}>
+			<p className="mb-4 font-medium text-sm">Neuer Teilnehmer</p>
 			<FieldGroup>
 				<Field>
 					<FieldLabel htmlFor="add-name">Name</FieldLabel>
 					<Input
-						id="add-name"
-						value={name}
-						onChange={(e) => setName(e.target.value)}
 						disabled={createMutation.isPending}
+						id="add-name"
+						onChange={(e) => setName(e.target.value)}
 						placeholder="Vor- und Nachname"
 						required
+						value={name}
 					/>
 					{zodErrors?.name && (
 						<FieldError errors={zodErrors.name.map((m) => ({ message: m }))} />
@@ -356,33 +491,35 @@ function AddParticipantForm({ acId, utils }: AddFormProps) {
 				<Field>
 					<FieldLabel htmlFor="add-email">
 						E-Mail{" "}
-						<span className="font-normal text-muted-foreground">(optional)</span>
+						<span className="font-normal text-muted-foreground">
+							(optional)
+						</span>
 					</FieldLabel>
 					<Input
+						disabled={createMutation.isPending}
 						id="add-email"
+						onChange={(e) => setEmail(e.target.value)}
+						placeholder="name@beispiel.de"
 						type="email"
 						value={email}
-						onChange={(e) => setEmail(e.target.value)}
-						disabled={createMutation.isPending}
-						placeholder="name@beispiel.de"
 					/>
 				</Field>
 			</FieldGroup>
 			<div className="mt-4 flex gap-2">
 				<Button
-					type="submit"
 					disabled={createMutation.isPending || name.trim() === ""}
+					type="submit"
 				>
 					{createMutation.isPending ? "Hinzufügen..." : "Hinzufügen"}
 				</Button>
 				<Button
-					type="button"
-					variant="ghost"
 					onClick={() => {
 						setShowForm(false);
 						setName("");
 						setEmail("");
 					}}
+					type="button"
+					variant="ghost"
 				>
 					Abbrechen
 				</Button>
@@ -395,7 +532,7 @@ function ParticipantsTableSkeleton() {
 	return (
 		<div className="space-y-2">
 			{[1, 2, 3].map((i) => (
-				<div key={i} className="h-10 animate-pulse rounded bg-muted" />
+				<div className="h-10 animate-pulse rounded bg-muted" key={i} />
 			))}
 		</div>
 	);

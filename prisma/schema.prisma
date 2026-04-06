@@ -193,6 +193,8 @@ model Participant {
   assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
   name               String
   email              String?
+  avatarUrl          String?
+  avatarFileKey      String?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
   deletedAt          DateTime?
