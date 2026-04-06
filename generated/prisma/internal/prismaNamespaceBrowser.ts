@@ -211,6 +211,8 @@ export const ParticipantScalarFieldEnum = {
   assessmentCenterId: 'assessmentCenterId',
   name: 'name',
   email: 'email',
+  avatarUrl: 'avatarUrl',
+  avatarFileKey: 'avatarFileKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'

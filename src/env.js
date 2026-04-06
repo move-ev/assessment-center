@@ -16,6 +16,7 @@ export const env = createEnv({
 		MICROSOFT_CLIENT_ID: z.string(),
 		MICROSOFT_CLIENT_SECRET: z.string(),
 		MICROSOFT_TENANT_ID: z.string(),
+		UPLOADTHING_TOKEN: z.string(),
 		NODE_ENV: z
 			.enum(["development", "test", "production"])
 			.default("development"),
@@ -42,6 +43,7 @@ export const env = createEnv({
 		MICROSOFT_CLIENT_ID: process.env.MICROSOFT_CLIENT_ID,
 		MICROSOFT_CLIENT_SECRET: process.env.MICROSOFT_CLIENT_SECRET,
 		MICROSOFT_TENANT_ID: process.env.MICROSOFT_TENANT_ID,
+		UPLOADTHING_TOKEN: process.env.UPLOADTHING_TOKEN,
 	},
 	/**
 	 * Run `build` or `dev` with `SKIP_ENV_VALIDATION` to skip env validation. This is especially
