@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { buildParticipantDashboardSnapshot } from "@/modules/evaluation/server/participant-dashboard-snapshot";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 export const assessmentCenterRouter = createTRPCRouter({
@@ -405,9 +406,15 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
+			const participantDashboardSnapshot =
+				await buildParticipantDashboardSnapshot(input.id);
+
 			await ctx.db.assessmentCenter.update({
 				where: { id: input.id },
-				data: { status: "COMPLETED" },
+				data: {
+					status: "COMPLETED",
+					participantDashboardSnapshot,
+				},
 			});
 		}),
 });

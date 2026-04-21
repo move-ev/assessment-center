@@ -1,347 +1,83 @@
 import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-	Empty,
-	EmptyDescription,
-	EmptyHeader,
-	EmptyTitle,
-} from "@/components/ui/empty";
+import { ArrowLeft } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
+import { EvaluationParticipantDetailDashboard } from "./evaluation-participant-detail-dashboard";
 
 type Props = {
 	acId: string;
 	data: EvaluationParticipantDetailData;
 };
 
+function getInitials(name: string): string {
+	return name
+		.split(" ")
+		.map((part) => part[0] ?? "")
+		.join("")
+		.toUpperCase()
+		.slice(0, 2);
+}
+
 function EvaluationParticipantDetail({ acId, data }: Props) {
+	const hasData = data.views.some((view) => view.groups.length > 0);
+	const initials = getInitials(data.participant.name);
+	const { completedAssignmentCount, totalAssignmentCount, overallScore } =
+		data.participant;
+
 	return (
 		<div className="space-y-6 p-6">
-			<header className="space-y-3">
+			<div className="space-y-5">
 				<Link
-					className="text-primary text-sm underline underline-offset-4"
+					className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
 					href={ROUTES.acResults(acId)}
 				>
-					Zurück zur Ergebnisübersicht
+					<ArrowLeft className="h-3.5 w-3.5" />
+					Ergebnisübersicht
 				</Link>
-				<div className="space-y-1">
-					<h1 className="font-medium text-xl">{data.participant.name}</h1>
-					<p className="text-muted-foreground text-sm">
-						{data.participant.groupName ?? "Keine Gruppe"} ·{" "}
-						{data.participant.completedAssignmentCount} /{" "}
-						{data.participant.totalAssignmentCount} Bewertungen abgeschlossen
-					</p>
-				</div>
-			</header>
 
-			<SummaryGrid participant={data.participant} />
-
-			{data.tasks.length === 0 ? (
-				<Empty className="border">
-					<EmptyHeader>
-						<EmptyTitle>Keine Aufgabenbewertungen vorhanden</EmptyTitle>
-						<EmptyDescription>
-							Für diesen Teilnehmer wurden noch keine Aufgaben zugewiesen oder
-							bewertet.
-						</EmptyDescription>
-					</EmptyHeader>
-				</Empty>
-			) : (
-				<div className="space-y-6">
-					{data.tasks.map((task) => (
-						<TaskCard key={task.id} task={task} />
-					))}
-				</div>
-			)}
-		</div>
-	);
-}
-
-function SummaryGrid({
-	participant,
-}: {
-	participant: EvaluationParticipantDetailData["participant"];
-}) {
-	return (
-		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-			<SummaryCard
-				description="Gewichteter Durchschnitt über alle quantitativen Aufgaben."
-				label="Gesamtwert"
-				value={
-					participant.overallScore === null
-						? "n/a"
-						: participant.overallScore.toFixed(2)
-				}
-			/>
-			<SummaryCard
-				description="Vollständig erfasste Aufgaben für diesen Teilnehmer."
-				label="Aufgaben"
-				value={`${participant.completedTaskCount} / ${participant.totalTaskCount}`}
-			/>
-			<SummaryCard
-				description="Reviewer-Zuweisungen mit vollständig erfassten Kriterien."
-				label="Bewertungen"
-				value={`${participant.completedAssignmentCount} / ${participant.totalAssignmentCount}`}
-			/>
-			<SummaryCard
-				description="Qualitative Rückmeldungen und Teamnotizen."
-				label="Feedback"
-				value={`${participant.qualitativeEntries} / ${participant.teamObservationCount}`}
-			/>
-		</div>
-	);
-}
-
-function SummaryCard({
-	label,
-	value,
-	description,
-}: {
-	label: string;
-	value: string;
-	description: string;
-}) {
-	return (
-		<Card size="sm">
-			<CardHeader className="pb-0">
-				<CardTitle className="text-muted-foreground text-sm">{label}</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-1">
-				<p className="font-semibold text-2xl">{value}</p>
-				<p className="text-muted-foreground text-sm">{description}</p>
-			</CardContent>
-		</Card>
-	);
-}
-
-function TaskCard({
-	task,
-}: {
-	task: EvaluationParticipantDetailData["tasks"][number];
-}) {
-	const criteriaGroups = groupTaskCriteria(task.criteria);
-
-	return (
-		<Card>
-			<CardHeader className="gap-3">
-				<div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-					<div className="space-y-1">
-						<div className="flex items-center gap-2">
-							<CardTitle className="text-base">{task.name}</CardTitle>
-							<Badge variant={task.isTeamTask ? "secondary" : "outline"}>
-								{task.isTeamTask ? "Team" : "Einzeln"}
-							</Badge>
+				<div className="flex items-start justify-between gap-4">
+					<div className="flex items-center gap-4">
+						<div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+							{initials}
 						</div>
-						{task.description && (
-							<p className="text-muted-foreground text-sm">
-								{task.description}
+						<div>
+							<h1 className="font-semibold text-2xl tracking-tight">
+								{data.participant.name}
+							</h1>
+							<p className="mt-0.5 text-sm text-muted-foreground">
+								{data.participant.groupName ?? "Keine Gruppe"} ·{" "}
+								{completedAssignmentCount} / {totalAssignmentCount} Bewertungen
+								abgeschlossen
 							</p>
-						)}
-					</div>
-					<div className="text-right text-sm">
-						<p className="font-medium">
-							{task.score === null ? "n/a" : task.score.toFixed(2)}
-						</p>
-						<p className="text-muted-foreground">
-							{task.completedAssignments} / {task.totalAssignments} vollständig
-						</p>
-					</div>
-				</div>
-			</CardHeader>
-			<CardContent className="space-y-6">
-				<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
-					<MetricTile
-						label="Score"
-						value={task.score === null ? "n/a" : task.score.toFixed(2)}
-					/>
-					<MetricTile
-						label="Bewertungen"
-						value={`${task.completedAssignments} / ${task.totalAssignments}`}
-					/>
-					<MetricTile
-						label="Kriterien"
-						value={task.criteria.length.toString()}
-					/>
-					<MetricTile
-						label="Teamnotizen"
-						value={task.teamObservations.length.toString()}
-					/>
-				</div>
-
-				<div className="space-y-4">
-					{criteriaGroups.map((group) => (
-						<div className="space-y-3" key={group.key}>
-							<div className="flex flex-wrap items-center gap-2">
-								<h3 className="font-medium text-sm">{group.title}</h3>
-								<Badge
-									variant={
-										group.factorType === "POTENTIAL" ? "secondary" : "outline"
-									}
-								>
-									{group.factorType === "POTENTIAL"
-										? "Potenzial-Faktoren"
-										: "Kompetenz-Faktoren"}
-								</Badge>
-							</div>
-							<div className="space-y-4">
-								{group.criteria.map((criterion) => (
-									<CriterionCard criterion={criterion} key={criterion.id} />
-								))}
-							</div>
-						</div>
-					))}
-				</div>
-
-				{task.teamObservations.length > 0 && (
-					<div className="space-y-3">
-						<h3 className="font-medium text-sm">Teambeobachtungen</h3>
-						<div className="grid gap-3">
-							{task.teamObservations.map((observation) => (
-								<div
-									className="rounded-3xl border bg-muted/20 p-4"
-									key={`${task.id}-${observation.reviewerName}`}
-								>
-									<p className="font-medium text-sm">
-										{observation.reviewerName}
-									</p>
-									<p className="mt-2 whitespace-pre-wrap text-sm">
-										{observation.notes}
-									</p>
-								</div>
-							))}
 						</div>
 					</div>
-				)}
-			</CardContent>
-		</Card>
-	);
-}
 
-function MetricTile({ label, value }: { label: string; value: string }) {
-	return (
-		<div className="rounded-3xl border bg-muted/30 p-4">
-			<p className="text-muted-foreground text-xs uppercase tracking-wide">
-				{label}
-			</p>
-			<p className="mt-2 font-semibold text-2xl">{value}</p>
-		</div>
-	);
-}
-
-function CriterionCard({
-	criterion,
-}: {
-	criterion: EvaluationParticipantDetailData["tasks"][number]["criteria"][number];
-}) {
-	return (
-		<div className="rounded-3xl border p-4">
-			<div className="flex flex-col gap-2 lg:flex-row lg:items-start lg:justify-between">
-				<div className="space-y-1">
-					<div className="flex items-center gap-2">
-						<p className="font-medium">{criterion.name}</p>
-						<Badge
-							variant={
-								criterion.type === "QUANTITATIVE" ? "secondary" : "outline"
-							}
-						>
-							{criterion.type === "QUANTITATIVE" ? "Quantitativ" : "Qualitativ"}
-						</Badge>
-					</div>
-					{criterion.description && (
-						<p className="text-muted-foreground text-sm">
-							{criterion.description}
-						</p>
+					{overallScore !== null && (
+						<div className="shrink-0 text-right">
+							<p className="text-xs text-muted-foreground">Gesamtwert</p>
+							<p className="font-bold text-3xl tabular-nums">
+								{overallScore.toFixed(2)}
+							</p>
+						</div>
 					)}
 				</div>
-				{criterion.type === "QUANTITATIVE" && (
-					<div className="text-right text-sm">
-						<p className="font-medium">
-							{criterion.averageScore === null
-								? "n/a"
-								: criterion.averageScore.toFixed(2)}
-						</p>
-						<p className="text-muted-foreground">
-							Gewicht {criterion.weight.toFixed(2)}
-						</p>
-					</div>
-				)}
 			</div>
 
-			{criterion.type === "QUANTITATIVE" ? (
-				<div className="mt-4 grid gap-3 md:grid-cols-2">
-					{criterion.ratings.length === 0 ? (
+			{!hasData ? (
+				<Card>
+					<CardContent className="flex min-h-40 items-center justify-center">
 						<p className="text-muted-foreground text-sm">
-							Noch keine Bewertungen vorhanden.
+							Für diesen Teilnehmer liegen noch keine quantitativen
+							Kriteriengruppen mit Bewertungen vor.
 						</p>
-					) : (
-						criterion.ratings.map((rating) => (
-							<div
-								className="rounded-2xl bg-muted/20 p-4"
-								key={`${criterion.id}-${rating.reviewerName}`}
-							>
-								<div className="flex items-center justify-between gap-3">
-									<p className="font-medium text-sm">{rating.reviewerName}</p>
-									<Badge>{rating.value}</Badge>
-								</div>
-								{rating.notes && (
-									<p className="mt-2 whitespace-pre-wrap text-sm">
-										{rating.notes}
-									</p>
-								)}
-							</div>
-						))
-					)}
-				</div>
+					</CardContent>
+				</Card>
 			) : (
-				<div className="mt-4 grid gap-3">
-					{criterion.textEntries.length === 0 ? (
-						<p className="text-muted-foreground text-sm">
-							Noch kein qualitatives Feedback vorhanden.
-						</p>
-					) : (
-						criterion.textEntries.map((entry) => (
-							<div
-								className="rounded-2xl bg-muted/20 p-4"
-								key={`${criterion.id}-${entry.reviewerName}`}
-							>
-								<p className="font-medium text-sm">{entry.reviewerName}</p>
-								<p className="mt-2 whitespace-pre-wrap text-sm">{entry.text}</p>
-							</div>
-						))
-					)}
-				</div>
+				<EvaluationParticipantDetailDashboard data={data} />
 			)}
 		</div>
 	);
-}
-
-function groupTaskCriteria(
-	criteria: EvaluationParticipantDetailData["tasks"][number]["criteria"],
-) {
-	const groups = new Map<
-		string,
-		{
-			key: string;
-			title: string;
-			factorType: "POTENTIAL" | "COMPETENCE";
-			criteria: EvaluationParticipantDetailData["tasks"][number]["criteria"];
-		}
-	>();
-
-	for (const criterion of criteria) {
-		const key = `${criterion.criteriaGroupFactorType}:${criterion.criteriaGroupTitle}`;
-		const current = groups.get(key) ?? {
-			key,
-			title: criterion.criteriaGroupTitle,
-			factorType: criterion.criteriaGroupFactorType,
-			criteria: [],
-		};
-		current.criteria.push(criterion);
-		groups.set(key, current);
-	}
-
-	return Array.from(groups.values());
 }
 
 export { EvaluationParticipantDetail };

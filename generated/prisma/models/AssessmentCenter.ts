@@ -49,6 +49,7 @@ export type AssessmentCenterCountAggregateOutputType = {
   name: number
   description: number
   status: number
+  participantDashboardSnapshot: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -81,6 +82,7 @@ export type AssessmentCenterCountAggregateInputType = {
   name?: true
   description?: true
   status?: true
+  participantDashboardSnapshot?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -164,6 +166,7 @@ export type AssessmentCenterGroupByOutputType = {
   name: string
   description: string | null
   status: $Enums.AcStatus
+  participantDashboardSnapshot: runtime.JsonValue | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -195,6 +198,7 @@ export type AssessmentCenterWhereInput = {
   name?: Prisma.StringFilter<"AssessmentCenter"> | string
   description?: Prisma.StringNullableFilter<"AssessmentCenter"> | string | null
   status?: Prisma.EnumAcStatusFilter<"AssessmentCenter"> | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.JsonNullableFilter<"AssessmentCenter">
   createdAt?: Prisma.DateTimeFilter<"AssessmentCenter"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssessmentCenter"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"AssessmentCenter"> | Date | string | null
@@ -210,6 +214,7 @@ export type AssessmentCenterOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  participantDashboardSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -228,6 +233,7 @@ export type AssessmentCenterWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"AssessmentCenter"> | string
   description?: Prisma.StringNullableFilter<"AssessmentCenter"> | string | null
   status?: Prisma.EnumAcStatusFilter<"AssessmentCenter"> | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.JsonNullableFilter<"AssessmentCenter">
   createdAt?: Prisma.DateTimeFilter<"AssessmentCenter"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"AssessmentCenter"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"AssessmentCenter"> | Date | string | null
@@ -243,6 +249,7 @@ export type AssessmentCenterOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  participantDashboardSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -259,6 +266,7 @@ export type AssessmentCenterScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"AssessmentCenter"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"AssessmentCenter"> | string | null
   status?: Prisma.EnumAcStatusWithAggregatesFilter<"AssessmentCenter"> | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.JsonNullableWithAggregatesFilter<"AssessmentCenter">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AssessmentCenter"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"AssessmentCenter"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"AssessmentCenter"> | Date | string | null
@@ -269,6 +277,7 @@ export type AssessmentCenterCreateInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -284,6 +293,7 @@ export type AssessmentCenterUncheckedCreateInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -299,6 +309,7 @@ export type AssessmentCenterUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -314,6 +325,7 @@ export type AssessmentCenterUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -329,6 +341,7 @@ export type AssessmentCenterCreateManyInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -339,6 +352,7 @@ export type AssessmentCenterUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -349,6 +363,7 @@ export type AssessmentCenterUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -359,6 +374,7 @@ export type AssessmentCenterCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  participantDashboardSnapshot?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -468,6 +484,7 @@ export type AssessmentCenterCreateWithoutDaysInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -482,6 +499,7 @@ export type AssessmentCenterUncheckedCreateWithoutDaysInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -512,6 +530,7 @@ export type AssessmentCenterUpdateWithoutDaysInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -526,6 +545,7 @@ export type AssessmentCenterUncheckedUpdateWithoutDaysInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -540,6 +560,7 @@ export type AssessmentCenterCreateWithoutGroupsInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -554,6 +575,7 @@ export type AssessmentCenterUncheckedCreateWithoutGroupsInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -584,6 +606,7 @@ export type AssessmentCenterUpdateWithoutGroupsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -598,6 +621,7 @@ export type AssessmentCenterUncheckedUpdateWithoutGroupsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -612,6 +636,7 @@ export type AssessmentCenterCreateWithoutParticipantsInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -626,6 +651,7 @@ export type AssessmentCenterUncheckedCreateWithoutParticipantsInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -656,6 +682,7 @@ export type AssessmentCenterUpdateWithoutParticipantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -670,6 +697,7 @@ export type AssessmentCenterUncheckedUpdateWithoutParticipantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -684,6 +712,7 @@ export type AssessmentCenterCreateWithoutReviewersInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -698,6 +727,7 @@ export type AssessmentCenterUncheckedCreateWithoutReviewersInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -728,6 +758,7 @@ export type AssessmentCenterUpdateWithoutReviewersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -742,6 +773,7 @@ export type AssessmentCenterUncheckedUpdateWithoutReviewersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -756,6 +788,7 @@ export type AssessmentCenterCreateWithoutTasksInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -770,6 +803,7 @@ export type AssessmentCenterUncheckedCreateWithoutTasksInput = {
   name: string
   description?: string | null
   status?: $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -800,6 +834,7 @@ export type AssessmentCenterUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -814,6 +849,7 @@ export type AssessmentCenterUncheckedUpdateWithoutTasksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  participantDashboardSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -895,6 +931,7 @@ export type AssessmentCenterSelect<ExtArgs extends runtime.Types.Extensions.Inte
   name?: boolean
   description?: boolean
   status?: boolean
+  participantDashboardSnapshot?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -911,6 +948,7 @@ export type AssessmentCenterSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   name?: boolean
   description?: boolean
   status?: boolean
+  participantDashboardSnapshot?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -921,6 +959,7 @@ export type AssessmentCenterSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   name?: boolean
   description?: boolean
   status?: boolean
+  participantDashboardSnapshot?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -931,12 +970,13 @@ export type AssessmentCenterSelectScalar = {
   name?: boolean
   description?: boolean
   status?: boolean
+  participantDashboardSnapshot?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type AssessmentCenterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "status" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["assessmentCenter"]>
+export type AssessmentCenterOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "status" | "participantDashboardSnapshot" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["assessmentCenter"]>
 export type AssessmentCenterInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   days?: boolean | Prisma.AssessmentCenter$daysArgs<ExtArgs>
   groups?: boolean | Prisma.AssessmentCenter$groupsArgs<ExtArgs>
@@ -962,6 +1002,7 @@ export type $AssessmentCenterPayload<ExtArgs extends runtime.Types.Extensions.In
     name: string
     description: string | null
     status: $Enums.AcStatus
+    participantDashboardSnapshot: runtime.JsonValue | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1397,6 +1438,7 @@ export interface AssessmentCenterFieldRefs {
   readonly name: Prisma.FieldRef<"AssessmentCenter", 'String'>
   readonly description: Prisma.FieldRef<"AssessmentCenter", 'String'>
   readonly status: Prisma.FieldRef<"AssessmentCenter", 'AcStatus'>
+  readonly participantDashboardSnapshot: Prisma.FieldRef<"AssessmentCenter", 'Json'>
   readonly createdAt: Prisma.FieldRef<"AssessmentCenter", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"AssessmentCenter", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"AssessmentCenter", 'DateTime'>
