@@ -55,7 +55,6 @@ type RankConfig = {
 
 type RadarChartDatum = {
 	axisId: string;
-	taskLabel: string;
 	criteriaGroupLabelLines: string[];
 	participant: number;
 	benchmark: number;
@@ -169,7 +168,6 @@ function splitLabelIntoLines(label: string, maxLineLength: number): string[] {
 function buildRadarChartData(view: ViewData): RadarChartDatum[] {
 	return view.groups.map((group) => ({
 		axisId: group.axisId,
-		taskLabel: group.taskName,
 		criteriaGroupLabelLines: splitLabelIntoLines(group.criteriaGroupTitle, 18),
 		participant: group.participantScore ?? 0,
 		benchmark: group.benchmarkScore ?? 0,
@@ -178,10 +176,6 @@ function buildRadarChartData(view: ViewData): RadarChartDatum[] {
 
 function getRadarChartDatum(value: unknown): RadarChartDatum | null {
 	if (typeof value !== "object" || value === null) {
-		return null;
-	}
-
-	if (!("taskLabel" in value) || typeof value.taskLabel !== "string") {
 		return null;
 	}
 
@@ -207,7 +201,6 @@ function getRadarChartDatum(value: unknown): RadarChartDatum | null {
 
 	return {
 		axisId: value.axisId,
-		taskLabel: value.taskLabel,
 		criteriaGroupLabelLines: value.criteriaGroupLabelLines,
 		participant: value.participant,
 		benchmark: value.benchmark,
@@ -253,8 +246,8 @@ function RadarAxisTick({
 		return null;
 	}
 
-	const { taskLabel, criteriaGroupLabelLines } = datum;
-	const allLines = [taskLabel, ...criteriaGroupLabelLines];
+	const { criteriaGroupLabelLines } = datum;
+	const allLines = criteriaGroupLabelLines;
 	const startOffset = -((allLines.length - 1) * 14) / 2;
 
 	return (
@@ -265,13 +258,13 @@ function RadarAxisTick({
 			x={x}
 			y={y}
 		>
-			<title>{`${taskLabel} · ${criteriaGroupLabelLines.join(" ")}`}</title>
+			<title>{criteriaGroupLabelLines.join(" ")}</title>
 			{allLines.map((line, index) => (
 				<tspan
-					dominantBaseline={index === 0 ? "auto" : undefined}
+					dominantBaseline="auto"
 					dy={index === 0 ? startOffset : 14}
-					fontWeight={index === 0 ? 600 : 400}
-					key={index === 0 ? `task-${line}` : `group-${line}`}
+					fontWeight={400}
+					key={`group-${line}`}
 					x={x}
 				>
 					{line}
@@ -460,7 +453,7 @@ function RadarChartContent({ view }: { view: ViewData }) {
 									return "";
 								}
 
-								return `${datum.taskLabel} · ${datum.criteriaGroupLabelLines.join(" ")}`;
+								return datum.criteriaGroupLabelLines.join(" ");
 							}}
 						/>
 					}
