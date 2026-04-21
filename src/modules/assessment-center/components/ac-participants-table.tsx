@@ -1,7 +1,7 @@
 "use client";
 
-import { CameraIcon, PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
-import { useRef, useState } from "react";
+import { PencilIcon, PlusIcon, Trash2Icon } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import {
 	AlertDialog,
@@ -37,7 +37,6 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { useUploadThing } from "@/lib/uploadthing";
 import { api } from "@/trpc/react";
 import { ParticipantAvatar } from "./participant-avatar";
 
@@ -265,13 +264,6 @@ function EditParticipantDialog({
 				<DialogHeader>
 					<DialogTitle>Teilnehmer bearbeiten</DialogTitle>
 				</DialogHeader>
-				<div className="flex flex-col items-center py-2">
-					<AvatarUploadControl
-						acId={acId}
-						participant={participant}
-						utils={utils}
-					/>
-				</div>
 				<form id="edit-participant-form" onSubmit={handleSubmit}>
 					<FieldGroup>
 						<Field>
@@ -320,110 +312,6 @@ function EditParticipantDialog({
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
-	);
-}
-
-type AvatarUploadControlProps = {
-	participant: Participant;
-	acId: string;
-	utils: ReturnType<typeof api.useUtils>;
-};
-
-function AvatarUploadControl({
-	participant,
-	acId,
-	utils,
-}: AvatarUploadControlProps) {
-	const fileInputRef = useRef<HTMLInputElement>(null);
-
-	const { startUpload, isUploading } = useUploadThing("participantAvatar");
-
-	const removeAvatarMutation = api.participant.removeAvatar.useMutation({
-		onSuccess: async () => {
-			await utils.participant.listByAc.invalidate({ acId });
-			toast.success("Avatar entfernt");
-		},
-		onError: (error) => toast.error(error.message),
-	});
-
-	const isLoading = isUploading || removeAvatarMutation.isPending;
-
-	async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-		const file = e.target.files?.[0];
-		if (!file) return;
-
-		// Reset input so the same file can be re-selected after removal
-		e.target.value = "";
-
-		try {
-			const result = await startUpload([file], {
-				participantId: participant.id,
-				acId,
-			});
-
-			if (!result) {
-				toast.error("Upload fehlgeschlagen");
-				return;
-			}
-
-			await utils.participant.listByAc.invalidate({ acId });
-			toast.success("Avatar gespeichert");
-		} catch {
-			toast.error("Upload fehlgeschlagen");
-		}
-	}
-
-	function handleRemove() {
-		removeAvatarMutation.mutate({ id: participant.id, acId });
-	}
-
-	return (
-		<div className="flex flex-col items-center gap-2">
-			<button
-				aria-label="Foto ändern"
-				className="group relative cursor-pointer rounded-full disabled:cursor-not-allowed"
-				disabled={isLoading}
-				onClick={() => fileInputRef.current?.click()}
-				type="button"
-			>
-				<ParticipantAvatar
-					avatarUrl={participant.avatarUrl}
-					name={participant.name}
-					size="lg"
-				/>
-				<div className="absolute inset-0 flex items-center justify-center rounded-full bg-black/40 opacity-0 transition-opacity group-hover:opacity-100 group-disabled:opacity-0">
-					<CameraIcon className="h-4 w-4 text-white" />
-				</div>
-			</button>
-			<input
-				accept="image/*"
-				className="sr-only"
-				disabled={isLoading}
-				onChange={handleFileChange}
-				ref={fileInputRef}
-				type="file"
-			/>
-			<div className="flex gap-3 text-xs">
-				<button
-					className="text-primary underline underline-offset-2 disabled:opacity-50"
-					disabled={isLoading}
-					onClick={() => fileInputRef.current?.click()}
-					type="button"
-				>
-					{isUploading ? "Lädt hoch..." : "Foto ändern"}
-				</button>
-				{participant.avatarUrl && (
-					<button
-						className="text-muted-foreground underline underline-offset-2 disabled:opacity-50"
-						disabled={isLoading}
-						onClick={handleRemove}
-						type="button"
-					>
-						Entfernen
-					</button>
-				)}
-			</div>
-		</div>
 	);
 }
 
