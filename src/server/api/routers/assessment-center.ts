@@ -1,7 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { Prisma } from "../../../../generated/prisma/client";
 import { buildParticipantDashboardSnapshot } from "@/modules/evaluation/server/participant-dashboard-snapshot";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+
+const LOCKED_MSG =
+	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const assessmentCenterRouter = createTRPCRouter({
 	listForUser: protectedProcedure.query(async ({ ctx }) => {
@@ -186,12 +190,8 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (ac.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			await ctx.db.assessmentCenter.update({
@@ -230,12 +230,8 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (ac.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			const date = new Date(`${input.date}T00:00:00.000Z`);
@@ -278,12 +274,8 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (day.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (day.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			if (day._count.scheduleEntries > 0) {
@@ -414,6 +406,48 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: {
 					status: "COMPLETED",
 					participantDashboardSnapshot,
+				},
+			});
+		}),
+
+	reopen: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können den Status ändern",
+				});
+			}
+
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id, deletedAt: null },
+				select: { id: true, status: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			if (ac.status !== "COMPLETED") {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message:
+						"Nur abgeschlossene Assessment Center können wieder geöffnet werden",
+				});
+			}
+
+			// Snapshot wird verworfen, damit die Auswertung nach der Wiederöffnung
+			// live aus den (ggf. angepassten) Ratings berechnet wird. Beim erneuten
+			// Abschließen wird ein frischer Snapshot erzeugt.
+			await ctx.db.assessmentCenter.update({
+				where: { id: input.id },
+				data: {
+					status: "ACTIVE",
+					participantDashboardSnapshot: Prisma.JsonNull,
 				},
 			});
 		}),

@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
-const DRAFT_ONLY_MSG =
-	"Einrichtung kann nach Aktivierung nicht mehr geändert werden";
+const LOCKED_MSG =
+	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 const criteriaGroupFactorTypeSchema = z.enum(["POTENTIAL", "COMPETENCE"]);
 
@@ -115,8 +115,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (ac.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.task.create({
@@ -167,8 +167,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.task.update({
@@ -212,8 +212,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			if (task._count.scheduleEntries > 0) {
@@ -279,8 +279,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.reviewCriteriaGroup.create({
@@ -337,8 +337,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (group.task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.reviewCriteriaGroup.update({
@@ -387,8 +387,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (group.task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			const deletedAt = new Date();
@@ -449,8 +449,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (group.task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.reviewCriteria.create({
@@ -518,8 +518,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (criteria.task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (criteria.task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			const group = await ctx.db.reviewCriteriaGroup.findFirst({
@@ -591,8 +591,8 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (criteria.task.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (criteria.task.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			await ctx.db.reviewCriteria.update({
