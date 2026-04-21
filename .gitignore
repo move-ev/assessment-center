@@ -45,3 +45,9 @@ yarn-error.log*
 # idea files
 .idea
 /.vscode
+
+# R REPL history
+.Rhistory
+
+# local scratch files
+/role.txt
