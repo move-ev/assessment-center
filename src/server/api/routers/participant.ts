@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { utapi } from "@/server/uploadthing";
 
 export const participantRouter = createTRPCRouter({
 	listByAc: protectedProcedure
@@ -112,54 +111,6 @@ export const participantRouter = createTRPCRouter({
 			});
 		}),
 
-	removeAvatar: protectedProcedure
-		.input(z.object({ id: z.string(), acId: z.string() }))
-		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Teilnehmer bearbeiten",
-				});
-			}
-
-			const participant = await ctx.db.participant.findFirst({
-				where: {
-					id: input.id,
-					assessmentCenterId: input.acId,
-					deletedAt: null,
-				},
-				select: {
-					id: true,
-					avatarFileKey: true,
-					assessmentCenter: { select: { status: true } },
-				},
-			});
-
-			if (!participant) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Teilnehmer nicht gefunden",
-				});
-			}
-
-			if (participant.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
-			}
-
-			if (participant.avatarFileKey) {
-				await utapi.deleteFiles(participant.avatarFileKey);
-			}
-
-			await ctx.db.participant.update({
-				where: { id: input.id },
-				data: { avatarUrl: null, avatarFileKey: null },
-			});
-		}),
-
 	remove: protectedProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
@@ -178,7 +129,6 @@ export const participantRouter = createTRPCRouter({
 				},
 				select: {
 					id: true,
-					avatarFileKey: true,
 					assessmentCenter: { select: { status: true } },
 				},
 			});
@@ -196,10 +146,6 @@ export const participantRouter = createTRPCRouter({
 					message:
 						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
 				});
-			}
-
-			if (participant.avatarFileKey) {
-				await utapi.deleteFiles(participant.avatarFileKey);
 			}
 
 			await ctx.db.participantGroupMembership.deleteMany({
