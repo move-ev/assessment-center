@@ -23,24 +23,29 @@ export type ReviewRatingFormData = {
 		completedCriteriaCount: number;
 		totalCriteriaCount: number;
 	};
-	criteria: Array<
-		| {
-				id: string;
-				name: string;
-				description: string | null;
-				type: "QUANTITATIVE";
-				weight: number;
-				value: number | null;
-				notes: string;
-		  }
-		| {
-				id: string;
-				name: string;
-				description: string | null;
-				type: "QUALITATIVE";
-				text: string;
-		  }
-	>;
+	criteriaGroups: Array<{
+		id: string;
+		title: string;
+		factorType: "POTENTIAL" | "COMPETENCE";
+		criteria: Array<
+			| {
+					id: string;
+					name: string;
+					description: string | null;
+					type: "QUANTITATIVE";
+					weight: number;
+					value: number | null;
+					notes: string;
+			  }
+			| {
+					id: string;
+					name: string;
+					description: string | null;
+					type: "QUALITATIVE";
+					text: string;
+			  }
+		>;
+	}>;
 	teamObservation: {
 		enabled: boolean;
 		notes: string;
@@ -69,14 +74,23 @@ export async function getReviewRatingFormData(
 					name: true,
 					description: true,
 					isTeamTask: true,
-					criteria: {
+					criteriaGroups: {
 						where: { deletedAt: null },
 						select: {
 							id: true,
-							name: true,
-							description: true,
-							type: true,
-							weight: true,
+							title: true,
+							factorType: true,
+							criteria: {
+								where: { deletedAt: null },
+								select: {
+									id: true,
+									name: true,
+									description: true,
+									type: true,
+									weight: true,
+								},
+								orderBy: { createdAt: "asc" },
+							},
 						},
 						orderBy: { createdAt: "asc" },
 					},
@@ -156,31 +170,39 @@ export async function getReviewRatingFormData(
 		},
 		progress: {
 			completedCriteriaCount: getCompletedCriteriaCount(assignment),
-			totalCriteriaCount: assignment.task.criteria.length,
+			totalCriteriaCount: assignment.task.criteriaGroups.reduce(
+				(count, group) => count + group.criteria.length,
+				0,
+			),
 		},
-		criteria: assignment.task.criteria.map((criteria) => {
-			if (criteria.type === "QUANTITATIVE") {
-				const rating = quantitativeRatings.get(criteria.id);
+		criteriaGroups: assignment.task.criteriaGroups.map((group) => ({
+			id: group.id,
+			title: group.title,
+			factorType: group.factorType,
+			criteria: group.criteria.map((criteria) => {
+				if (criteria.type === "QUANTITATIVE") {
+					const rating = quantitativeRatings.get(criteria.id);
+					return {
+						id: criteria.id,
+						name: criteria.name,
+						description: criteria.description,
+						type: "QUANTITATIVE" as const,
+						weight: criteria.weight ?? 0,
+						value: rating?.value ?? null,
+						notes: rating?.notes ?? "",
+					};
+				}
+
+				const rating = qualitativeRatings.get(criteria.id);
 				return {
 					id: criteria.id,
 					name: criteria.name,
 					description: criteria.description,
-					type: "QUANTITATIVE" as const,
-					weight: criteria.weight ?? 0,
-					value: rating?.value ?? null,
-					notes: rating?.notes ?? "",
+					type: "QUALITATIVE" as const,
+					text: rating?.text ?? "",
 				};
-			}
-
-			const rating = qualitativeRatings.get(criteria.id);
-			return {
-				id: criteria.id,
-				name: criteria.name,
-				description: criteria.description,
-				type: "QUALITATIVE" as const,
-				text: rating?.text ?? "",
-			};
-		}),
+			}),
+		})),
 		teamObservation: {
 			enabled: assignment.task.isTeamTask,
 			notes: teamObservation?.notes ?? "",

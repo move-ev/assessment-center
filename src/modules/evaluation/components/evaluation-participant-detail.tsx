@@ -120,6 +120,8 @@ function TaskCard({
 }: {
 	task: EvaluationParticipantDetailData["tasks"][number];
 }) {
+	const criteriaGroups = groupTaskCriteria(task.criteria);
+
 	return (
 		<Card>
 			<CardHeader className="gap-3">
@@ -168,8 +170,26 @@ function TaskCard({
 				</div>
 
 				<div className="space-y-4">
-					{task.criteria.map((criterion) => (
-						<CriterionCard criterion={criterion} key={criterion.id} />
+					{criteriaGroups.map((group) => (
+						<div className="space-y-3" key={group.key}>
+							<div className="flex flex-wrap items-center gap-2">
+								<h3 className="font-medium text-sm">{group.title}</h3>
+								<Badge
+									variant={
+										group.factorType === "POTENTIAL" ? "secondary" : "outline"
+									}
+								>
+									{group.factorType === "POTENTIAL"
+										? "Potenzial-Faktoren"
+										: "Kompetenz-Faktoren"}
+								</Badge>
+							</div>
+							<div className="space-y-4">
+								{group.criteria.map((criterion) => (
+									<CriterionCard criterion={criterion} key={criterion.id} />
+								))}
+							</div>
+						</div>
 					))}
 				</div>
 
@@ -294,6 +314,34 @@ function CriterionCard({
 			)}
 		</div>
 	);
+}
+
+function groupTaskCriteria(
+	criteria: EvaluationParticipantDetailData["tasks"][number]["criteria"],
+) {
+	const groups = new Map<
+		string,
+		{
+			key: string;
+			title: string;
+			factorType: "POTENTIAL" | "COMPETENCE";
+			criteria: EvaluationParticipantDetailData["tasks"][number]["criteria"];
+		}
+	>();
+
+	for (const criterion of criteria) {
+		const key = `${criterion.criteriaGroupFactorType}:${criterion.criteriaGroupTitle}`;
+		const current = groups.get(key) ?? {
+			key,
+			title: criterion.criteriaGroupTitle,
+			factorType: criterion.criteriaGroupFactorType,
+			criteria: [],
+		};
+		current.criteria.push(criterion);
+		groups.set(key, current);
+	}
+
+	return Array.from(groups.values());
 }
 
 export { EvaluationParticipantDetail };

@@ -29,6 +29,10 @@ type TaskDefinition = {
 		name: string;
 		type: "QUANTITATIVE" | "QUALITATIVE";
 		weight: number | null;
+		criteriaGroup: {
+			title: string;
+			factorType: "POTENTIAL" | "COMPETENCE";
+		};
 	}>;
 	teamObservations: Array<{
 		groupId: string;
@@ -81,6 +85,8 @@ export type EvaluationCriterionResult = {
 	id: string;
 	taskId: string;
 	taskName: string;
+	criteriaGroupTitle: string;
+	criteriaGroupFactorType: "POTENTIAL" | "COMPETENCE";
 	name: string;
 	type: "QUANTITATIVE" | "QUALITATIVE";
 	weight: number | null;
@@ -129,6 +135,12 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 							name: true,
 							type: true,
 							weight: true,
+							criteriaGroup: {
+								select: {
+									title: true,
+									factorType: true,
+								},
+							},
 						},
 						orderBy: { createdAt: "asc" },
 					},
@@ -228,6 +240,8 @@ function buildCriterionResults(data: QueryResult) {
 				id: criteria.id,
 				taskId: task.id,
 				taskName: task.name,
+				criteriaGroupTitle: criteria.criteriaGroup.title,
+				criteriaGroupFactorType: criteria.criteriaGroup.factorType,
 				name: criteria.name,
 				type: criteria.type,
 				weight: criteria.weight,

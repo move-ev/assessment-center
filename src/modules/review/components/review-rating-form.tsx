@@ -20,12 +20,14 @@ function ReviewRatingForm({ acId, taskId, data }: Props) {
 	const [completion, setCompletion] = useState(
 		() =>
 			new Map(
-				data.criteria.map((criteria) => [
-					criteria.id,
-					criteria.type === "QUANTITATIVE"
-						? criteria.value !== null
-						: criteria.text.trim() !== "",
-				]),
+				data.criteriaGroups.flatMap((group) =>
+					group.criteria.map((criteria) => [
+						criteria.id,
+						criteria.type === "QUANTITATIVE"
+							? criteria.value !== null
+							: criteria.text.trim() !== "",
+					]),
+				),
 			),
 	);
 
@@ -98,33 +100,54 @@ function ReviewRatingForm({ acId, taskId, data }: Props) {
 				)}
 			</header>
 
-			{data.criteria.length === 0 ? (
+			{data.criteriaGroups.length === 0 ? (
 				<p className="text-muted-foreground text-sm">
 					Für diese Aufgabe sind noch keine Kriterien hinterlegt.
 				</p>
 			) : (
 				<div className="space-y-4">
-					{data.criteria.map((criteria) =>
-						criteria.type === "QUANTITATIVE" ? (
-							<ReviewQuantitativeField
-								acId={acId}
-								criterion={criteria}
-								key={criteria.id}
-								onPersisted={handlePersisted}
-								participantId={data.participant.id}
-								taskId={taskId}
-							/>
-						) : (
-							<ReviewQualitativeField
-								acId={acId}
-								criterion={criteria}
-								key={criteria.id}
-								onPersisted={handlePersisted}
-								participantId={data.participant.id}
-								taskId={taskId}
-							/>
-						),
-					)}
+					{data.criteriaGroups.map((group) => (
+						<section
+							className="space-y-3 rounded-3xl border p-4"
+							key={group.id}
+						>
+							<div className="flex flex-wrap items-center gap-2">
+								<h2 className="font-medium text-base">{group.title}</h2>
+								<Badge
+									variant={
+										group.factorType === "POTENTIAL" ? "secondary" : "outline"
+									}
+								>
+									{group.factorType === "POTENTIAL"
+										? "Potenzial-Faktoren"
+										: "Kompetenz-Faktoren"}
+								</Badge>
+							</div>
+							<div className="space-y-4">
+								{group.criteria.map((criteria) =>
+									criteria.type === "QUANTITATIVE" ? (
+										<ReviewQuantitativeField
+											acId={acId}
+											criterion={criteria}
+											key={criteria.id}
+											onPersisted={handlePersisted}
+											participantId={data.participant.id}
+											taskId={taskId}
+										/>
+									) : (
+										<ReviewQualitativeField
+											acId={acId}
+											criterion={criteria}
+											key={criteria.id}
+											onPersisted={handlePersisted}
+											participantId={data.participant.id}
+											taskId={taskId}
+										/>
+									),
+								)}
+							</div>
+						</section>
+					))}
 				</div>
 			)}
 
