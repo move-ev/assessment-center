@@ -18,6 +18,8 @@ import {
 import {
 	type ChartConfig,
 	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
 	ChartTooltip,
 	ChartTooltipContent,
 } from "@/components/ui/chart";
@@ -439,6 +441,7 @@ function RadarChartContent({ view }: { view: ViewData }) {
 						/>
 					}
 				/>
+				<ChartLegend content={<ChartLegendContent />} />
 				<PolarGrid />
 				<PolarAngleAxis
 					dataKey="axisId"
