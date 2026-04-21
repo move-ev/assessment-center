@@ -66,8 +66,8 @@ model Session {
   impersonatedBy String?
 
   @@unique([token])
-  @@map("session")
   @@index([userId])
+  @@map("session")
 }
 
 model Account {
@@ -86,8 +86,8 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  @@map("account")
   @@index([userId])
+  @@map("account")
 }
 
 model Verification {
@@ -98,8 +98,8 @@ model Verification {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now()) @updatedAt
 
-  @@map("verification")
   @@index([identifier])
+  @@map("verification")
 }
 
 // ---------------------------------------------------------------------------
@@ -237,6 +237,7 @@ model Task {
   updatedAt          DateTime         @updatedAt
   deletedAt          DateTime?
 
+  criteriaGroups      ReviewCriteriaGroup[]
   criteria            ReviewCriteria[]
   scheduleEntries     ScheduleEntry[]
   reviewerAssignments ReviewerAssignment[]
@@ -265,6 +266,24 @@ model ScheduleEntry {
   @@index([taskId])
 }
 
+/// A titled group of review criteria within a task.
+/// factorType determines whether the group belongs to potential or competence factors.
+
+model ReviewCriteriaGroup {
+  id         String                  @id @default(cuid())
+  taskId     String
+  task       Task                    @relation(fields: [taskId], references: [id])
+  title      String
+  factorType CriteriaGroupFactorType
+  createdAt  DateTime                @default(now())
+  updatedAt  DateTime                @updatedAt
+  deletedAt  DateTime?
+
+  criteria ReviewCriteria[]
+
+  @@index([taskId])
+}
+
 /// A criterion used to evaluate participants on a specific task.
 ///
 /// DB-level constraint (applied via migration SQL, not expressible in Prisma):
@@ -275,28 +294,36 @@ model ScheduleEntry {
 ///   - weight IS NULL for QUALITATIVE criteria
 
 model ReviewCriteria {
-  id          String       @id @default(cuid())
-  taskId      String
-  task        Task         @relation(fields: [taskId], references: [id])
-  name        String
-  description String?
-  type        CriteriaType
+  id              String              @id @default(cuid())
+  taskId          String
+  task            Task                @relation(fields: [taskId], references: [id])
+  criteriaGroupId String
+  criteriaGroup   ReviewCriteriaGroup @relation(fields: [criteriaGroupId], references: [id])
+  name            String
+  description     String?
+  type            CriteriaType
   /// Required when type = QUANTITATIVE. Must be > 0.
   /// Null when type = QUALITATIVE.
-  weight      Float?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
-  deletedAt   DateTime?
+  weight          Float?
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  deletedAt       DateTime?
 
   quantitativeRatings QuantitativeRating[]
   qualitativeRatings  QualitativeRating[]
 
   @@index([taskId])
+  @@index([criteriaGroupId])
 }
 
 enum CriteriaType {
   QUANTITATIVE
   QUALITATIVE
+}
+
+enum CriteriaGroupFactorType {
+  POTENTIAL
+  COMPETENCE
 }
 
 /// Links a specific reviewer to a specific participant for a specific task.

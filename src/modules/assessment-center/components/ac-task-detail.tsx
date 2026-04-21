@@ -61,7 +61,7 @@ function AcTaskDetail({ acId, taskId }: Props) {
 
 			<AcCriteriaEditor
 				acId={acId}
-				criteria={task.criteria}
+				criteriaGroups={task.criteriaGroups}
 				taskId={taskId}
 				utils={utils}
 			/>
@@ -74,12 +74,18 @@ type TaskData = {
 	name: string;
 	description: string | null;
 	isTeamTask: boolean;
-	criteria: Array<{
+	criteriaGroups: Array<{
 		id: string;
-		name: string;
-		description: string | null;
-		type: "QUANTITATIVE" | "QUALITATIVE";
-		weight: number | null;
+		title: string;
+		factorType: "POTENTIAL" | "COMPETENCE";
+		criteria: Array<{
+			id: string;
+			criteriaGroupId: string;
+			name: string;
+			description: string | null;
+			type: "QUANTITATIVE" | "QUALITATIVE";
+			weight: number | null;
+		}>;
 	}>;
 };
 

@@ -205,6 +205,23 @@ export type IntWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedIntFilter<$PrismaModel>
 }
 
+export type EnumCriteriaGroupFactorTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CriteriaGroupFactorType | Prisma.EnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel> | $Enums.CriteriaGroupFactorType
+}
+
+export type EnumCriteriaGroupFactorTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CriteriaGroupFactorType | Prisma.EnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCriteriaGroupFactorTypeWithAggregatesFilter<$PrismaModel> | $Enums.CriteriaGroupFactorType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel>
+}
+
 export type EnumCriteriaTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.CriteriaType | Prisma.EnumCriteriaTypeFieldRefInput<$PrismaModel>
   in?: $Enums.CriteriaType[] | Prisma.ListEnumCriteriaTypeFieldRefInput<$PrismaModel>
@@ -451,6 +468,23 @@ export type NestedFloatFilter<$PrismaModel = never> = {
   gt?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   gte?: number | Prisma.FloatFieldRefInput<$PrismaModel>
   not?: Prisma.NestedFloatFilter<$PrismaModel> | number
+}
+
+export type NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.CriteriaGroupFactorType | Prisma.EnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel> | $Enums.CriteriaGroupFactorType
+}
+
+export type NestedEnumCriteriaGroupFactorTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.CriteriaGroupFactorType | Prisma.EnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.CriteriaGroupFactorType[] | Prisma.ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumCriteriaGroupFactorTypeWithAggregatesFilter<$PrismaModel> | $Enums.CriteriaGroupFactorType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumCriteriaGroupFactorTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumCriteriaTypeFilter<$PrismaModel = never> = {

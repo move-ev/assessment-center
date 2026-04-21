@@ -37,6 +37,7 @@ export type ReviewCriteriaSumAggregateOutputType = {
 export type ReviewCriteriaMinAggregateOutputType = {
   id: string | null
   taskId: string | null
+  criteriaGroupId: string | null
   name: string | null
   description: string | null
   type: $Enums.CriteriaType | null
@@ -49,6 +50,7 @@ export type ReviewCriteriaMinAggregateOutputType = {
 export type ReviewCriteriaMaxAggregateOutputType = {
   id: string | null
   taskId: string | null
+  criteriaGroupId: string | null
   name: string | null
   description: string | null
   type: $Enums.CriteriaType | null
@@ -61,6 +63,7 @@ export type ReviewCriteriaMaxAggregateOutputType = {
 export type ReviewCriteriaCountAggregateOutputType = {
   id: number
   taskId: number
+  criteriaGroupId: number
   name: number
   description: number
   type: number
@@ -83,6 +86,7 @@ export type ReviewCriteriaSumAggregateInputType = {
 export type ReviewCriteriaMinAggregateInputType = {
   id?: true
   taskId?: true
+  criteriaGroupId?: true
   name?: true
   description?: true
   type?: true
@@ -95,6 +99,7 @@ export type ReviewCriteriaMinAggregateInputType = {
 export type ReviewCriteriaMaxAggregateInputType = {
   id?: true
   taskId?: true
+  criteriaGroupId?: true
   name?: true
   description?: true
   type?: true
@@ -107,6 +112,7 @@ export type ReviewCriteriaMaxAggregateInputType = {
 export type ReviewCriteriaCountAggregateInputType = {
   id?: true
   taskId?: true
+  criteriaGroupId?: true
   name?: true
   description?: true
   type?: true
@@ -206,6 +212,7 @@ export type ReviewCriteriaGroupByArgs<ExtArgs extends runtime.Types.Extensions.I
 export type ReviewCriteriaGroupByOutputType = {
   id: string
   taskId: string
+  criteriaGroupId: string
   name: string
   description: string | null
   type: $Enums.CriteriaType
@@ -241,6 +248,7 @@ export type ReviewCriteriaWhereInput = {
   NOT?: Prisma.ReviewCriteriaWhereInput | Prisma.ReviewCriteriaWhereInput[]
   id?: Prisma.StringFilter<"ReviewCriteria"> | string
   taskId?: Prisma.StringFilter<"ReviewCriteria"> | string
+  criteriaGroupId?: Prisma.StringFilter<"ReviewCriteria"> | string
   name?: Prisma.StringFilter<"ReviewCriteria"> | string
   description?: Prisma.StringNullableFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeFilter<"ReviewCriteria"> | $Enums.CriteriaType
@@ -249,6 +257,7 @@ export type ReviewCriteriaWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteria"> | Date | string | null
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
+  criteriaGroup?: Prisma.XOR<Prisma.ReviewCriteriaGroupScalarRelationFilter, Prisma.ReviewCriteriaGroupWhereInput>
   quantitativeRatings?: Prisma.QuantitativeRatingListRelationFilter
   qualitativeRatings?: Prisma.QualitativeRatingListRelationFilter
 }
@@ -256,6 +265,7 @@ export type ReviewCriteriaWhereInput = {
 export type ReviewCriteriaOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
+  criteriaGroupId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -264,6 +274,7 @@ export type ReviewCriteriaOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   task?: Prisma.TaskOrderByWithRelationInput
+  criteriaGroup?: Prisma.ReviewCriteriaGroupOrderByWithRelationInput
   quantitativeRatings?: Prisma.QuantitativeRatingOrderByRelationAggregateInput
   qualitativeRatings?: Prisma.QualitativeRatingOrderByRelationAggregateInput
 }
@@ -274,6 +285,7 @@ export type ReviewCriteriaWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ReviewCriteriaWhereInput[]
   NOT?: Prisma.ReviewCriteriaWhereInput | Prisma.ReviewCriteriaWhereInput[]
   taskId?: Prisma.StringFilter<"ReviewCriteria"> | string
+  criteriaGroupId?: Prisma.StringFilter<"ReviewCriteria"> | string
   name?: Prisma.StringFilter<"ReviewCriteria"> | string
   description?: Prisma.StringNullableFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeFilter<"ReviewCriteria"> | $Enums.CriteriaType
@@ -282,6 +294,7 @@ export type ReviewCriteriaWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteria"> | Date | string | null
   task?: Prisma.XOR<Prisma.TaskScalarRelationFilter, Prisma.TaskWhereInput>
+  criteriaGroup?: Prisma.XOR<Prisma.ReviewCriteriaGroupScalarRelationFilter, Prisma.ReviewCriteriaGroupWhereInput>
   quantitativeRatings?: Prisma.QuantitativeRatingListRelationFilter
   qualitativeRatings?: Prisma.QualitativeRatingListRelationFilter
 }, "id">
@@ -289,6 +302,7 @@ export type ReviewCriteriaWhereUniqueInput = Prisma.AtLeast<{
 export type ReviewCriteriaOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
+  criteriaGroupId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -309,6 +323,7 @@ export type ReviewCriteriaScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ReviewCriteriaScalarWhereWithAggregatesInput | Prisma.ReviewCriteriaScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ReviewCriteria"> | string
   taskId?: Prisma.StringWithAggregatesFilter<"ReviewCriteria"> | string
+  criteriaGroupId?: Prisma.StringWithAggregatesFilter<"ReviewCriteria"> | string
   name?: Prisma.StringWithAggregatesFilter<"ReviewCriteria"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeWithAggregatesFilter<"ReviewCriteria"> | $Enums.CriteriaType
@@ -328,6 +343,7 @@ export type ReviewCriteriaCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   task: Prisma.TaskCreateNestedOneWithoutCriteriaInput
+  criteriaGroup: Prisma.ReviewCriteriaGroupCreateNestedOneWithoutCriteriaInput
   quantitativeRatings?: Prisma.QuantitativeRatingCreateNestedManyWithoutCriteriaInput
   qualitativeRatings?: Prisma.QualitativeRatingCreateNestedManyWithoutCriteriaInput
 }
@@ -335,6 +351,7 @@ export type ReviewCriteriaCreateInput = {
 export type ReviewCriteriaUncheckedCreateInput = {
   id?: string
   taskId: string
+  criteriaGroupId: string
   name: string
   description?: string | null
   type: $Enums.CriteriaType
@@ -356,6 +373,7 @@ export type ReviewCriteriaUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   task?: Prisma.TaskUpdateOneRequiredWithoutCriteriaNestedInput
+  criteriaGroup?: Prisma.ReviewCriteriaGroupUpdateOneRequiredWithoutCriteriaNestedInput
   quantitativeRatings?: Prisma.QuantitativeRatingUpdateManyWithoutCriteriaNestedInput
   qualitativeRatings?: Prisma.QualitativeRatingUpdateManyWithoutCriteriaNestedInput
 }
@@ -363,6 +381,7 @@ export type ReviewCriteriaUpdateInput = {
 export type ReviewCriteriaUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  criteriaGroupId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
@@ -377,6 +396,7 @@ export type ReviewCriteriaUncheckedUpdateInput = {
 export type ReviewCriteriaCreateManyInput = {
   id?: string
   taskId: string
+  criteriaGroupId: string
   name: string
   description?: string | null
   type: $Enums.CriteriaType
@@ -400,6 +420,7 @@ export type ReviewCriteriaUpdateManyMutationInput = {
 export type ReviewCriteriaUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  criteriaGroupId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
@@ -422,6 +443,7 @@ export type ReviewCriteriaOrderByRelationAggregateInput = {
 export type ReviewCriteriaCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
+  criteriaGroupId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -438,6 +460,7 @@ export type ReviewCriteriaAvgOrderByAggregateInput = {
 export type ReviewCriteriaMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
+  criteriaGroupId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -450,6 +473,7 @@ export type ReviewCriteriaMaxOrderByAggregateInput = {
 export type ReviewCriteriaMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
+  criteriaGroupId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -510,6 +534,48 @@ export type ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput = {
   deleteMany?: Prisma.ReviewCriteriaScalarWhereInput | Prisma.ReviewCriteriaScalarWhereInput[]
 }
 
+export type ReviewCriteriaCreateNestedManyWithoutCriteriaGroupInput = {
+  create?: Prisma.XOR<Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput> | Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput[] | Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput[]
+  connectOrCreate?: Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput | Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput[]
+  createMany?: Prisma.ReviewCriteriaCreateManyCriteriaGroupInputEnvelope
+  connect?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+}
+
+export type ReviewCriteriaUncheckedCreateNestedManyWithoutCriteriaGroupInput = {
+  create?: Prisma.XOR<Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput> | Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput[] | Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput[]
+  connectOrCreate?: Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput | Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput[]
+  createMany?: Prisma.ReviewCriteriaCreateManyCriteriaGroupInputEnvelope
+  connect?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+}
+
+export type ReviewCriteriaUpdateManyWithoutCriteriaGroupNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput> | Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput[] | Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput[]
+  connectOrCreate?: Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput | Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput[]
+  upsert?: Prisma.ReviewCriteriaUpsertWithWhereUniqueWithoutCriteriaGroupInput | Prisma.ReviewCriteriaUpsertWithWhereUniqueWithoutCriteriaGroupInput[]
+  createMany?: Prisma.ReviewCriteriaCreateManyCriteriaGroupInputEnvelope
+  set?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  disconnect?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  delete?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  connect?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  update?: Prisma.ReviewCriteriaUpdateWithWhereUniqueWithoutCriteriaGroupInput | Prisma.ReviewCriteriaUpdateWithWhereUniqueWithoutCriteriaGroupInput[]
+  updateMany?: Prisma.ReviewCriteriaUpdateManyWithWhereWithoutCriteriaGroupInput | Prisma.ReviewCriteriaUpdateManyWithWhereWithoutCriteriaGroupInput[]
+  deleteMany?: Prisma.ReviewCriteriaScalarWhereInput | Prisma.ReviewCriteriaScalarWhereInput[]
+}
+
+export type ReviewCriteriaUncheckedUpdateManyWithoutCriteriaGroupNestedInput = {
+  create?: Prisma.XOR<Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput> | Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput[] | Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput[]
+  connectOrCreate?: Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput | Prisma.ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput[]
+  upsert?: Prisma.ReviewCriteriaUpsertWithWhereUniqueWithoutCriteriaGroupInput | Prisma.ReviewCriteriaUpsertWithWhereUniqueWithoutCriteriaGroupInput[]
+  createMany?: Prisma.ReviewCriteriaCreateManyCriteriaGroupInputEnvelope
+  set?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  disconnect?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  delete?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  connect?: Prisma.ReviewCriteriaWhereUniqueInput | Prisma.ReviewCriteriaWhereUniqueInput[]
+  update?: Prisma.ReviewCriteriaUpdateWithWhereUniqueWithoutCriteriaGroupInput | Prisma.ReviewCriteriaUpdateWithWhereUniqueWithoutCriteriaGroupInput[]
+  updateMany?: Prisma.ReviewCriteriaUpdateManyWithWhereWithoutCriteriaGroupInput | Prisma.ReviewCriteriaUpdateManyWithWhereWithoutCriteriaGroupInput[]
+  deleteMany?: Prisma.ReviewCriteriaScalarWhereInput | Prisma.ReviewCriteriaScalarWhereInput[]
+}
+
 export type EnumCriteriaTypeFieldUpdateOperationsInput = {
   set?: $Enums.CriteriaType
 }
@@ -559,12 +625,14 @@ export type ReviewCriteriaCreateWithoutTaskInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroup: Prisma.ReviewCriteriaGroupCreateNestedOneWithoutCriteriaInput
   quantitativeRatings?: Prisma.QuantitativeRatingCreateNestedManyWithoutCriteriaInput
   qualitativeRatings?: Prisma.QualitativeRatingCreateNestedManyWithoutCriteriaInput
 }
 
 export type ReviewCriteriaUncheckedCreateWithoutTaskInput = {
   id?: string
+  criteriaGroupId: string
   name: string
   description?: string | null
   type: $Enums.CriteriaType
@@ -608,6 +676,7 @@ export type ReviewCriteriaScalarWhereInput = {
   NOT?: Prisma.ReviewCriteriaScalarWhereInput | Prisma.ReviewCriteriaScalarWhereInput[]
   id?: Prisma.StringFilter<"ReviewCriteria"> | string
   taskId?: Prisma.StringFilter<"ReviewCriteria"> | string
+  criteriaGroupId?: Prisma.StringFilter<"ReviewCriteria"> | string
   name?: Prisma.StringFilter<"ReviewCriteria"> | string
   description?: Prisma.StringNullableFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeFilter<"ReviewCriteria"> | $Enums.CriteriaType
@@ -615,6 +684,60 @@ export type ReviewCriteriaScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteria"> | Date | string | null
+}
+
+export type ReviewCriteriaCreateWithoutCriteriaGroupInput = {
+  id?: string
+  name: string
+  description?: string | null
+  type: $Enums.CriteriaType
+  weight?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  task: Prisma.TaskCreateNestedOneWithoutCriteriaInput
+  quantitativeRatings?: Prisma.QuantitativeRatingCreateNestedManyWithoutCriteriaInput
+  qualitativeRatings?: Prisma.QualitativeRatingCreateNestedManyWithoutCriteriaInput
+}
+
+export type ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput = {
+  id?: string
+  taskId: string
+  name: string
+  description?: string | null
+  type: $Enums.CriteriaType
+  weight?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  quantitativeRatings?: Prisma.QuantitativeRatingUncheckedCreateNestedManyWithoutCriteriaInput
+  qualitativeRatings?: Prisma.QualitativeRatingUncheckedCreateNestedManyWithoutCriteriaInput
+}
+
+export type ReviewCriteriaCreateOrConnectWithoutCriteriaGroupInput = {
+  where: Prisma.ReviewCriteriaWhereUniqueInput
+  create: Prisma.XOR<Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput>
+}
+
+export type ReviewCriteriaCreateManyCriteriaGroupInputEnvelope = {
+  data: Prisma.ReviewCriteriaCreateManyCriteriaGroupInput | Prisma.ReviewCriteriaCreateManyCriteriaGroupInput[]
+  skipDuplicates?: boolean
+}
+
+export type ReviewCriteriaUpsertWithWhereUniqueWithoutCriteriaGroupInput = {
+  where: Prisma.ReviewCriteriaWhereUniqueInput
+  update: Prisma.XOR<Prisma.ReviewCriteriaUpdateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedUpdateWithoutCriteriaGroupInput>
+  create: Prisma.XOR<Prisma.ReviewCriteriaCreateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput>
+}
+
+export type ReviewCriteriaUpdateWithWhereUniqueWithoutCriteriaGroupInput = {
+  where: Prisma.ReviewCriteriaWhereUniqueInput
+  data: Prisma.XOR<Prisma.ReviewCriteriaUpdateWithoutCriteriaGroupInput, Prisma.ReviewCriteriaUncheckedUpdateWithoutCriteriaGroupInput>
+}
+
+export type ReviewCriteriaUpdateManyWithWhereWithoutCriteriaGroupInput = {
+  where: Prisma.ReviewCriteriaScalarWhereInput
+  data: Prisma.XOR<Prisma.ReviewCriteriaUpdateManyMutationInput, Prisma.ReviewCriteriaUncheckedUpdateManyWithoutCriteriaGroupInput>
 }
 
 export type ReviewCriteriaCreateWithoutQuantitativeRatingsInput = {
@@ -627,12 +750,14 @@ export type ReviewCriteriaCreateWithoutQuantitativeRatingsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   task: Prisma.TaskCreateNestedOneWithoutCriteriaInput
+  criteriaGroup: Prisma.ReviewCriteriaGroupCreateNestedOneWithoutCriteriaInput
   qualitativeRatings?: Prisma.QualitativeRatingCreateNestedManyWithoutCriteriaInput
 }
 
 export type ReviewCriteriaUncheckedCreateWithoutQuantitativeRatingsInput = {
   id?: string
   taskId: string
+  criteriaGroupId: string
   name: string
   description?: string | null
   type: $Enums.CriteriaType
@@ -669,12 +794,14 @@ export type ReviewCriteriaUpdateWithoutQuantitativeRatingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   task?: Prisma.TaskUpdateOneRequiredWithoutCriteriaNestedInput
+  criteriaGroup?: Prisma.ReviewCriteriaGroupUpdateOneRequiredWithoutCriteriaNestedInput
   qualitativeRatings?: Prisma.QualitativeRatingUpdateManyWithoutCriteriaNestedInput
 }
 
 export type ReviewCriteriaUncheckedUpdateWithoutQuantitativeRatingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  criteriaGroupId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
@@ -695,12 +822,14 @@ export type ReviewCriteriaCreateWithoutQualitativeRatingsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   task: Prisma.TaskCreateNestedOneWithoutCriteriaInput
+  criteriaGroup: Prisma.ReviewCriteriaGroupCreateNestedOneWithoutCriteriaInput
   quantitativeRatings?: Prisma.QuantitativeRatingCreateNestedManyWithoutCriteriaInput
 }
 
 export type ReviewCriteriaUncheckedCreateWithoutQualitativeRatingsInput = {
   id?: string
   taskId: string
+  criteriaGroupId: string
   name: string
   description?: string | null
   type: $Enums.CriteriaType
@@ -737,12 +866,14 @@ export type ReviewCriteriaUpdateWithoutQualitativeRatingsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   task?: Prisma.TaskUpdateOneRequiredWithoutCriteriaNestedInput
+  criteriaGroup?: Prisma.ReviewCriteriaGroupUpdateOneRequiredWithoutCriteriaNestedInput
   quantitativeRatings?: Prisma.QuantitativeRatingUpdateManyWithoutCriteriaNestedInput
 }
 
 export type ReviewCriteriaUncheckedUpdateWithoutQualitativeRatingsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  criteriaGroupId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
@@ -755,6 +886,7 @@ export type ReviewCriteriaUncheckedUpdateWithoutQualitativeRatingsInput = {
 
 export type ReviewCriteriaCreateManyTaskInput = {
   id?: string
+  criteriaGroupId: string
   name: string
   description?: string | null
   type: $Enums.CriteriaType
@@ -773,12 +905,14 @@ export type ReviewCriteriaUpdateWithoutTaskInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroup?: Prisma.ReviewCriteriaGroupUpdateOneRequiredWithoutCriteriaNestedInput
   quantitativeRatings?: Prisma.QuantitativeRatingUpdateManyWithoutCriteriaNestedInput
   qualitativeRatings?: Prisma.QualitativeRatingUpdateManyWithoutCriteriaNestedInput
 }
 
 export type ReviewCriteriaUncheckedUpdateWithoutTaskInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  criteriaGroupId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
@@ -792,6 +926,59 @@ export type ReviewCriteriaUncheckedUpdateWithoutTaskInput = {
 
 export type ReviewCriteriaUncheckedUpdateManyWithoutTaskInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  criteriaGroupId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+}
+
+export type ReviewCriteriaCreateManyCriteriaGroupInput = {
+  id?: string
+  taskId: string
+  name: string
+  description?: string | null
+  type: $Enums.CriteriaType
+  weight?: number | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type ReviewCriteriaUpdateWithoutCriteriaGroupInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  task?: Prisma.TaskUpdateOneRequiredWithoutCriteriaNestedInput
+  quantitativeRatings?: Prisma.QuantitativeRatingUpdateManyWithoutCriteriaNestedInput
+  qualitativeRatings?: Prisma.QualitativeRatingUpdateManyWithoutCriteriaNestedInput
+}
+
+export type ReviewCriteriaUncheckedUpdateWithoutCriteriaGroupInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  taskId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
+  weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  quantitativeRatings?: Prisma.QuantitativeRatingUncheckedUpdateManyWithoutCriteriaNestedInput
+  qualitativeRatings?: Prisma.QualitativeRatingUncheckedUpdateManyWithoutCriteriaNestedInput
+}
+
+export type ReviewCriteriaUncheckedUpdateManyWithoutCriteriaGroupInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  taskId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
@@ -844,6 +1031,7 @@ export type ReviewCriteriaCountOutputTypeCountQualitativeRatingsArgs<ExtArgs ext
 export type ReviewCriteriaSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   taskId?: boolean
+  criteriaGroupId?: boolean
   name?: boolean
   description?: boolean
   type?: boolean
@@ -852,6 +1040,7 @@ export type ReviewCriteriaSelect<ExtArgs extends runtime.Types.Extensions.Intern
   updatedAt?: boolean
   deletedAt?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
   quantitativeRatings?: boolean | Prisma.ReviewCriteria$quantitativeRatingsArgs<ExtArgs>
   qualitativeRatings?: boolean | Prisma.ReviewCriteria$qualitativeRatingsArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewCriteriaCountOutputTypeDefaultArgs<ExtArgs>
@@ -860,6 +1049,7 @@ export type ReviewCriteriaSelect<ExtArgs extends runtime.Types.Extensions.Intern
 export type ReviewCriteriaSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   taskId?: boolean
+  criteriaGroupId?: boolean
   name?: boolean
   description?: boolean
   type?: boolean
@@ -868,11 +1058,13 @@ export type ReviewCriteriaSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   updatedAt?: boolean
   deletedAt?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewCriteria"]>
 
 export type ReviewCriteriaSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   taskId?: boolean
+  criteriaGroupId?: boolean
   name?: boolean
   description?: boolean
   type?: boolean
@@ -881,11 +1073,13 @@ export type ReviewCriteriaSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   updatedAt?: boolean
   deletedAt?: boolean
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["reviewCriteria"]>
 
 export type ReviewCriteriaSelectScalar = {
   id?: boolean
   taskId?: boolean
+  criteriaGroupId?: boolean
   name?: boolean
   description?: boolean
   type?: boolean
@@ -895,30 +1089,35 @@ export type ReviewCriteriaSelectScalar = {
   deletedAt?: boolean
 }
 
-export type ReviewCriteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "name" | "description" | "type" | "weight" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reviewCriteria"]>
+export type ReviewCriteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "criteriaGroupId" | "name" | "description" | "type" | "weight" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reviewCriteria"]>
 export type ReviewCriteriaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
   quantitativeRatings?: boolean | Prisma.ReviewCriteria$quantitativeRatingsArgs<ExtArgs>
   qualitativeRatings?: boolean | Prisma.ReviewCriteria$qualitativeRatingsArgs<ExtArgs>
   _count?: boolean | Prisma.ReviewCriteriaCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ReviewCriteriaIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
 }
 export type ReviewCriteriaIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
+  criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
 }
 
 export type $ReviewCriteriaPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ReviewCriteria"
   objects: {
     task: Prisma.$TaskPayload<ExtArgs>
+    criteriaGroup: Prisma.$ReviewCriteriaGroupPayload<ExtArgs>
     quantitativeRatings: Prisma.$QuantitativeRatingPayload<ExtArgs>[]
     qualitativeRatings: Prisma.$QualitativeRatingPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     taskId: string
+    criteriaGroupId: string
     name: string
     description: string | null
     type: $Enums.CriteriaType
@@ -1325,6 +1524,7 @@ readonly fields: ReviewCriteriaFieldRefs;
 export interface Prisma__ReviewCriteriaClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   task<T extends Prisma.TaskDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TaskDefaultArgs<ExtArgs>>): Prisma.Prisma__TaskClient<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  criteriaGroup<T extends Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>>): Prisma.Prisma__ReviewCriteriaGroupClient<runtime.Types.Result.GetResult<Prisma.$ReviewCriteriaGroupPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   quantitativeRatings<T extends Prisma.ReviewCriteria$quantitativeRatingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewCriteria$quantitativeRatingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QuantitativeRatingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   qualitativeRatings<T extends Prisma.ReviewCriteria$qualitativeRatingsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ReviewCriteria$qualitativeRatingsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$QualitativeRatingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1358,6 +1558,7 @@ export interface Prisma__ReviewCriteriaClient<T, Null = never, ExtArgs extends r
 export interface ReviewCriteriaFieldRefs {
   readonly id: Prisma.FieldRef<"ReviewCriteria", 'String'>
   readonly taskId: Prisma.FieldRef<"ReviewCriteria", 'String'>
+  readonly criteriaGroupId: Prisma.FieldRef<"ReviewCriteria", 'String'>
   readonly name: Prisma.FieldRef<"ReviewCriteria", 'String'>
   readonly description: Prisma.FieldRef<"ReviewCriteria", 'String'>
   readonly type: Prisma.FieldRef<"ReviewCriteria", 'CriteriaType'>

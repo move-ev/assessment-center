@@ -64,6 +64,7 @@ export const ModelName = {
   Reviewer: 'Reviewer',
   Task: 'Task',
   ScheduleEntry: 'ScheduleEntry',
+  ReviewCriteriaGroup: 'ReviewCriteriaGroup',
   ReviewCriteria: 'ReviewCriteria',
   ReviewerAssignment: 'ReviewerAssignment',
   QuantitativeRating: 'QuantitativeRating',
@@ -259,9 +260,23 @@ export const ScheduleEntryScalarFieldEnum = {
 export type ScheduleEntryScalarFieldEnum = (typeof ScheduleEntryScalarFieldEnum)[keyof typeof ScheduleEntryScalarFieldEnum]
 
 
+export const ReviewCriteriaGroupScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  title: 'title',
+  factorType: 'factorType',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ReviewCriteriaGroupScalarFieldEnum = (typeof ReviewCriteriaGroupScalarFieldEnum)[keyof typeof ReviewCriteriaGroupScalarFieldEnum]
+
+
 export const ReviewCriteriaScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
+  criteriaGroupId: 'criteriaGroupId',
   name: 'name',
   description: 'description',
   type: 'type',
