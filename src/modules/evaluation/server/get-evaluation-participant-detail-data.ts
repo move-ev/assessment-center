@@ -46,6 +46,15 @@ export type EvaluationParticipantDetailData = {
 			delta: number | null;
 		}>;
 	}>;
+	teamObservations: Array<{
+		taskId: string;
+		taskName: string;
+		entries: Array<{
+			reviewerName: string;
+			notes: string;
+			updatedAt: Date;
+		}>;
+	}>;
 };
 
 const VIEW_DEFINITIONS: Array<{
@@ -166,6 +175,78 @@ async function fetchParticipantSnapshot(acId: string, participantId: string) {
 	);
 }
 
+async function fetchParticipantGroupId(acId: string, participantId: string) {
+	const membership = await db.participantGroupMembership.findFirst({
+		where: {
+			participantId,
+			participant: {
+				assessmentCenterId: acId,
+				deletedAt: null,
+			},
+		},
+		select: { groupId: true },
+		orderBy: { createdAt: "asc" },
+	});
+
+	return membership?.groupId ?? null;
+}
+
+async function fetchTeamObservations(
+	acId: string,
+	groupId: string,
+): Promise<EvaluationParticipantDetailData["teamObservations"]> {
+	const observations = await db.teamTaskObservation.findMany({
+		where: {
+			groupId,
+			deletedAt: null,
+			notes: { not: null },
+			task: {
+				assessmentCenterId: acId,
+				deletedAt: null,
+				isTeamTask: true,
+			},
+		},
+		select: {
+			notes: true,
+			updatedAt: true,
+			task: {
+				select: { id: true, name: true },
+			},
+			reviewer: {
+				select: {
+					user: { select: { name: true } },
+				},
+			},
+		},
+		orderBy: [{ task: { name: "asc" } }, { updatedAt: "asc" }],
+	});
+
+	const byTask = new Map<
+		string,
+		EvaluationParticipantDetailData["teamObservations"][number]
+	>();
+
+	for (const observation of observations) {
+		if (observation.notes === null || observation.notes.trim() === "") {
+			continue;
+		}
+
+		const bucket = byTask.get(observation.task.id) ?? {
+			taskId: observation.task.id,
+			taskName: observation.task.name,
+			entries: [],
+		};
+		bucket.entries.push({
+			reviewerName: observation.reviewer.user.name,
+			notes: observation.notes,
+			updatedAt: observation.updatedAt,
+		});
+		byTask.set(observation.task.id, bucket);
+	}
+
+	return Array.from(byTask.values());
+}
+
 export async function getEvaluationParticipantDetailData(
 	acId: string,
 	participantId: string,
@@ -175,6 +256,11 @@ export async function getEvaluationParticipantDetailData(
 	if (!participant) {
 		notFound();
 	}
+
+	const groupId = await fetchParticipantGroupId(acId, participantId);
+	const teamObservations = groupId
+		? await fetchTeamObservations(acId, groupId)
+		: [];
 
 	return {
 		participant: {
@@ -188,5 +274,6 @@ export async function getEvaluationParticipantDetailData(
 			totalGroupCount: participant.totalGroupCount,
 		},
 		views: buildViews(participant.groups),
+		teamObservations,
 	};
 }

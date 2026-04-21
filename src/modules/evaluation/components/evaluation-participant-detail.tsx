@@ -1,6 +1,13 @@
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { ArrowLeft, Users } from "lucide-react";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
 import { EvaluationParticipantDetailDashboard } from "./evaluation-participant-detail-dashboard";
@@ -76,7 +83,76 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 			) : (
 				<EvaluationParticipantDetailDashboard data={data} />
 			)}
+
+			<TeamObservationsSection
+				groupName={data.participant.groupName}
+				teamObservations={data.teamObservations}
+			/>
 		</div>
+	);
+}
+
+type TeamObservationsSectionProps = {
+	groupName: string | null;
+	teamObservations: EvaluationParticipantDetailData["teamObservations"];
+};
+
+function TeamObservationsSection({
+	groupName,
+	teamObservations,
+}: TeamObservationsSectionProps) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle className="flex items-center gap-2">
+					<Users className="h-5 w-5" />
+					Gruppenbeobachtungen
+				</CardTitle>
+				<CardDescription>
+					Gesamt-Reviews der Bewerter zu Teamaufgaben der Gruppe
+					{groupName ? ` „${groupName}"` : ""}
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				{teamObservations.length === 0 ? (
+					<p className="text-muted-foreground text-sm">
+						{groupName
+							? "Für diese Gruppe wurden noch keine Gesamt-Reviews zu Teamaufgaben erfasst."
+							: "Dieser Teilnehmer ist keiner Gruppe zugeordnet, daher liegen keine Gruppenbeobachtungen vor."}
+					</p>
+				) : (
+					<div className="space-y-5">
+						{teamObservations.map((task, index) => (
+							<div className="space-y-3" key={task.taskId}>
+								{index > 0 && <Separator />}
+								<div>
+									<p className="font-medium text-sm">{task.taskName}</p>
+									<p className="text-muted-foreground text-xs">
+										{task.entries.length}{" "}
+										{task.entries.length === 1 ? "Beobachtung" : "Beobachtungen"}
+									</p>
+								</div>
+								<ul className="space-y-3">
+									{task.entries.map((entry) => (
+										<li
+											className="rounded-lg border bg-muted/30 p-3"
+											key={`${task.taskId}-${entry.reviewerName}-${entry.updatedAt.toString()}`}
+										>
+											<p className="text-muted-foreground text-xs">
+												{entry.reviewerName}
+											</p>
+											<p className="mt-1 whitespace-pre-wrap text-sm">
+												{entry.notes}
+											</p>
+										</li>
+									))}
+								</ul>
+							</div>
+						))}
+					</div>
+				)}
+			</CardContent>
+		</Card>
 	);
 }
 
