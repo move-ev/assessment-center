@@ -62,7 +62,7 @@ type RadarChartDatum = {
 };
 
 type RadarAxisTickPayload = {
-	payload?: RadarChartDatum;
+	value?: string;
 };
 
 type RadarAxisTickProps = {
@@ -224,12 +224,36 @@ function getRadarTickTextAnchor(
 	return "middle";
 }
 
-function RadarAxisTick({ x, y, textAnchor, payload }: RadarAxisTickProps) {
-	if (x === undefined || y === undefined || payload?.payload === undefined) {
+function findRadarChartDatum(
+	chartData: RadarChartDatum[],
+	axisId: string | undefined,
+): RadarChartDatum | null {
+	if (axisId === undefined) {
 		return null;
 	}
 
-	const { taskLabel, criteriaGroupLabelLines } = payload.payload;
+	return chartData.find((datum) => datum.axisId === axisId) ?? null;
+}
+
+function RadarAxisTick({
+	x,
+	y,
+	textAnchor,
+	payload,
+	chartData,
+}: RadarAxisTickProps & {
+	chartData: RadarChartDatum[];
+}) {
+	if (x === undefined || y === undefined) {
+		return null;
+	}
+
+	const datum = findRadarChartDatum(chartData, payload?.value);
+	if (datum === null) {
+		return null;
+	}
+
+	const { taskLabel, criteriaGroupLabelLines } = datum;
 	const allLines = [taskLabel, ...criteriaGroupLabelLines];
 	const startOffset = -((allLines.length - 1) * 14) / 2;
 
@@ -445,7 +469,7 @@ function RadarChartContent({ view }: { view: ViewData }) {
 				<PolarGrid />
 				<PolarAngleAxis
 					dataKey="axisId"
-					tick={<RadarAxisTick />}
+					tick={<RadarAxisTick chartData={chartData} />}
 					tickLine={false}
 				/>
 				<PolarRadiusAxis
