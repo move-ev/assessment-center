@@ -1,5 +1,6 @@
 "use client";
 
+import { TrendingDown, TrendingUp } from "lucide-react";
 import {
 	PolarAngleAxis,
 	PolarGrid,
@@ -7,7 +8,6 @@ import {
 	Radar,
 	RadarChart,
 } from "recharts";
-import { TrendingDown, TrendingUp } from "lucide-react";
 import {
 	Card,
 	CardContent,
@@ -22,7 +22,6 @@ import {
 	ChartTooltipContent,
 } from "@/components/ui/chart";
 import { Separator } from "@/components/ui/separator";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
 	Table,
 	TableBody,
@@ -31,6 +30,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
 
@@ -49,6 +49,25 @@ type RankConfig = {
 	barColorClass: string;
 	pillClass: string;
 	deltaTextClass: string;
+};
+
+type RadarChartDatum = {
+	axisId: string;
+	taskLabel: string;
+	criteriaGroupLabelLines: string[];
+	participant: number;
+	benchmark: number;
+};
+
+type RadarAxisTickPayload = {
+	payload?: RadarChartDatum;
+};
+
+type RadarAxisTickProps = {
+	x?: number;
+	y?: number;
+	textAnchor?: string;
+	payload?: RadarAxisTickPayload;
 };
 
 const RANK_CONFIG: Record<RankLevel, RankConfig> = {
@@ -120,6 +139,122 @@ function getGridColsClass(count: number): string {
 	return "";
 }
 
+function splitLabelIntoLines(label: string, maxLineLength: number): string[] {
+	const words = label.trim().split(/\s+/);
+	const lines: string[] = [];
+	let currentLine = "";
+
+	for (const word of words) {
+		const nextLine = currentLine.length === 0 ? word : `${currentLine} ${word}`;
+		if (nextLine.length <= maxLineLength) {
+			currentLine = nextLine;
+			continue;
+		}
+
+		if (currentLine.length > 0) {
+			lines.push(currentLine);
+		}
+		currentLine = word;
+	}
+
+	if (currentLine.length > 0) {
+		lines.push(currentLine);
+	}
+
+	return lines.length > 0 ? lines : [label];
+}
+
+function buildRadarChartData(view: ViewData): RadarChartDatum[] {
+	return view.groups.map((group) => ({
+		axisId: group.axisId,
+		taskLabel: group.taskName,
+		criteriaGroupLabelLines: splitLabelIntoLines(group.criteriaGroupTitle, 18),
+		participant: group.participantScore ?? 0,
+		benchmark: group.benchmarkScore ?? 0,
+	}));
+}
+
+function getRadarChartDatum(value: unknown): RadarChartDatum | null {
+	if (typeof value !== "object" || value === null) {
+		return null;
+	}
+
+	if (!("taskLabel" in value) || typeof value.taskLabel !== "string") {
+		return null;
+	}
+
+	if (
+		!("criteriaGroupLabelLines" in value) ||
+		!Array.isArray(value.criteriaGroupLabelLines) ||
+		!value.criteriaGroupLabelLines.every((line) => typeof line === "string")
+	) {
+		return null;
+	}
+
+	if (!("axisId" in value) || typeof value.axisId !== "string") {
+		return null;
+	}
+
+	if (!("participant" in value) || typeof value.participant !== "number") {
+		return null;
+	}
+
+	if (!("benchmark" in value) || typeof value.benchmark !== "number") {
+		return null;
+	}
+
+	return {
+		axisId: value.axisId,
+		taskLabel: value.taskLabel,
+		criteriaGroupLabelLines: value.criteriaGroupLabelLines,
+		participant: value.participant,
+		benchmark: value.benchmark,
+	};
+}
+
+function getRadarTickTextAnchor(
+	value: string | undefined,
+): "middle" | "start" | "end" {
+	if (value === "start" || value === "end") {
+		return value;
+	}
+
+	return "middle";
+}
+
+function RadarAxisTick({ x, y, textAnchor, payload }: RadarAxisTickProps) {
+	if (x === undefined || y === undefined || payload?.payload === undefined) {
+		return null;
+	}
+
+	const { taskLabel, criteriaGroupLabelLines } = payload.payload;
+	const allLines = [taskLabel, ...criteriaGroupLabelLines];
+	const startOffset = -((allLines.length - 1) * 14) / 2;
+
+	return (
+		<text
+			fill="currentColor"
+			fontSize={11}
+			textAnchor={getRadarTickTextAnchor(textAnchor)}
+			x={x}
+			y={y}
+		>
+			<title>{`${taskLabel} · ${criteriaGroupLabelLines.join(" ")}`}</title>
+			{allLines.map((line, index) => (
+				<tspan
+					dominantBaseline={index === 0 ? "auto" : undefined}
+					dy={index === 0 ? startOffset : 14}
+					fontWeight={index === 0 ? 600 : 400}
+					key={index === 0 ? `task-${line}` : `group-${line}`}
+					x={x}
+				>
+					{line}
+				</tspan>
+			))}
+		</text>
+	);
+}
+
 function RankPill({
 	delta,
 	className,
@@ -132,7 +267,7 @@ function RankPill({
 	return (
 		<span
 			className={cn(
-				"inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium",
+				"inline-flex items-center rounded-full border px-2 py-0.5 font-medium text-xs",
 				config.pillClass,
 				className,
 			)}
@@ -203,17 +338,19 @@ function ViewSummaryCard({ view }: { view: ViewData }) {
 			<CardContent className="space-y-3">
 				<div className="flex items-start justify-between gap-2">
 					<div className="space-y-0.5">
-						<p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+						<p className="font-medium text-muted-foreground text-xs uppercase tracking-wide">
 							{view.label}
 						</p>
-						<p className="text-3xl font-bold tabular-nums">
+						<p className="font-bold text-3xl tabular-nums">
 							{formatScore(view.participantAverage)}
 						</p>
 					</div>
 					<RankPill className="mt-1 shrink-0" delta={view.deltaAverage} />
 				</div>
-				<div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-					{isAbove && <TrendingUp className="h-3.5 w-3.5 shrink-0 text-green-600" />}
+				<div className="flex items-center gap-1.5 text-muted-foreground text-sm">
+					{isAbove && (
+						<TrendingUp className="h-3.5 w-3.5 shrink-0 text-green-600" />
+					)}
 					{isBelow && (
 						<TrendingDown className="h-3.5 w-3.5 shrink-0 text-red-600" />
 					)}
@@ -230,7 +367,7 @@ function ViewSummaryCard({ view }: { view: ViewData }) {
 						</span>
 					</span>
 				</div>
-				<p className="text-xs text-muted-foreground">
+				<p className="text-muted-foreground text-xs">
 					{view.scoredGroupCount} / {view.groupCount} Gruppen bewertet
 				</p>
 			</CardContent>
@@ -246,9 +383,7 @@ function PerformanceRadarCard({ views }: { views: ViewData[] }) {
 		<Card>
 			<CardHeader>
 				<CardTitle>Performance-Profil</CardTitle>
-				<CardDescription>
-					Teilnehmer vs. Benchmark nach Bereich
-				</CardDescription>
+				<CardDescription>Teilnehmer vs. Benchmark nach Bereich</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Tabs defaultValue={defaultTab}>
@@ -271,18 +406,17 @@ function PerformanceRadarCard({ views }: { views: ViewData[] }) {
 }
 
 function RadarChartContent({ view }: { view: ViewData }) {
-	const chartData = view.groups.map((group) => ({
-		label: `${group.taskName} · ${group.criteriaGroupTitle}`,
-		participant: group.participantScore ?? 0,
-		benchmark: group.benchmarkScore ?? 0,
-	}));
+	const chartData = buildRadarChartData(view);
 
 	return (
 		<ChartContainer
-			className="mx-auto aspect-square max-h-[480px]"
+			className="mx-auto aspect-square max-h-[560px]"
 			config={CHART_CONFIG}
 		>
-			<RadarChart data={chartData}>
+			<RadarChart
+				data={chartData}
+				margin={{ top: 32, right: 72, bottom: 32, left: 72 }}
+			>
 				<ChartTooltip
 					content={
 						<ChartTooltipContent
@@ -294,14 +428,21 @@ function RadarChartContent({ view }: { view: ViewData }) {
 									</span>
 								</div>
 							)}
-							labelFormatter={(label) => String(label)}
+							labelFormatter={(_, payload) => {
+								const datum = getRadarChartDatum(payload[0]?.payload);
+								if (datum === null) {
+									return "";
+								}
+
+								return `${datum.taskLabel} · ${datum.criteriaGroupLabelLines.join(" ")}`;
+							}}
 						/>
 					}
 				/>
 				<PolarGrid />
 				<PolarAngleAxis
-					dataKey="label"
-					tick={{ fontSize: 11 }}
+					dataKey="axisId"
+					tick={<RadarAxisTick />}
 					tickLine={false}
 				/>
 				<PolarRadiusAxis
@@ -374,10 +515,15 @@ type InsightListProps = {
 	isStrength: boolean;
 };
 
-function InsightList({ title, items, emptyLabel, isStrength }: InsightListProps) {
+function InsightList({
+	title,
+	items,
+	emptyLabel,
+	isStrength,
+}: InsightListProps) {
 	return (
 		<div className="space-y-2">
-			<p className="flex items-center gap-1.5 text-sm font-medium">
+			<p className="flex items-center gap-1.5 font-medium text-sm">
 				{isStrength ? (
 					<TrendingUp className="h-4 w-4 shrink-0 text-green-600" />
 				) : (
@@ -386,11 +532,15 @@ function InsightList({ title, items, emptyLabel, isStrength }: InsightListProps)
 				{title}
 			</p>
 			{items.length === 0 ? (
-				<p className="pl-5 text-xs text-muted-foreground">{emptyLabel}</p>
+				<p className="pl-5 text-muted-foreground text-xs">{emptyLabel}</p>
 			) : (
 				<ul className="space-y-1.5">
 					{items.map((group) => (
-						<InsightItem group={group} isStrength={isStrength} key={group.axisId} />
+						<InsightItem
+							group={group}
+							isStrength={isStrength}
+							key={group.axisId}
+						/>
 					))}
 				</ul>
 			)}
@@ -407,12 +557,12 @@ function InsightItem({
 }) {
 	return (
 		<li className="flex items-center justify-between gap-2 pl-5">
-			<span className="min-w-0 truncate text-sm text-muted-foreground">
+			<span className="min-w-0 truncate text-muted-foreground text-sm">
 				{group.taskName} · {group.criteriaGroupTitle}
 			</span>
 			<span
 				className={cn(
-					"shrink-0 font-mono text-xs font-semibold tabular-nums",
+					"shrink-0 font-mono font-semibold text-xs tabular-nums",
 					isStrength ? "text-green-700" : "text-red-700",
 				)}
 			>
@@ -427,7 +577,10 @@ type FactorBreakdownProps = {
 	potentialView: ViewData | null;
 };
 
-function FactorBreakdown({ competenceView, potentialView }: FactorBreakdownProps) {
+function FactorBreakdown({
+	competenceView,
+	potentialView,
+}: FactorBreakdownProps) {
 	const showCompetence =
 		competenceView !== null && competenceView.groups.length > 0;
 	const showPotential =
@@ -479,15 +632,15 @@ function GroupBar({ group }: { group: GroupData }) {
 		<div className="space-y-1.5">
 			<div className="flex items-start justify-between gap-2">
 				<div className="min-w-0">
-					<p className="truncate text-sm font-medium">
+					<p className="truncate font-medium text-sm">
 						{group.criteriaGroupTitle}
 					</p>
-					<p className="truncate text-xs text-muted-foreground">
+					<p className="truncate text-muted-foreground text-xs">
 						{group.taskName}
 					</p>
 				</div>
 				<div className="flex shrink-0 items-center gap-2">
-					<span className="font-mono text-sm font-semibold tabular-nums">
+					<span className="font-mono font-semibold text-sm tabular-nums">
 						{formatScore(group.participantScore)}
 					</span>
 					<RankPill delta={group.delta} />
@@ -505,7 +658,7 @@ function GroupBar({ group }: { group: GroupData }) {
 					/>
 				)}
 			</div>
-			<p className="text-xs text-muted-foreground">
+			<p className="text-muted-foreground text-xs">
 				Benchmark: {formatScore(group.benchmarkScore)} ·{" "}
 				<span className={cn("font-medium", config.deltaTextClass)}>
 					{formatDelta(group.delta)}
@@ -557,14 +710,14 @@ function GroupTableRow({ group }: { group: GroupData }) {
 			<TableCell className="font-medium">{group.taskName}</TableCell>
 			<TableCell>{group.criteriaGroupTitle}</TableCell>
 			<TableCell>
-				<span className="text-xs text-muted-foreground">
+				<span className="text-muted-foreground text-xs">
 					{group.factorType === "POTENTIAL" ? "Potenzial" : "Kompetenz"}
 				</span>
 			</TableCell>
 			<TableCell className="text-right font-mono tabular-nums">
 				{formatScore(group.participantScore)}
 			</TableCell>
-			<TableCell className="text-right font-mono tabular-nums text-muted-foreground">
+			<TableCell className="text-right font-mono text-muted-foreground tabular-nums">
 				{formatScore(group.benchmarkScore)}
 			</TableCell>
 			<TableCell className="text-right font-mono tabular-nums">
