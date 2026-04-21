@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
@@ -19,7 +18,6 @@ type Props = {
 		description: string | null;
 		weight: number;
 		value: number | null;
-		notes: string;
 	};
 	onPersisted: (criterionId: string, isComplete: boolean) => void;
 };
@@ -32,31 +30,22 @@ function ReviewQuantitativeField({
 	onPersisted,
 }: Props) {
 	const [value, setValue] = useState<number | null>(criterion.value);
-	const [notes, setNotes] = useState(criterion.notes);
 	const [saveState, setSaveState] = useState<
 		"idle" | "saving" | "saved" | "error"
 	>("idle");
 	const mutation = api.rating.upsertQuantitative.useMutation();
-	const lastSaved = useRef({ value: criterion.value, notes: criterion.notes });
-	const snapshot = useMemo(
-		() => ({ value, notes: notes.trim() }),
-		[notes, value],
-	);
+	const lastSavedValue = useRef(criterion.value);
 
 	useEffect(() => {
-		if (snapshot.value === null) {
+		if (value === null) {
 			return;
 		}
 
-		const currentValue = snapshot.value;
-
-		if (
-			currentValue === lastSaved.current.value &&
-			snapshot.notes === lastSaved.current.notes
-		) {
+		if (value === lastSavedValue.current) {
 			return;
 		}
 
+		const currentValue = value;
 		setSaveState("saving");
 		const timer = window.setTimeout(async () => {
 			try {
@@ -66,9 +55,8 @@ function ReviewQuantitativeField({
 					participantId,
 					criteriaId: criterion.id,
 					value: currentValue,
-					notes: snapshot.notes === "" ? undefined : snapshot.notes,
 				});
-				lastSaved.current = { value: currentValue, notes: snapshot.notes };
+				lastSavedValue.current = currentValue;
 				setSaveState("saved");
 				onPersisted(criterion.id, true);
 			} catch (error) {
@@ -84,8 +72,8 @@ function ReviewQuantitativeField({
 		mutation,
 		onPersisted,
 		participantId,
-		snapshot,
 		taskId,
+		value,
 	]);
 
 	return (
@@ -120,16 +108,10 @@ function ReviewQuantitativeField({
 					))}
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-3">
-				<Textarea
-					disabled={value === null}
-					onChange={(event) => setNotes(event.target.value)}
-					placeholder="Optionaler Kontext zur Bewertung"
-					value={notes}
-				/>
+			<CardContent>
 				<p className="text-muted-foreground text-xs">
 					{value === null
-						? "Wähle zuerst einen Wert von 0 bis 5."
+						? "Wähle einen Wert von 0 bis 5."
 						: getSaveStateLabel(saveState)}
 				</p>
 			</CardContent>

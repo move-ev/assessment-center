@@ -8,7 +8,6 @@ const quantitativeInput = z.object({
 	participantId: z.string(),
 	criteriaId: z.string(),
 	value: z.number().int().min(0).max(5),
-	notes: z.string().trim().max(2000).optional(),
 });
 
 const qualitativeInput = z.object({
@@ -158,17 +157,14 @@ export const ratingRouter = createTRPCRouter({
 					reviewerAssignmentId: access.id,
 					criteriaId: input.criteriaId,
 					value: input.value,
-					notes: input.notes ?? null,
 				},
 				update: {
 					value: input.value,
-					notes: input.notes ?? null,
 					deletedAt: null,
 				},
 				select: {
 					id: true,
 					value: true,
-					notes: true,
 					updatedAt: true,
 				},
 			});
