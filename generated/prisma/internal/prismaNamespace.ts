@@ -397,6 +397,7 @@ export const ModelName = {
   Reviewer: 'Reviewer',
   Task: 'Task',
   ScheduleEntry: 'ScheduleEntry',
+  ReviewCriteriaGroup: 'ReviewCriteriaGroup',
   ReviewCriteria: 'ReviewCriteria',
   ReviewerAssignment: 'ReviewerAssignment',
   QuantitativeRating: 'QuantitativeRating',
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "post" | "user" | "session" | "account" | "verification" | "assessmentCenter" | "assessmentDay" | "participantGroup" | "participantGroupMembership" | "participant" | "reviewer" | "task" | "scheduleEntry" | "reviewCriteria" | "reviewerAssignment" | "quantitativeRating" | "qualitativeRating" | "teamTaskObservation"
+    modelProps: "post" | "user" | "session" | "account" | "verification" | "assessmentCenter" | "assessmentDay" | "participantGroup" | "participantGroupMembership" | "participant" | "reviewer" | "task" | "scheduleEntry" | "reviewCriteriaGroup" | "reviewCriteria" | "reviewerAssignment" | "quantitativeRating" | "qualitativeRating" | "teamTaskObservation"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1383,6 +1384,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    ReviewCriteriaGroup: {
+      payload: Prisma.$ReviewCriteriaGroupPayload<ExtArgs>
+      fields: Prisma.ReviewCriteriaGroupFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ReviewCriteriaGroupFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ReviewCriteriaGroupFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>
+        }
+        findFirst: {
+          args: Prisma.ReviewCriteriaGroupFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ReviewCriteriaGroupFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>
+        }
+        findMany: {
+          args: Prisma.ReviewCriteriaGroupFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>[]
+        }
+        create: {
+          args: Prisma.ReviewCriteriaGroupCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>
+        }
+        createMany: {
+          args: Prisma.ReviewCriteriaGroupCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ReviewCriteriaGroupCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>[]
+        }
+        delete: {
+          args: Prisma.ReviewCriteriaGroupDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>
+        }
+        update: {
+          args: Prisma.ReviewCriteriaGroupUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>
+        }
+        deleteMany: {
+          args: Prisma.ReviewCriteriaGroupDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ReviewCriteriaGroupUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ReviewCriteriaGroupUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>[]
+        }
+        upsert: {
+          args: Prisma.ReviewCriteriaGroupUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ReviewCriteriaGroupPayload>
+        }
+        aggregate: {
+          args: Prisma.ReviewCriteriaGroupAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateReviewCriteriaGroup>
+        }
+        groupBy: {
+          args: Prisma.ReviewCriteriaGroupGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewCriteriaGroupGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ReviewCriteriaGroupCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ReviewCriteriaGroupCountAggregateOutputType> | number
+        }
+      }
+    }
     ReviewCriteria: {
       payload: Prisma.$ReviewCriteriaPayload<ExtArgs>
       fields: Prisma.ReviewCriteriaFieldRefs
@@ -1964,9 +2039,23 @@ export const ScheduleEntryScalarFieldEnum = {
 export type ScheduleEntryScalarFieldEnum = (typeof ScheduleEntryScalarFieldEnum)[keyof typeof ScheduleEntryScalarFieldEnum]
 
 
+export const ReviewCriteriaGroupScalarFieldEnum = {
+  id: 'id',
+  taskId: 'taskId',
+  title: 'title',
+  factorType: 'factorType',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  deletedAt: 'deletedAt'
+} as const
+
+export type ReviewCriteriaGroupScalarFieldEnum = (typeof ReviewCriteriaGroupScalarFieldEnum)[keyof typeof ReviewCriteriaGroupScalarFieldEnum]
+
+
 export const ReviewCriteriaScalarFieldEnum = {
   id: 'id',
   taskId: 'taskId',
+  criteriaGroupId: 'criteriaGroupId',
   name: 'name',
   description: 'description',
   type: 'type',
@@ -2126,6 +2215,20 @@ export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
+ * Reference to a field of type 'CriteriaGroupFactorType'
+ */
+export type EnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CriteriaGroupFactorType'>
+    
+
+
+/**
+ * Reference to a field of type 'CriteriaGroupFactorType[]'
+ */
+export type ListEnumCriteriaGroupFactorTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CriteriaGroupFactorType[]'>
+    
+
+
+/**
  * Reference to a field of type 'CriteriaType'
  */
 export type EnumCriteriaTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'CriteriaType'>
@@ -2260,6 +2363,7 @@ export type GlobalOmitConfig = {
   reviewer?: Prisma.ReviewerOmit
   task?: Prisma.TaskOmit
   scheduleEntry?: Prisma.ScheduleEntryOmit
+  reviewCriteriaGroup?: Prisma.ReviewCriteriaGroupOmit
   reviewCriteria?: Prisma.ReviewCriteriaOmit
   reviewerAssignment?: Prisma.ReviewerAssignmentOmit
   quantitativeRating?: Prisma.QuantitativeRatingOmit

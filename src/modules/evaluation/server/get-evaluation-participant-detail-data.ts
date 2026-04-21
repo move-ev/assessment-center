@@ -25,6 +25,10 @@ type DetailAssignment = {
 			description: string | null;
 			type: CriteriaType;
 			weight: number | null;
+			criteriaGroup: {
+				title: string;
+				factorType: "POTENTIAL" | "COMPETENCE";
+			};
 		}>;
 	};
 	quantitativeRatings: Array<{
@@ -64,6 +68,8 @@ export type EvaluationParticipantDetailData = {
 					id: string;
 					name: string;
 					description: string | null;
+					criteriaGroupTitle: string;
+					criteriaGroupFactorType: "POTENTIAL" | "COMPETENCE";
 					type: "QUANTITATIVE";
 					weight: number;
 					averageScore: number | null;
@@ -77,6 +83,8 @@ export type EvaluationParticipantDetailData = {
 					id: string;
 					name: string;
 					description: string | null;
+					criteriaGroupTitle: string;
+					criteriaGroupFactorType: "POTENTIAL" | "COMPETENCE";
 					type: "QUALITATIVE";
 					textEntries: Array<{
 						reviewerName: string;
@@ -148,6 +156,12 @@ async function fetchParticipantDetailSource(
 									description: true,
 									type: true,
 									weight: true,
+									criteriaGroup: {
+										select: {
+											title: true,
+											factorType: true,
+										},
+									},
 								},
 								orderBy: { createdAt: "asc" },
 							},
@@ -342,6 +356,8 @@ export async function getEvaluationParticipantDetailData(
 							id: criterion.id,
 							name: criterion.name,
 							description: criterion.description,
+							criteriaGroupTitle: criterion.criteriaGroup.title,
+							criteriaGroupFactorType: criterion.criteriaGroup.factorType,
 							type: "QUANTITATIVE" as const,
 							weight: criterion.weight,
 							averageScore:
@@ -375,6 +391,8 @@ export async function getEvaluationParticipantDetailData(
 						id: criterion.id,
 						name: criterion.name,
 						description: criterion.description,
+						criteriaGroupTitle: criterion.criteriaGroup.title,
+						criteriaGroupFactorType: criterion.criteriaGroup.factorType,
 						type: "QUALITATIVE" as const,
 						textEntries,
 					};

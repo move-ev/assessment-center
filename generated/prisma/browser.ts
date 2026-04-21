@@ -83,6 +83,11 @@ export type Task = Prisma.TaskModel
  */
 export type ScheduleEntry = Prisma.ScheduleEntryModel
 /**
+ * Model ReviewCriteriaGroup
+ * 
+ */
+export type ReviewCriteriaGroup = Prisma.ReviewCriteriaGroupModel
+/**
  * Model ReviewCriteria
  * 
  */

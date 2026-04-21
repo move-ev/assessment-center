@@ -207,6 +207,7 @@ export type TaskWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   assessmentCenter?: Prisma.XOR<Prisma.AssessmentCenterScalarRelationFilter, Prisma.AssessmentCenterWhereInput>
+  criteriaGroups?: Prisma.ReviewCriteriaGroupListRelationFilter
   criteria?: Prisma.ReviewCriteriaListRelationFilter
   scheduleEntries?: Prisma.ScheduleEntryListRelationFilter
   reviewerAssignments?: Prisma.ReviewerAssignmentListRelationFilter
@@ -223,6 +224,7 @@ export type TaskOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   assessmentCenter?: Prisma.AssessmentCenterOrderByWithRelationInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupOrderByRelationAggregateInput
   criteria?: Prisma.ReviewCriteriaOrderByRelationAggregateInput
   scheduleEntries?: Prisma.ScheduleEntryOrderByRelationAggregateInput
   reviewerAssignments?: Prisma.ReviewerAssignmentOrderByRelationAggregateInput
@@ -242,6 +244,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
   assessmentCenter?: Prisma.XOR<Prisma.AssessmentCenterScalarRelationFilter, Prisma.AssessmentCenterWhereInput>
+  criteriaGroups?: Prisma.ReviewCriteriaGroupListRelationFilter
   criteria?: Prisma.ReviewCriteriaListRelationFilter
   scheduleEntries?: Prisma.ScheduleEntryListRelationFilter
   reviewerAssignments?: Prisma.ReviewerAssignmentListRelationFilter
@@ -285,6 +288,7 @@ export type TaskCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutTasksInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutTaskInput
@@ -300,6 +304,7 @@ export type TaskUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaUncheckedCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutTaskInput
@@ -315,6 +320,7 @@ export type TaskUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutTaskNestedInput
@@ -330,6 +336,7 @@ export type TaskUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -472,6 +479,20 @@ export type TaskUpdateOneRequiredWithoutScheduleEntriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutScheduleEntriesInput, Prisma.TaskUpdateWithoutScheduleEntriesInput>, Prisma.TaskUncheckedUpdateWithoutScheduleEntriesInput>
 }
 
+export type TaskCreateNestedOneWithoutCriteriaGroupsInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutCriteriaGroupsInput, Prisma.TaskUncheckedCreateWithoutCriteriaGroupsInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutCriteriaGroupsInput
+  connect?: Prisma.TaskWhereUniqueInput
+}
+
+export type TaskUpdateOneRequiredWithoutCriteriaGroupsNestedInput = {
+  create?: Prisma.XOR<Prisma.TaskCreateWithoutCriteriaGroupsInput, Prisma.TaskUncheckedCreateWithoutCriteriaGroupsInput>
+  connectOrCreate?: Prisma.TaskCreateOrConnectWithoutCriteriaGroupsInput
+  upsert?: Prisma.TaskUpsertWithoutCriteriaGroupsInput
+  connect?: Prisma.TaskWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.TaskUpdateToOneWithWhereWithoutCriteriaGroupsInput, Prisma.TaskUpdateWithoutCriteriaGroupsInput>, Prisma.TaskUncheckedUpdateWithoutCriteriaGroupsInput>
+}
+
 export type TaskCreateNestedOneWithoutCriteriaInput = {
   create?: Prisma.XOR<Prisma.TaskCreateWithoutCriteriaInput, Prisma.TaskUncheckedCreateWithoutCriteriaInput>
   connectOrCreate?: Prisma.TaskCreateOrConnectWithoutCriteriaInput
@@ -522,6 +543,7 @@ export type TaskCreateWithoutAssessmentCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutTaskInput
@@ -536,6 +558,7 @@ export type TaskUncheckedCreateWithoutAssessmentCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaUncheckedCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutTaskInput
@@ -591,6 +614,7 @@ export type TaskCreateWithoutScheduleEntriesInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutTasksInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutTaskInput
   teamObservations?: Prisma.TeamTaskObservationCreateNestedManyWithoutTaskInput
@@ -605,6 +629,7 @@ export type TaskUncheckedCreateWithoutScheduleEntriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaUncheckedCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutTaskInput
   teamObservations?: Prisma.TeamTaskObservationUncheckedCreateNestedManyWithoutTaskInput
@@ -635,6 +660,7 @@ export type TaskUpdateWithoutScheduleEntriesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutTaskNestedInput
   teamObservations?: Prisma.TeamTaskObservationUpdateManyWithoutTaskNestedInput
@@ -649,7 +675,84 @@ export type TaskUncheckedUpdateWithoutScheduleEntriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutTaskNestedInput
+  teamObservations?: Prisma.TeamTaskObservationUncheckedUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskCreateWithoutCriteriaGroupsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  isTeamTask?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutTasksInput
+  criteria?: Prisma.ReviewCriteriaCreateNestedManyWithoutTaskInput
+  scheduleEntries?: Prisma.ScheduleEntryCreateNestedManyWithoutTaskInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutTaskInput
+  teamObservations?: Prisma.TeamTaskObservationCreateNestedManyWithoutTaskInput
+}
+
+export type TaskUncheckedCreateWithoutCriteriaGroupsInput = {
+  id?: string
+  assessmentCenterId: string
+  name: string
+  description?: string | null
+  isTeamTask?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  criteria?: Prisma.ReviewCriteriaUncheckedCreateNestedManyWithoutTaskInput
+  scheduleEntries?: Prisma.ScheduleEntryUncheckedCreateNestedManyWithoutTaskInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutTaskInput
+  teamObservations?: Prisma.TeamTaskObservationUncheckedCreateNestedManyWithoutTaskInput
+}
+
+export type TaskCreateOrConnectWithoutCriteriaGroupsInput = {
+  where: Prisma.TaskWhereUniqueInput
+  create: Prisma.XOR<Prisma.TaskCreateWithoutCriteriaGroupsInput, Prisma.TaskUncheckedCreateWithoutCriteriaGroupsInput>
+}
+
+export type TaskUpsertWithoutCriteriaGroupsInput = {
+  update: Prisma.XOR<Prisma.TaskUpdateWithoutCriteriaGroupsInput, Prisma.TaskUncheckedUpdateWithoutCriteriaGroupsInput>
+  create: Prisma.XOR<Prisma.TaskCreateWithoutCriteriaGroupsInput, Prisma.TaskUncheckedCreateWithoutCriteriaGroupsInput>
+  where?: Prisma.TaskWhereInput
+}
+
+export type TaskUpdateToOneWithWhereWithoutCriteriaGroupsInput = {
+  where?: Prisma.TaskWhereInput
+  data: Prisma.XOR<Prisma.TaskUpdateWithoutCriteriaGroupsInput, Prisma.TaskUncheckedUpdateWithoutCriteriaGroupsInput>
+}
+
+export type TaskUpdateWithoutCriteriaGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput
+  criteria?: Prisma.ReviewCriteriaUpdateManyWithoutTaskNestedInput
+  scheduleEntries?: Prisma.ScheduleEntryUpdateManyWithoutTaskNestedInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutTaskNestedInput
+  teamObservations?: Prisma.TeamTaskObservationUpdateManyWithoutTaskNestedInput
+}
+
+export type TaskUncheckedUpdateWithoutCriteriaGroupsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteria?: Prisma.ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput
+  scheduleEntries?: Prisma.ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutTaskNestedInput
   teamObservations?: Prisma.TeamTaskObservationUncheckedUpdateManyWithoutTaskNestedInput
 }
@@ -663,6 +766,7 @@ export type TaskCreateWithoutCriteriaInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutTasksInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutTaskInput
   teamObservations?: Prisma.TeamTaskObservationCreateNestedManyWithoutTaskInput
@@ -677,6 +781,7 @@ export type TaskUncheckedCreateWithoutCriteriaInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutTaskInput
   teamObservations?: Prisma.TeamTaskObservationUncheckedCreateNestedManyWithoutTaskInput
@@ -707,6 +812,7 @@ export type TaskUpdateWithoutCriteriaInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutTaskNestedInput
   teamObservations?: Prisma.TeamTaskObservationUpdateManyWithoutTaskNestedInput
@@ -721,6 +827,7 @@ export type TaskUncheckedUpdateWithoutCriteriaInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutTaskNestedInput
   teamObservations?: Prisma.TeamTaskObservationUncheckedUpdateManyWithoutTaskNestedInput
@@ -735,6 +842,7 @@ export type TaskCreateWithoutReviewerAssignmentsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutTasksInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryCreateNestedManyWithoutTaskInput
   teamObservations?: Prisma.TeamTaskObservationCreateNestedManyWithoutTaskInput
@@ -749,6 +857,7 @@ export type TaskUncheckedCreateWithoutReviewerAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaUncheckedCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedCreateNestedManyWithoutTaskInput
   teamObservations?: Prisma.TeamTaskObservationUncheckedCreateNestedManyWithoutTaskInput
@@ -779,6 +888,7 @@ export type TaskUpdateWithoutReviewerAssignmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUpdateManyWithoutTaskNestedInput
   teamObservations?: Prisma.TeamTaskObservationUpdateManyWithoutTaskNestedInput
@@ -793,6 +903,7 @@ export type TaskUncheckedUpdateWithoutReviewerAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput
   teamObservations?: Prisma.TeamTaskObservationUncheckedUpdateManyWithoutTaskNestedInput
@@ -807,6 +918,7 @@ export type TaskCreateWithoutTeamObservationsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutTasksInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutTaskInput
@@ -821,6 +933,7 @@ export type TaskUncheckedCreateWithoutTeamObservationsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedCreateNestedManyWithoutTaskInput
   criteria?: Prisma.ReviewCriteriaUncheckedCreateNestedManyWithoutTaskInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedCreateNestedManyWithoutTaskInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutTaskInput
@@ -851,6 +964,7 @@ export type TaskUpdateWithoutTeamObservationsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutTaskNestedInput
@@ -865,6 +979,7 @@ export type TaskUncheckedUpdateWithoutTeamObservationsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -888,6 +1003,7 @@ export type TaskUpdateWithoutAssessmentCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutTaskNestedInput
@@ -902,6 +1018,7 @@ export type TaskUncheckedUpdateWithoutAssessmentCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  criteriaGroups?: Prisma.ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput
   criteria?: Prisma.ReviewCriteriaUncheckedUpdateManyWithoutTaskNestedInput
   scheduleEntries?: Prisma.ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutTaskNestedInput
@@ -924,6 +1041,7 @@ export type TaskUncheckedUpdateManyWithoutAssessmentCenterInput = {
  */
 
 export type TaskCountOutputType = {
+  criteriaGroups: number
   criteria: number
   scheduleEntries: number
   reviewerAssignments: number
@@ -931,6 +1049,7 @@ export type TaskCountOutputType = {
 }
 
 export type TaskCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  criteriaGroups?: boolean | TaskCountOutputTypeCountCriteriaGroupsArgs
   criteria?: boolean | TaskCountOutputTypeCountCriteriaArgs
   scheduleEntries?: boolean | TaskCountOutputTypeCountScheduleEntriesArgs
   reviewerAssignments?: boolean | TaskCountOutputTypeCountReviewerAssignmentsArgs
@@ -945,6 +1064,13 @@ export type TaskCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
    * Select specific fields to fetch from the TaskCountOutputType
    */
   select?: Prisma.TaskCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * TaskCountOutputType without action
+ */
+export type TaskCountOutputTypeCountCriteriaGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ReviewCriteriaGroupWhereInput
 }
 
 /**
@@ -986,6 +1112,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   updatedAt?: boolean
   deletedAt?: boolean
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  criteriaGroups?: boolean | Prisma.Task$criteriaGroupsArgs<ExtArgs>
   criteria?: boolean | Prisma.Task$criteriaArgs<ExtArgs>
   scheduleEntries?: boolean | Prisma.Task$scheduleEntriesArgs<ExtArgs>
   reviewerAssignments?: boolean | Prisma.Task$reviewerAssignmentsArgs<ExtArgs>
@@ -1031,6 +1158,7 @@ export type TaskSelectScalar = {
 export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "description" | "isTeamTask" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  criteriaGroups?: boolean | Prisma.Task$criteriaGroupsArgs<ExtArgs>
   criteria?: boolean | Prisma.Task$criteriaArgs<ExtArgs>
   scheduleEntries?: boolean | Prisma.Task$scheduleEntriesArgs<ExtArgs>
   reviewerAssignments?: boolean | Prisma.Task$reviewerAssignmentsArgs<ExtArgs>
@@ -1048,6 +1176,7 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Task"
   objects: {
     assessmentCenter: Prisma.$AssessmentCenterPayload<ExtArgs>
+    criteriaGroups: Prisma.$ReviewCriteriaGroupPayload<ExtArgs>[]
     criteria: Prisma.$ReviewCriteriaPayload<ExtArgs>[]
     scheduleEntries: Prisma.$ScheduleEntryPayload<ExtArgs>[]
     reviewerAssignments: Prisma.$ReviewerAssignmentPayload<ExtArgs>[]
@@ -1457,6 +1586,7 @@ readonly fields: TaskFieldRefs;
 export interface Prisma__TaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assessmentCenter<T extends Prisma.AssessmentCenterDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentCenterDefaultArgs<ExtArgs>>): Prisma.Prisma__AssessmentCenterClient<runtime.Types.Result.GetResult<Prisma.$AssessmentCenterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  criteriaGroups<T extends Prisma.Task$criteriaGroupsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$criteriaGroupsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewCriteriaGroupPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   criteria<T extends Prisma.Task$criteriaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$criteriaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewCriteriaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scheduleEntries<T extends Prisma.Task$scheduleEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$scheduleEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScheduleEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewerAssignments<T extends Prisma.Task$reviewerAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Task$reviewerAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewerAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1896,6 +2026,30 @@ export type TaskDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
    * Limit how many Tasks to delete.
    */
   limit?: number
+}
+
+/**
+ * Task.criteriaGroups
+ */
+export type Task$criteriaGroupsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ReviewCriteriaGroup
+   */
+  select?: Prisma.ReviewCriteriaGroupSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ReviewCriteriaGroup
+   */
+  omit?: Prisma.ReviewCriteriaGroupOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ReviewCriteriaGroupInclude<ExtArgs> | null
+  where?: Prisma.ReviewCriteriaGroupWhereInput
+  orderBy?: Prisma.ReviewCriteriaGroupOrderByWithRelationInput | Prisma.ReviewCriteriaGroupOrderByWithRelationInput[]
+  cursor?: Prisma.ReviewCriteriaGroupWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ReviewCriteriaGroupScalarFieldEnum | Prisma.ReviewCriteriaGroupScalarFieldEnum[]
 }
 
 /**

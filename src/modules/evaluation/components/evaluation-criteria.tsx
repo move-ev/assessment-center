@@ -27,6 +27,7 @@ function EvaluationCriteria({ criteria }: Props) {
 			<TableHeader>
 				<TableRow>
 					<TableHead>Aufgabe</TableHead>
+					<TableHead>Gruppe</TableHead>
 					<TableHead>Kriterium</TableHead>
 					<TableHead>Typ</TableHead>
 					<TableHead>Gewicht</TableHead>
@@ -38,6 +39,22 @@ function EvaluationCriteria({ criteria }: Props) {
 				{criteria.map((criterion) => (
 					<TableRow key={criterion.id}>
 						<TableCell className="font-medium">{criterion.taskName}</TableCell>
+						<TableCell>
+							<div className="space-y-1">
+								<p>{criterion.criteriaGroupTitle}</p>
+								<Badge
+									variant={
+										criterion.criteriaGroupFactorType === "POTENTIAL"
+											? "secondary"
+											: "outline"
+									}
+								>
+									{criterion.criteriaGroupFactorType === "POTENTIAL"
+										? "Potenzial"
+										: "Kompetenz"}
+								</Badge>
+							</div>
+						</TableCell>
 						<TableCell>{criterion.name}</TableCell>
 						<TableCell>
 							<Badge
