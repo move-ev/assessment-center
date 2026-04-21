@@ -168,7 +168,7 @@ function splitLabelIntoLines(label: string, maxLineLength: number): string[] {
 function buildRadarChartData(view: ViewData): RadarChartDatum[] {
 	return view.groups.map((group) => ({
 		axisId: group.axisId,
-		criteriaGroupLabelLines: splitLabelIntoLines(group.criteriaGroupTitle, 18),
+		criteriaGroupLabelLines: splitLabelIntoLines(group.criteriaGroupTitle, 14),
 		participant: group.participantScore ?? 0,
 		benchmark: group.benchmarkScore ?? 0,
 	}));
@@ -429,12 +429,12 @@ function RadarChartContent({ view }: { view: ViewData }) {
 
 	return (
 		<ChartContainer
-			className="mx-auto aspect-square max-h-[560px]"
+			className="mx-auto aspect-square max-h-[640px] overflow-visible pb-12 [&_.recharts-surface]:overflow-visible"
 			config={CHART_CONFIG}
 		>
 			<RadarChart
 				data={chartData}
-				margin={{ top: 32, right: 72, bottom: 32, left: 72 }}
+				margin={{ top: 48, right: 104, bottom: 64, left: 104 }}
 			>
 				<ChartTooltip
 					content={
