@@ -118,13 +118,14 @@ enum AcStatus {
 /// Status gates which sections are accessible (DRAFT → setup, ACTIVE → overview, COMPLETED → results).
 
 model AssessmentCenter {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  status      AcStatus  @default(DRAFT)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id                         String    @id @default(cuid())
+  name                       String
+  description                String?
+  status                     AcStatus  @default(DRAFT)
+  participantDashboardSnapshot Json?
+  createdAt                  DateTime  @default(now())
+  updatedAt                  DateTime  @updatedAt
+  deletedAt                  DateTime?
 
   days         AssessmentDay[]
   groups       ParticipantGroup[]
