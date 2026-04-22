@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,46 +35,59 @@ function ReviewQuantitativeField({
 	>("idle");
 	const mutation = api.rating.upsertQuantitative.useMutation();
 	const lastSavedValue = useRef(criterion.value);
+	const saveTimer = useRef<number | null>(null);
 
-	useEffect(() => {
-		if (value === null) {
-			return;
-		}
+	const saveValue = useCallback(
+		async (nextValue: number, { isRetry }: { isRetry: boolean }) => {
+			if (!isRetry && nextValue === lastSavedValue.current) {
+				return;
+			}
 
-		if (value === lastSavedValue.current) {
-			return;
-		}
-
-		const currentValue = value;
-		setSaveState("saving");
-		const timer = window.setTimeout(async () => {
+			setSaveState("saving");
 			try {
 				await mutation.mutateAsync({
 					acId,
 					taskId,
 					participantId,
 					criteriaId: criterion.id,
-					value: currentValue,
+					value: nextValue,
 				});
-				lastSavedValue.current = currentValue;
+				lastSavedValue.current = nextValue;
 				setSaveState("saved");
 				onPersisted(criterion.id, true);
 			} catch (error) {
 				setSaveState("error");
 				toast.error(getErrorMessage(error));
 			}
-		}, 500);
+		},
+		[acId, criterion.id, mutation, onPersisted, participantId, taskId],
+	);
 
-		return () => window.clearTimeout(timer);
-	}, [
-		acId,
-		criterion.id,
-		mutation,
-		onPersisted,
-		participantId,
-		taskId,
-		value,
-	]);
+	useEffect(() => {
+		return () => {
+			if (saveTimer.current !== null) {
+				window.clearTimeout(saveTimer.current);
+				saveTimer.current = null;
+			}
+		};
+	}, []);
+
+	const handleSelectValue = useCallback(
+		(nextValue: number) => {
+			const isRetryWithSameValue =
+				nextValue === value && saveState === "error";
+			setValue(nextValue);
+
+			if (saveTimer.current !== null) {
+				window.clearTimeout(saveTimer.current);
+			}
+
+			saveTimer.current = window.setTimeout(() => {
+				saveValue(nextValue, { isRetry: isRetryWithSameValue });
+			}, 500);
+		},
+		[saveState, saveValue, value],
+	);
 
 	return (
 		<Card>
@@ -99,7 +112,7 @@ function ReviewQuantitativeField({
 									"border-primary bg-primary text-primary-foreground hover:bg-primary/90",
 							)}
 							key={rating}
-							onClick={() => setValue(rating)}
+							onClick={() => handleSelectValue(rating)}
 							type="button"
 							variant="outline"
 						>
