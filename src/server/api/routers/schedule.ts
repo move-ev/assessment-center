@@ -2,8 +2,8 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
-const DRAFT_ONLY_MSG =
-	"Einrichtung kann nach Aktivierung nicht mehr geändert werden";
+const LOCKED_MSG =
+	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const scheduleRouter = createTRPCRouter({
 	listByAc: protectedProcedure
@@ -70,8 +70,8 @@ export const scheduleRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (ac.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			if (!day) {
@@ -166,8 +166,8 @@ export const scheduleRouter = createTRPCRouter({
 				});
 			}
 
-			if (entry.day.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (entry.day.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			await ctx.db.scheduleEntry.delete({ where: { id: input.id } });
@@ -209,8 +209,8 @@ export const scheduleRouter = createTRPCRouter({
 				});
 			}
 
-			if (entry.day.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({ code: "FORBIDDEN", message: DRAFT_ONLY_MSG });
+			if (entry.day.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			const adjacent = await ctx.db.scheduleEntry.findFirst({

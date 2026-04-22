@@ -37,6 +37,10 @@ type TaskDefinition = {
 	teamObservations: Array<{
 		groupId: string;
 		reviewerId: string;
+		notes: string | null;
+		reviewer: {
+			user: { name: string };
+		};
 	}>;
 };
 
@@ -58,6 +62,7 @@ type ParticipantTaskResult = {
 type ParticipantResult = {
 	id: string;
 	name: string;
+	groupId: string | null;
 	groupName: string | null;
 	overallScore: number | null;
 	completedTaskCount: number;
@@ -149,6 +154,12 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 						select: {
 							groupId: true,
 							reviewerId: true,
+							notes: true,
+							reviewer: {
+								select: {
+									user: { select: { name: true } },
+								},
+							},
 						},
 					},
 				},
@@ -425,6 +436,7 @@ function buildParticipantResults(
 		participants.push({
 			id: participant.id,
 			name: participant.name,
+			groupId: group?.id ?? null,
 			groupName: group?.name ?? null,
 			overallScore:
 				weightedScoreWeight === 0
@@ -551,8 +563,38 @@ function buildExportRows(
 			row[`Aufgabe_${task.name}`] = formatScore(taskResult?.score ?? null);
 		}
 
+		for (const task of taskLookup.values()) {
+			row[`Teambeobachtung_${task.name}`] = formatTeamObservations(
+				task,
+				participant.groupId,
+			);
+		}
+
 		return row;
 	});
+}
+
+function formatTeamObservations(
+	task: TaskDefinition,
+	groupId: string | null,
+): string {
+	if (!task.isTeamTask || !groupId) {
+		return "";
+	}
+
+	const notes = task.teamObservations
+		.filter(
+			(observation) =>
+				observation.groupId === groupId &&
+				observation.notes !== null &&
+				observation.notes.trim() !== "",
+		)
+		.map(
+			(observation) =>
+				`${observation.reviewer.user.name}: ${(observation.notes ?? "").trim()}`,
+		);
+
+	return notes.join(" | ");
 }
 
 function buildSummary(data: QueryResult, participants: ParticipantResult[]) {

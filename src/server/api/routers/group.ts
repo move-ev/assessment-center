@@ -2,6 +2,9 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
+const LOCKED_MSG =
+	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
+
 export const groupRouter = createTRPCRouter({
 	listByAc: protectedProcedure
 		.input(z.object({ acId: z.string() }))
@@ -52,12 +55,8 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (ac.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.participantGroup.create({
@@ -92,12 +91,8 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (group.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			if (group._count.scheduleEntries > 0) {
@@ -147,12 +142,8 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (group.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			// Verify the participant belongs to the same AC and is active
@@ -226,12 +217,8 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (group.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			// Verify the participant belongs to the same AC
