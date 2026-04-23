@@ -7,7 +7,7 @@ const quantitativeInput = z.object({
 	taskId: z.string(),
 	participantId: z.string(),
 	criteriaId: z.string(),
-	value: z.number().int().min(0).max(5),
+	value: z.number().int().min(1).max(5),
 });
 
 const qualitativeInput = z.object({
