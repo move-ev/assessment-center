@@ -3,6 +3,9 @@ import { z } from "zod";
 
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
+const LOCKED_MSG =
+	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
+
 export const participantRouter = createTRPCRouter({
 	listByAc: protectedProcedure
 		.input(z.object({ acId: z.string() }))
@@ -42,12 +45,8 @@ export const participantRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (ac.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.participant.create({
@@ -96,12 +95,8 @@ export const participantRouter = createTRPCRouter({
 				});
 			}
 
-			if (participant.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (participant.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			return ctx.db.participant.update({
@@ -140,12 +135,8 @@ export const participantRouter = createTRPCRouter({
 				});
 			}
 
-			if (participant.assessmentCenter.status !== "DRAFT") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message:
-						"Einrichtung kann nach Aktivierung nicht mehr geändert werden",
-				});
+			if (participant.assessmentCenter.status === "COMPLETED") {
+				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
 			await ctx.db.participantGroupMembership.deleteMany({

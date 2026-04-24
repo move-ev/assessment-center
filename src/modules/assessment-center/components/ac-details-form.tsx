@@ -61,7 +61,7 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 	const invalidateDetails = () =>
 		utils.assessmentCenter.getDetails.invalidate({ id: acId });
 
-	const isReadOnly = ac.status !== "DRAFT";
+	const isReadOnly = ac.status === "COMPLETED";
 
 	const updateMutation = api.assessmentCenter.updateDetails.useMutation({
 		onSuccess: async () => {
@@ -307,6 +307,14 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 			},
 			onError: (error) => toast.error(error.message),
 		});
+	const reopenMutation = api.assessmentCenter.reopen.useMutation({
+		onSuccess: async () => {
+			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
+			router.refresh();
+			toast.success("Assessment Center wurde wieder geöffnet");
+		},
+		onError: (error) => toast.error(error.message),
+	});
 
 	const STATUS_LABEL: Record<AcStatus, string> = {
 		DRAFT: "Entwurf",
@@ -316,15 +324,25 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 
 	if (currentStatus === "COMPLETED") {
 		return (
-			<div className="space-y-2">
-				<h3 className="font-medium text-sm">Status</h3>
-				<p className="text-muted-foreground text-sm">
-					Das Assessment Center ist{" "}
-					<strong className="text-foreground">
-						{STATUS_LABEL[currentStatus]}
-					</strong>{" "}
-					und kann nicht mehr bearbeitet werden.
-				</p>
+			<div className="space-y-4">
+				<div>
+					<h3 className="font-medium text-sm">Status</h3>
+					<p className="mt-1 text-muted-foreground text-sm">
+						Das Assessment Center ist{" "}
+						<strong className="text-foreground">
+							{STATUS_LABEL[currentStatus]}
+						</strong>
+						. Du kannst es wieder öffnen, um Bewertungen nachzupflegen. Beim
+						erneuten Abschließen werden die Auswertungen neu berechnet.
+					</p>
+				</div>
+				<Button
+					disabled={reopenMutation.isPending}
+					onClick={() => reopenMutation.mutate({ id: acId })}
+					variant="outline"
+				>
+					{reopenMutation.isPending ? "Öffne..." : "AC wieder öffnen"}
+				</Button>
 			</div>
 		);
 	}

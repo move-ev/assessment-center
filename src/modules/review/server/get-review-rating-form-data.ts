@@ -35,7 +35,6 @@ export type ReviewRatingFormData = {
 					type: "QUANTITATIVE";
 					weight: number;
 					value: number | null;
-					notes: string;
 			  }
 			| {
 					id: string;
@@ -119,7 +118,6 @@ export async function getReviewRatingFormData(
 				select: {
 					criteriaId: true,
 					value: true,
-					notes: true,
 				},
 			},
 			qualitativeRatings: {
@@ -189,7 +187,6 @@ export async function getReviewRatingFormData(
 						type: "QUANTITATIVE" as const,
 						weight: criteria.weight ?? 0,
 						value: rating?.value ?? null,
-						notes: rating?.notes ?? "",
 					};
 				}
 

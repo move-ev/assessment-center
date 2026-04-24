@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
@@ -19,7 +18,6 @@ type Props = {
 		description: string | null;
 		weight: number;
 		value: number | null;
-		notes: string;
 	};
 	onPersisted: (criterionId: string, isComplete: boolean) => void;
 };
@@ -32,61 +30,64 @@ function ReviewQuantitativeField({
 	onPersisted,
 }: Props) {
 	const [value, setValue] = useState<number | null>(criterion.value);
-	const [notes, setNotes] = useState(criterion.notes);
 	const [saveState, setSaveState] = useState<
 		"idle" | "saving" | "saved" | "error"
 	>("idle");
 	const mutation = api.rating.upsertQuantitative.useMutation();
-	const lastSaved = useRef({ value: criterion.value, notes: criterion.notes });
-	const snapshot = useMemo(
-		() => ({ value, notes: notes.trim() }),
-		[notes, value],
-	);
+	const lastSavedValue = useRef(criterion.value);
+	const saveTimer = useRef<number | null>(null);
 
-	useEffect(() => {
-		if (snapshot.value === null) {
-			return;
-		}
+	const saveValue = useCallback(
+		async (nextValue: number, { isRetry }: { isRetry: boolean }) => {
+			if (!isRetry && nextValue === lastSavedValue.current) {
+				return;
+			}
 
-		const currentValue = snapshot.value;
-
-		if (
-			currentValue === lastSaved.current.value &&
-			snapshot.notes === lastSaved.current.notes
-		) {
-			return;
-		}
-
-		setSaveState("saving");
-		const timer = window.setTimeout(async () => {
+			setSaveState("saving");
 			try {
 				await mutation.mutateAsync({
 					acId,
 					taskId,
 					participantId,
 					criteriaId: criterion.id,
-					value: currentValue,
-					notes: snapshot.notes === "" ? undefined : snapshot.notes,
+					value: nextValue,
 				});
-				lastSaved.current = { value: currentValue, notes: snapshot.notes };
+				lastSavedValue.current = nextValue;
 				setSaveState("saved");
 				onPersisted(criterion.id, true);
 			} catch (error) {
 				setSaveState("error");
 				toast.error(getErrorMessage(error));
 			}
-		}, 500);
+		},
+		[acId, criterion.id, mutation, onPersisted, participantId, taskId],
+	);
 
-		return () => window.clearTimeout(timer);
-	}, [
-		acId,
-		criterion.id,
-		mutation,
-		onPersisted,
-		participantId,
-		snapshot,
-		taskId,
-	]);
+	useEffect(() => {
+		return () => {
+			if (saveTimer.current !== null) {
+				window.clearTimeout(saveTimer.current);
+				saveTimer.current = null;
+			}
+		};
+	}, []);
+
+	const handleSelectValue = useCallback(
+		(nextValue: number) => {
+			const isRetryWithSameValue =
+				nextValue === value && saveState === "error";
+			setValue(nextValue);
+
+			if (saveTimer.current !== null) {
+				window.clearTimeout(saveTimer.current);
+			}
+
+			saveTimer.current = window.setTimeout(() => {
+				saveValue(nextValue, { isRetry: isRetryWithSameValue });
+			}, 500);
+		},
+		[saveState, saveValue, value],
+	);
 
 	return (
 		<Card>
@@ -111,7 +112,7 @@ function ReviewQuantitativeField({
 									"border-primary bg-primary text-primary-foreground hover:bg-primary/90",
 							)}
 							key={rating}
-							onClick={() => setValue(rating)}
+							onClick={() => handleSelectValue(rating)}
 							type="button"
 							variant="outline"
 						>
@@ -120,16 +121,10 @@ function ReviewQuantitativeField({
 					))}
 				</div>
 			</CardHeader>
-			<CardContent className="space-y-3">
-				<Textarea
-					disabled={value === null}
-					onChange={(event) => setNotes(event.target.value)}
-					placeholder="Optionaler Kontext zur Bewertung"
-					value={notes}
-				/>
+			<CardContent>
 				<p className="text-muted-foreground text-xs">
 					{value === null
-						? "Wähle zuerst einen Wert von 0 bis 5."
+						? "Wähle einen Wert von 0 bis 5."
 						: getSaveStateLabel(saveState)}
 				</p>
 			</CardContent>
