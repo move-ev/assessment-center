@@ -9,14 +9,16 @@ import type { ReviewRatingFormData } from "../server/get-review-rating-form-data
 import { ReviewQualitativeField } from "./review-qualitative-field";
 import { ReviewQuantitativeField } from "./review-quantitative-field";
 import { ReviewTeamObservation } from "./review-team-observation";
+import { TaskInstructionsSheet } from "./task-instructions-sheet";
 
 type Props = {
 	acId: string;
 	taskId: string;
 	data: ReviewRatingFormData;
+	instructionsContent?: React.ReactNode;
 };
 
-function ReviewRatingForm({ acId, taskId, data }: Props) {
+function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 	const [completion, setCompletion] = useState(
 		() =>
 			new Map(
@@ -159,6 +161,12 @@ function ReviewRatingForm({ acId, taskId, data }: Props) {
 					participantId={data.participant.id}
 					taskId={taskId}
 				/>
+			)}
+
+			{instructionsContent && (
+				<TaskInstructionsSheet taskName={data.task.name}>
+					{instructionsContent}
+				</TaskInstructionsSheet>
 			)}
 		</div>
 	);

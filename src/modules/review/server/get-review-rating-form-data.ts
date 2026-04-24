@@ -9,6 +9,7 @@ export type ReviewRatingFormData = {
 		id: string;
 		name: string;
 		description: string | null;
+		instructions: string | null;
 		isTeamTask: boolean;
 	};
 	participant: {
@@ -72,6 +73,7 @@ export async function getReviewRatingFormData(
 					id: true,
 					name: true,
 					description: true,
+					instructions: true,
 					isTeamTask: true,
 					criteriaGroups: {
 						where: { deletedAt: null },
@@ -159,6 +161,7 @@ export async function getReviewRatingFormData(
 			id: assignment.task.id,
 			name: assignment.task.name,
 			description: assignment.task.description,
+			instructions: assignment.task.instructions,
 			isTeamTask: assignment.task.isTeamTask,
 		},
 		participant: {
