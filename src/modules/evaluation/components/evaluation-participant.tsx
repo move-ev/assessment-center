@@ -38,7 +38,7 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 			<header className="space-y-1">
 				<h1 className="font-medium text-xl">Ergebnisse</h1>
 				<p className="text-muted-foreground text-sm">
-					Aggregierte Bewertungen pro Teilnehmer, Aufgabe und Kriterium.
+					Aggregierte Bewertungen pro Bewerbende, Aufgabe und Kriterium.
 				</p>
 			</header>
 
@@ -46,7 +46,7 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 
 			<Tabs className="gap-4" defaultValue="participants">
 				<TabsList>
-					<TabsTrigger value="participants">Teilnehmer</TabsTrigger>
+					<TabsTrigger value="participants">Bewerbende</TabsTrigger>
 					<TabsTrigger value="tasks">Aufgaben</TabsTrigger>
 					<TabsTrigger value="criteria">Kriterien</TabsTrigger>
 					<TabsTrigger value="export">Export</TabsTrigger>
@@ -77,12 +77,12 @@ function SummaryGrid({
 	return (
 		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 			<SummaryCard
-				description="Anzahl der Teilnehmer mit quantitativer Gesamtauswertung."
-				label="Teilnehmer mit Score"
+				description="Anzahl der Bewerbenden mit quantitativer Gesamtauswertung."
+				label="Bewerbende mit Score"
 				value={`${summary.participantsWithScore} / ${summary.participantCount}`}
 			/>
 			<SummaryCard
-				description="Gemittelter Gesamtwert über alle bewertbaren Teilnehmer."
+				description="Gemittelter Gesamtwert über alle bewertbaren Bewerbenden."
 				label="Durchschnitt"
 				value={
 					summary.averageOverallScore === null
@@ -91,7 +91,7 @@ function SummaryGrid({
 				}
 			/>
 			<SummaryCard
-				description={`${summary.completionPercent}% aller Reviewer-Zuweisungen vollständig erfasst.`}
+				description={`${summary.completionPercent}% aller Bewerter-Zuweisungen vollständig erfasst.`}
 				label="Bewertungen"
 				value={`${summary.completedAssignments} / ${summary.totalAssignments}`}
 			/>
@@ -138,7 +138,7 @@ function ParticipantTable({
 			<TableHeader>
 				<TableRow>
 					<TableHead>Rang</TableHead>
-					<TableHead>Teilnehmer</TableHead>
+					<TableHead>Bewerbende</TableHead>
 					<TableHead>Gruppe</TableHead>
 					<TableHead>Gesamtwert</TableHead>
 					<TableHead>Aufgaben</TableHead>

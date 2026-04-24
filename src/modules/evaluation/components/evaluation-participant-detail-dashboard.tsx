@@ -107,7 +107,7 @@ const RANK_CONFIG: Record<RankLevel, RankConfig> = {
 
 const CHART_CONFIG = {
 	participant: {
-		label: "Teilnehmer",
+		label: "Bewerbende",
 		color: "hsl(220 70% 50%)",
 	},
 	benchmark: {
@@ -404,7 +404,7 @@ function PerformanceRadarCard({ views }: { views: ViewData[] }) {
 		<Card>
 			<CardHeader>
 				<CardTitle>Performance-Profil</CardTitle>
-				<CardDescription>Teilnehmer vs. Benchmark nach Bereich</CardDescription>
+				<CardDescription>Bewerbende vs. Benchmark nach Bereich</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<Tabs defaultValue={defaultTab}>
@@ -477,7 +477,7 @@ function RadarChartContent({ view }: { view: ViewData }) {
 					dataKey="participant"
 					fill="var(--color-participant)"
 					fillOpacity={0.22}
-					name="Teilnehmer"
+					name="Bewerbende"
 					stroke="var(--color-participant)"
 					strokeWidth={2}
 				/>
@@ -632,7 +632,7 @@ function FactorGroupBars({ label, view }: { label: string; view: ViewData }) {
 			<CardHeader>
 				<CardTitle>{label}</CardTitle>
 				<CardDescription>
-					Teilnehmerwert je Kriteriengruppe · Benchmark-Markierung sichtbar
+					Bewerbendenwert je Kriteriengruppe · Benchmark-Markierung sichtbar
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-5">
@@ -706,7 +706,7 @@ function GroupScoresTable({ view }: { view: ViewData }) {
 							<TableHead>Aufgabe</TableHead>
 							<TableHead>Kriteriengruppe</TableHead>
 							<TableHead>Typ</TableHead>
-							<TableHead className="text-right">Teilnehmer</TableHead>
+							<TableHead className="text-right">Bewerbende</TableHead>
 							<TableHead className="text-right">Benchmark</TableHead>
 							<TableHead className="text-right">Delta</TableHead>
 							<TableHead>Einordnung</TableHead>

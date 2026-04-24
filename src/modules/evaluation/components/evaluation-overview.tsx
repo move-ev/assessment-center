@@ -28,7 +28,7 @@ function EvaluationOverview({ acId, overview }: Props) {
 			<header className="space-y-1">
 				<h1 className="font-medium text-xl">Live-Übersicht</h1>
 				<p className="text-muted-foreground text-sm">
-					Fortschritt der Bewertungsaufgaben pro Gruppe, Teilnehmer und Aufgabe.
+					Fortschritt der Bewertungsaufgaben pro Gruppe, Bewerbende und Aufgabe.
 				</p>
 			</header>
 
@@ -60,18 +60,18 @@ function SummaryGrid({
 				value={`${summary.completionPercent}%`}
 			/>
 			<SummaryCard
-				description="Noch nicht vollständig erfasste Reviewer-Zuweisungen"
+				description="Noch nicht vollständig erfasste Bewerter-Zuweisungen"
 				label="Offene Bewertungen"
 				value={summary.unratedAssignments.toString()}
 			/>
 			<SummaryCard
 				description={`${summary.groupCount} Gruppen, ${summary.taskCount} Aufgaben, ${summary.dayCount} Tage`}
-				label="Teilnehmer"
+				label="Bewerbende"
 				value={summary.participantCount.toString()}
 			/>
 			<SummaryCard
 				description={`${summary.reviewerCount} Bewerter, ${summary.assignmentsWithoutCriteria} Zuweisungen ohne Kriterien`}
-				label="Reviewer-Setup"
+				label="Bewerter-Setup"
 				value={summary.totalAssignments.toString()}
 			/>
 		</div>
@@ -108,7 +108,7 @@ function OverviewSetupHint({ acId }: { acId: string }) {
 			</CardHeader>
 			<CardContent className="space-y-3">
 				<p className="text-muted-foreground text-sm">
-					Für die Live-Übersicht fehlen entweder Reviewer-Zuweisungen oder
+					Für die Live-Übersicht fehlen entweder Bewerter-Zuweisungen oder
 					Bewertungskriterien. Sobald Aufgaben Kriterien haben und zugewiesen
 					sind, erscheint hier der Fortschritt live.
 				</p>
@@ -143,7 +143,7 @@ function GroupCard({ group }: GroupCardProps) {
 					<div className="space-y-1">
 						<CardTitle className="text-base">{group.name}</CardTitle>
 						<p className="text-muted-foreground text-sm">
-							{group.participants.length} Teilnehmer, {group.tasks.length}{" "}
+							{group.participants.length} Bewerbende, {group.tasks.length}{" "}
 							Aufgaben
 						</p>
 					</div>
@@ -164,7 +164,7 @@ function GroupCard({ group }: GroupCardProps) {
 			<CardContent>
 				{group.participants.length === 0 ? (
 					<p className="text-muted-foreground text-sm">
-						Dieser Gruppe sind noch keine Teilnehmer zugeordnet.
+						Dieser Gruppe sind noch keine Bewerbende zugeordnet.
 					</p>
 				) : group.tasks.length === 0 ? (
 					<p className="text-muted-foreground text-sm">
@@ -185,7 +185,7 @@ function GroupMatrixTable({ group }: GroupCardProps) {
 			<Table>
 				<TableHeader>
 					<TableRow>
-						<TableHead className="min-w-44">Teilnehmer</TableHead>
+						<TableHead className="min-w-44">Bewerbende</TableHead>
 						{group.tasks.map((task) => (
 							<TableHead className="min-w-44 align-top" key={task.id}>
 								<div className="space-y-1">
@@ -303,7 +303,7 @@ function OverviewEmptyState({ acId }: { acId: string }) {
 				</CardHeader>
 				<CardContent className="space-y-3">
 					<p className="text-muted-foreground text-sm">
-						Für dieses Assessment Center gibt es noch keine Gruppen, Teilnehmer
+						Für dieses Assessment Center gibt es noch keine Gruppen, Bewerbende
 						oder Aufgaben mit Zuweisungen. Die Live-Übersicht wird sichtbar,
 						sobald die Einrichtung vollständig ist.
 					</p>
