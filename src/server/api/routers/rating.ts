@@ -233,7 +233,7 @@ export const ratingRouter = createTRPCRouter({
 			if (!groupId) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: "Teilnehmer ist keiner Gruppe zugeordnet",
+					message: "Bewerbende ist keiner Gruppe zugeordnet",
 				});
 			}
 

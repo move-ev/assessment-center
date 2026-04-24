@@ -75,7 +75,7 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 				<Card>
 					<CardContent className="flex min-h-40 items-center justify-center">
 						<p className="text-muted-foreground text-sm">
-							Für diesen Teilnehmer liegen noch keine quantitativen
+							Für diese Bewerbende liegen noch keine quantitativen
 							Kriteriengruppen mit Bewertungen vor.
 						</p>
 					</CardContent>
@@ -118,7 +118,7 @@ function TeamObservationsSection({
 					<p className="text-muted-foreground text-sm">
 						{groupName
 							? "Für diese Gruppe wurden noch keine Gesamt-Reviews zu Teamaufgaben erfasst."
-							: "Dieser Teilnehmer ist keiner Gruppe zugeordnet, daher liegen keine Gruppenbeobachtungen vor."}
+							: "Diese Bewerbende ist keiner Gruppe zugeordnet, daher liegen keine Gruppenbeobachtungen vor."}
 					</p>
 				) : (
 					<div className="space-y-5">

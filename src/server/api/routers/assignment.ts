@@ -89,7 +89,7 @@ export const assignmentRouter = createTRPCRouter({
 			if (!participant) {
 				throw new TRPCError({
 					code: "BAD_REQUEST",
-					message: "Teilnehmer gehört nicht zu diesem Assessment Center",
+					message: "Bewerbende gehört nicht zu diesem Assessment Center",
 				});
 			}
 

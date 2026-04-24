@@ -74,7 +74,7 @@ function ReviewRatingForm({ acId, taskId, data }: Props) {
 						className="text-primary text-sm underline underline-offset-4"
 						href={ROUTES.acReviewTask(acId, taskId)}
 					>
-						Zur Teilnehmerliste
+						Zur Liste der Bewerbenden
 					</Link>
 				</div>
 				<div className="flex flex-wrap items-center gap-3">

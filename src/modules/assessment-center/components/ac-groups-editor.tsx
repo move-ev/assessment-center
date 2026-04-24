@@ -85,7 +85,7 @@ function AcGroupsEditor({ acId }: Props) {
 			<div>
 				<h2 className="text-base font-medium">Gruppen</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					Teilnehmer in Gruppen einteilen. Jeder Teilnehmer gehört genau einer
+					Bewerbende in Gruppen einteilen. Jede/r Bewerbende gehört genau einer
 					Gruppe an.
 				</p>
 			</div>
@@ -237,7 +237,7 @@ function GroupCard({
 							htmlFor={`assign-${group.id}`}
 							className="text-xs text-muted-foreground"
 						>
-							Teilnehmer zuweisen
+							Bewerbende zuweisen
 						</label>
 						<select
 							id={`assign-${group.id}`}
@@ -247,7 +247,7 @@ function GroupCard({
 								if (e.target.value) onAssign(e.target.value);
 							}}
 						>
-							<option value="">Teilnehmer wählen…</option>
+							<option value="">Bewerbende wählen…</option>
 							{unassignedForGroup.map((p) => (
 								<option key={p.id} value={p.id}>
 									{p.name}

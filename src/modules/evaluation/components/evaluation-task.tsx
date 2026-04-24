@@ -24,7 +24,7 @@ function EvaluationTask({ tasks }: Props) {
 							<div className="space-y-1">
 								<CardTitle className="text-base">{task.name}</CardTitle>
 								<p className="text-muted-foreground text-sm">
-									{task.participantCount} Teilnehmer,{" "}
+									{task.participantCount} Bewerbende,{" "}
 									{task.reviewerAssignmentCount} Bewertungen
 								</p>
 							</div>

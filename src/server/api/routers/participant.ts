@@ -29,7 +29,7 @@ export const participantRouter = createTRPCRouter({
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Nur Admins können Teilnehmer hinzufügen",
+					message: "Nur Admins können Bewerbende hinzufügen",
 				});
 			}
 
@@ -72,7 +72,7 @@ export const participantRouter = createTRPCRouter({
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Nur Admins können Teilnehmer bearbeiten",
+					message: "Nur Admins können Bewerbende bearbeiten",
 				});
 			}
 
@@ -91,7 +91,7 @@ export const participantRouter = createTRPCRouter({
 			if (!participant) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Teilnehmer nicht gefunden",
+					message: "Bewerbende nicht gefunden",
 				});
 			}
 
@@ -112,7 +112,7 @@ export const participantRouter = createTRPCRouter({
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Nur Admins können Teilnehmer entfernen",
+					message: "Nur Admins können Bewerbende entfernen",
 				});
 			}
 
@@ -131,7 +131,7 @@ export const participantRouter = createTRPCRouter({
 			if (!participant) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Teilnehmer nicht gefunden",
+					message: "Bewerbende nicht gefunden",
 				});
 			}
 
