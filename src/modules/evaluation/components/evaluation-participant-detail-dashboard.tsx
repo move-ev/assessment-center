@@ -35,6 +35,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
+import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
 
 type ViewData = EvaluationParticipantDetailData["views"][number];
 type GroupData = ViewData["groups"][number];
@@ -327,6 +328,7 @@ function EvaluationParticipantDetailDashboard({ data }: Props) {
 				potentialView={potentialView ?? null}
 			/>
 			<GroupScoresTable view={allView} />
+			<ReviewerBreakdownCard data={data.reviewerBreakdown} />
 		</div>
 	);
 }

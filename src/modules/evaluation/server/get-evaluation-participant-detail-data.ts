@@ -3,6 +3,10 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { db } from "@/server/db";
 import {
+	getParticipantReviewerBreakdown,
+	type ReviewerBreakdownData,
+} from "./get-participant-reviewer-breakdown";
+import {
 	buildParticipantDashboardSnapshot,
 	parseParticipantDashboardSnapshot,
 } from "./participant-dashboard-snapshot";
@@ -46,6 +50,7 @@ export type EvaluationParticipantDetailData = {
 			delta: number | null;
 		}>;
 	}>;
+	reviewerBreakdown: ReviewerBreakdownData;
 	teamObservations: Array<{
 		taskId: string;
 		taskName: string;
@@ -251,7 +256,10 @@ export async function getEvaluationParticipantDetailData(
 	acId: string,
 	participantId: string,
 ): Promise<EvaluationParticipantDetailData> {
-	const participant = await fetchParticipantSnapshot(acId, participantId);
+	const [participant, reviewerBreakdown] = await Promise.all([
+		fetchParticipantSnapshot(acId, participantId),
+		getParticipantReviewerBreakdown(acId, participantId),
+	]);
 
 	if (!participant) {
 		notFound();
@@ -274,6 +282,7 @@ export async function getEvaluationParticipantDetailData(
 			totalGroupCount: participant.totalGroupCount,
 		},
 		views: buildViews(participant.groups),
+		reviewerBreakdown,
 		teamObservations,
 	};
 }
