@@ -37,21 +37,21 @@ function ReviewParticipantList({ acId, taskId, data }: Props) {
 			<header className="space-y-1">
 				<h1 className="font-medium text-xl">{data.task.name}</h1>
 				<p className="text-muted-foreground text-sm">
-					{data.participants.length} Teilnehmer zugewiesen,{" "}
+					{data.participants.length} Bewerbende zugewiesen,{" "}
 					{data.task.criteriaCount} Kriterien pro Bewertung.
 				</p>
 			</header>
 
 			{data.participants.length === 0 ? (
 				<p className="text-muted-foreground text-sm">
-					Für diese Aufgabe liegen keine Teilnehmer-Zuweisungen vor.
+					Für diese Aufgabe liegen keine Zuweisungen von Bewerbenden vor.
 				</p>
 			) : (
 				<div className="overflow-x-auto">
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead>Teilnehmer</TableHead>
+								<TableHead>Bewerbende</TableHead>
 								<TableHead>Gruppe</TableHead>
 								<TableHead>Status</TableHead>
 								<TableHead>Fortschritt</TableHead>
