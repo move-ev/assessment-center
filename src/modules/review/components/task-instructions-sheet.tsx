@@ -19,7 +19,7 @@ function TaskInstructionsSheet({ taskName, children }: Props) {
 	const [open, setOpen] = useState(false);
 
 	return (
-		<Sheet open={open} onOpenChange={setOpen}>
+		<Sheet onOpenChange={setOpen} open={open}>
 			<Button
 				aria-label="Aufgabenanweisungen öffnen"
 				className="fixed right-6 bottom-6 z-40 size-14 rounded-full shadow-lg"
@@ -29,7 +29,7 @@ function TaskInstructionsSheet({ taskName, children }: Props) {
 			>
 				<BookOpenIcon className="size-6" />
 			</Button>
-			<SheetContent side="right">
+			<SheetContent className={"data-[side=right]:sm:max-w-4xl"} side="right">
 				<SheetHeader>
 					<SheetTitle>{taskName}</SheetTitle>
 				</SheetHeader>
