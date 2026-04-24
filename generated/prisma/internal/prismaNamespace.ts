@@ -2018,6 +2018,7 @@ export const TaskScalarFieldEnum = {
   assessmentCenterId: 'assessmentCenterId',
   name: 'name',
   description: 'description',
+  instructions: 'instructions',
   isTeamTask: 'isTeamTask',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
