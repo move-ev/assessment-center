@@ -165,7 +165,7 @@ function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 						<FieldLabel htmlFor="task-team">Gruppenaufgabe</FieldLabel>
 					</div>
 					<p className="text-muted-foreground text-xs">
-						Teilnehmer bearbeiten diese Aufgabe gemeinsam als Gruppe.
+						Bewerbende bearbeiten diese Aufgabe gemeinsam als Gruppe.
 					</p>
 				</Field>
 			</FieldGroup>

@@ -16,7 +16,7 @@ function ReviewTaskList({ acId, tasks }: Props) {
 			<header className="space-y-1">
 				<h1 className="font-medium text-xl">Meine Aufgaben</h1>
 				<p className="text-muted-foreground text-sm">
-					Öffne eine Aufgabe, um zugewiesene Teilnehmer zu bewerten.
+					Öffne eine Aufgabe, um zugewiesene Bewerbende zu bewerten.
 				</p>
 			</header>
 
@@ -43,7 +43,7 @@ function TaskCard({ acId, task }: { acId: string; task: ReviewTaskListItem }) {
 					<div className="space-y-1">
 						<CardTitle className="text-base">{task.name}</CardTitle>
 						<p className="text-muted-foreground text-sm">
-							{task.participantCount} Teilnehmer, {task.criteriaCount} Kriterien
+							{task.participantCount} Bewerbende, {task.criteriaCount} Kriterien
 						</p>
 					</div>
 					<Badge variant={task.isTeamTask ? "secondary" : "outline"}>
@@ -65,7 +65,7 @@ function TaskCard({ acId, task }: { acId: string; task: ReviewTaskListItem }) {
 					className="text-primary text-sm underline underline-offset-4"
 					href={ROUTES.acReviewTask(acId, task.id)}
 				>
-					Teilnehmer öffnen
+					Bewerbende öffnen
 				</Link>
 			</CardContent>
 		</Card>

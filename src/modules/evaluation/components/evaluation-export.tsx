@@ -19,13 +19,13 @@ function EvaluationExport({ acName, rows }: Props) {
 			<CardHeader className="gap-2">
 				<CardTitle>Export</CardTitle>
 				<p className="text-muted-foreground text-sm">
-					CSV-Export der Teilnehmerauswertung mit Gesamtwerten und
+					CSV-Export der Bewerbenden-Auswertung mit Gesamtwerten und
 					Aufgaben-Scores.
 				</p>
 			</CardHeader>
 			<CardContent className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 				<div className="space-y-1 text-sm">
-					<p>{rows.length} Teilnehmerzeilen verfügbar</p>
+					<p>{rows.length} Zeilen verfügbar</p>
 					<p className="text-muted-foreground">
 						Dateiname: {toFileName(acName)}
 					</p>

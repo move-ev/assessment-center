@@ -85,7 +85,7 @@ function AcGroupsEditor({ acId }: Props) {
 			<div>
 				<h2 className="text-base font-medium">Gruppen</h2>
 				<p className="mt-1 text-sm text-muted-foreground">
-					Teilnehmer in Gruppen einteilen. Jeder Teilnehmer gehört genau einer
+					Bewerbende in Gruppen einteilen. Jede/r Bewerbende gehört genau einer
 					Gruppe an.
 				</p>
 			</div>

@@ -73,7 +73,7 @@ function AcTasksTable({ acId }: Props) {
 			<div>
 				<h2 className="font-medium text-base">Aufgaben</h2>
 				<p className="mt-1 text-muted-foreground text-sm">
-					Aufgaben, die Teilnehmer im Assessment Center bearbeiten.
+					Aufgaben, die Bewerbende im Assessment Center bearbeiten.
 				</p>
 			</div>
 
