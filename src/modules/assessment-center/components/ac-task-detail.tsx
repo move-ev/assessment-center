@@ -73,6 +73,7 @@ type TaskData = {
 	id: string;
 	name: string;
 	description: string | null;
+	instructions: string | null;
 	isTeamTask: boolean;
 	criteriaGroups: Array<{
 		id: string;
@@ -98,6 +99,7 @@ type TaskEditFormProps = {
 function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 	const [name, setName] = useState(task.name);
 	const [description, setDescription] = useState(task.description ?? "");
+	const [instructions, setInstructions] = useState(task.instructions ?? "");
 	const [isTeamTask, setIsTeamTask] = useState(task.isTeamTask);
 
 	const updateMutation = api.task.update.useMutation({
@@ -120,6 +122,7 @@ function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 			acId,
 			name,
 			description: description.trim() !== "" ? description : undefined,
+			instructions: instructions.trim() !== "" ? instructions : undefined,
 			isTeamTask,
 		});
 	}
@@ -153,6 +156,25 @@ function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 						onChange={(e) => setDescription(e.target.value)}
 						value={description}
 					/>
+				</Field>
+				<Field>
+					<FieldLabel htmlFor="task-instructions">
+						Anweisungen{" "}
+						<span className="font-normal text-muted-foreground">
+							(optional, Markdown)
+						</span>
+					</FieldLabel>
+					<Textarea
+						className="min-h-32 font-mono text-sm"
+						disabled={updateMutation.isPending}
+						id="task-instructions"
+						onChange={(e) => setInstructions(e.target.value)}
+						placeholder="# Aufgabenstellung&#10;&#10;Beschreibe hier die Anweisungen für die Bewerter..."
+						value={instructions}
+					/>
+					<p className="text-muted-foreground text-xs">
+						Markdown wird beim Review als formatierter Text angezeigt.
+					</p>
 				</Field>
 				<Field>
 					<div className="flex items-center gap-3">
