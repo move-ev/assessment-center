@@ -38,7 +38,7 @@ const STEPS: StepConfig[] = [
 	},
 	{
 		key: "participants",
-		label: "Teilnehmer",
+		label: "Bewerbende",
 		route: ROUTES.acSetupParticipants,
 		isAvailable: () => true,
 		isComplete: (p) => p.participantCount > 0,

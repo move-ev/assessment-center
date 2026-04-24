@@ -237,7 +237,7 @@ function GroupCard({
 							htmlFor={`assign-${group.id}`}
 							className="text-xs text-muted-foreground"
 						>
-							Teilnehmer zuweisen
+							Bewerbende zuweisen
 						</label>
 						<select
 							id={`assign-${group.id}`}
@@ -247,7 +247,7 @@ function GroupCard({
 								if (e.target.value) onAssign(e.target.value);
 							}}
 						>
-							<option value="">Teilnehmer wählen…</option>
+							<option value="">Bewerbende wählen…</option>
 							{unassignedForGroup.map((p) => (
 								<option key={p.id} value={p.id}>
 									{p.name}

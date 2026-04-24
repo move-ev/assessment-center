@@ -51,7 +51,7 @@ function AcReviewersTable({ acId }: Props) {
 			<div>
 				<h2 className="font-medium text-base">Bewerter</h2>
 				<p className="mt-1 text-muted-foreground text-sm">
-					Benutzer, die Teilnehmer in diesem Assessment Center bewerten.
+					Benutzer, die Bewerbende in diesem Assessment Center bewerten.
 				</p>
 			</div>
 

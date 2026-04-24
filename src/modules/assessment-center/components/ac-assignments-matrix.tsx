@@ -51,14 +51,14 @@ function AcAssignmentsMatrix({ acId }: Props) {
 			<div>
 				<h2 className="font-medium text-base">Zuweisungen</h2>
 				<p className="mt-1 text-muted-foreground text-sm">
-					Bewerter Teilnehmern pro Aufgabe zuweisen.
+					Bewerter Bewerbenden pro Aufgabe zuweisen.
 				</p>
 			</div>
 
 			{!hasRequiredData ? (
 				<p className="text-muted-foreground text-sm">
-					Füge zuerst mindestens einen Teilnehmer, eine Aufgabe und einen
-					Bewerter hinzu.
+					Füge zuerst mindestens Bewerbende, eine Aufgabe und einen Bewerter
+					hinzu.
 				</p>
 			) : (
 				<AssignmentsGrid
@@ -94,7 +94,7 @@ function AssignmentsGrid({
 				<thead>
 					<tr>
 						<th className="min-w-[140px] border bg-muted/50 px-3 py-2 text-left font-medium text-muted-foreground">
-							Teilnehmer
+							Bewerbende
 						</th>
 						{tasks.map((task) => (
 							<th
@@ -270,7 +270,7 @@ function BulkAssignControl({
 		);
 
 		if (unassignedParticipants.length === 0) {
-			toast.info("Alle Teilnehmer sind diesem Bewerter bereits zugewiesen");
+			toast.info("Alle Bewerbende sind diesem Bewerter bereits zugewiesen");
 			return;
 		}
 

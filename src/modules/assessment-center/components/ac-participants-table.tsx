@@ -61,7 +61,7 @@ function AcParticipantsTable({ acId }: Props) {
 	const removeMutation = api.participant.remove.useMutation({
 		onSuccess: async () => {
 			await invalidate();
-			toast.success("Teilnehmer entfernt");
+			toast.success("Bewerbende entfernt");
 		},
 		onError: (error) => toast.error(error.message),
 	});
@@ -73,7 +73,7 @@ function AcParticipantsTable({ acId }: Props) {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="font-medium text-base">Teilnehmer</h2>
+				<h2 className="font-medium text-base">Bewerbende</h2>
 				<p className="mt-1 text-muted-foreground text-sm">
 					Personen, die am Assessment Center teilnehmen.
 				</p>
@@ -120,7 +120,7 @@ function ParticipantsTableContent({
 	if (participants.length === 0) {
 		return (
 			<p className="text-muted-foreground text-sm">
-				Noch keine Teilnehmer hinzugefügt.
+				Noch keine Bewerbende hinzugefügt.
 			</p>
 		);
 	}
@@ -177,7 +177,7 @@ function ParticipantsTableContent({
 										<AlertDialogContent size="sm">
 											<AlertDialogHeader>
 												<AlertDialogTitle>
-													Teilnehmer entfernen?
+													Bewerbende entfernen?
 												</AlertDialogTitle>
 												<AlertDialogDescription>
 													{p.name} wird dauerhaft aus diesem Assessment Center
@@ -233,7 +233,7 @@ function EditParticipantDialog({
 	const updateMutation = api.participant.update.useMutation({
 		onSuccess: async () => {
 			await utils.participant.listByAc.invalidate({ acId });
-			toast.success("Teilnehmer aktualisiert");
+			toast.success("Bewerbende aktualisiert");
 			onClose();
 		},
 		onError: (error) => toast.error(error.message),
@@ -262,7 +262,7 @@ function EditParticipantDialog({
 		>
 			<DialogContent>
 				<DialogHeader>
-					<DialogTitle>Teilnehmer bearbeiten</DialogTitle>
+					<DialogTitle>Bewerbende bearbeiten</DialogTitle>
 				</DialogHeader>
 				<form id="edit-participant-form" onSubmit={handleSubmit}>
 					<FieldGroup>
@@ -331,7 +331,7 @@ function AddParticipantForm({ acId, utils }: AddFormProps) {
 			setName("");
 			setEmail("");
 			setShowForm(false);
-			toast.success("Teilnehmer hinzugefügt");
+			toast.success("Bewerbende hinzugefügt");
 		},
 		onError: (error) => toast.error(error.message),
 	});
@@ -353,14 +353,14 @@ function AddParticipantForm({ acId, utils }: AddFormProps) {
 		return (
 			<Button onClick={() => setShowForm(true)} type="button" variant="outline">
 				<PlusIcon className="mr-2 h-4 w-4" />
-				Teilnehmer hinzufügen
+				Bewerbende hinzufügen
 			</Button>
 		);
 	}
 
 	return (
 		<form className="rounded-lg border bg-muted/30 p-4" onSubmit={handleSubmit}>
-			<p className="mb-4 font-medium text-sm">Neuer Teilnehmer</p>
+			<p className="mb-4 font-medium text-sm">Neue Bewerbende</p>
 			<FieldGroup>
 				<Field>
 					<FieldLabel htmlFor="add-name">Name</FieldLabel>
