@@ -1,4 +1,5 @@
 import { MDXRemote } from "next-mdx-remote/rsc";
+import { rehypeCollapsibleH1 } from "@/lib/rehype-collapsible-h1";
 import { getReviewRatingFormData, ReviewRatingForm } from "@/modules/review";
 
 type Props = {
@@ -10,7 +11,10 @@ export default async function AcReviewRatingPage({ params }: Props) {
 	const data = await getReviewRatingFormData(id, taskId, participantId);
 
 	const instructionsContent = data.task.instructions ? (
-		<MDXRemote source={data.task.instructions} />
+		<MDXRemote
+			options={{ mdxOptions: { rehypePlugins: [rehypeCollapsibleH1] } }}
+			source={data.task.instructions}
+		/>
 	) : undefined;
 
 	return (
