@@ -123,7 +123,7 @@ export const groupRouter = createTRPCRouter({
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Nur Admins können Teilnehmer zuweisen",
+					message: "Nur Admins können Bewerbende zuweisen",
 				});
 			}
 
@@ -159,7 +159,7 @@ export const groupRouter = createTRPCRouter({
 			if (!participant) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Teilnehmer nicht gefunden",
+					message: "Bewerbende nicht gefunden",
 				});
 			}
 
@@ -198,7 +198,7 @@ export const groupRouter = createTRPCRouter({
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
 					code: "FORBIDDEN",
-					message: "Nur Admins können Teilnehmer entfernen",
+					message: "Nur Admins können Bewerbende entfernen",
 				});
 			}
 
@@ -234,7 +234,7 @@ export const groupRouter = createTRPCRouter({
 			if (!participant) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
-					message: "Teilnehmer nicht gefunden",
+					message: "Bewerbende nicht gefunden",
 				});
 			}
 
