@@ -51,6 +51,7 @@ export const taskRouter = createTRPCRouter({
 					id: true,
 					name: true,
 					description: true,
+					instructions: true,
 					isTeamTask: true,
 					criteriaGroups: {
 						where: { deletedAt: null },
@@ -137,6 +138,7 @@ export const taskRouter = createTRPCRouter({
 				acId: z.string(),
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
+				instructions: z.string().trim().optional(),
 				isTeamTask: z.boolean(),
 			}),
 		)
@@ -176,9 +178,10 @@ export const taskRouter = createTRPCRouter({
 				data: {
 					name: input.name,
 					description: input.description ?? null,
+					instructions: input.instructions ?? null,
 					isTeamTask: input.isTeamTask,
 				},
-				select: { id: true, name: true, description: true, isTeamTask: true },
+				select: { id: true, name: true, description: true, instructions: true, isTeamTask: true },
 			});
 		}),
 
