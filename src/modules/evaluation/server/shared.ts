@@ -1,7 +1,3 @@
-export function roundScore(value: number) {
-	return Number(value.toFixed(2));
-}
-
 export function getCompletedCriteriaCount(input: {
 	quantitativeRatings: Array<{ criteriaId: string }>;
 	qualitativeRatings: Array<{ criteriaId: string }>;

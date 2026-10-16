@@ -1,7 +1,10 @@
 import "server-only";
 
 import { db } from "@/server/db";
-import { roundScore } from "./shared";
+import {
+	computeWeightedCriteriaScore,
+	type WeightedCriterion,
+} from "./scoring";
 
 export type ReviewerGroupScore = {
 	axisId: string;
@@ -23,14 +26,12 @@ export type ReviewerBreakdownData = {
 	reviewers: ReviewerEntry[];
 };
 
-type CriterionDefinition = { id: string; weight: number };
-
 type GroupDefinition = {
 	axisId: string;
 	taskName: string;
 	criteriaGroupTitle: string;
 	taskId: string;
-	criteria: CriterionDefinition[];
+	criteria: WeightedCriterion[];
 };
 
 function buildGroupDefinitions(
@@ -65,26 +66,6 @@ function buildGroupDefinitions(
 			];
 		}),
 	);
-}
-
-function computeGroupScore(
-	ratings: Array<{ criteriaId: string; value: number }>,
-	group: GroupDefinition,
-): number | null {
-	let weightedSum = 0;
-	let weightSum = 0;
-
-	for (const criterion of group.criteria) {
-		const rating = ratings.find((r) => r.criteriaId === criterion.id);
-		if (rating === undefined) {
-			continue;
-		}
-
-		weightedSum += rating.value * criterion.weight;
-		weightSum += criterion.weight;
-	}
-
-	return weightSum === 0 ? null : roundScore(weightedSum / weightSum);
 }
 
 export async function getParticipantReviewerBreakdown(
@@ -181,7 +162,7 @@ export async function getParticipantReviewerBreakdown(
 				const ratings = reviewer.ratingsByTask.get(group.taskId) ?? [];
 				return {
 					axisId: group.axisId,
-					score: computeGroupScore(ratings, group),
+					score: computeWeightedCriteriaScore(group.criteria, [ratings]),
 				};
 			}),
 		}),

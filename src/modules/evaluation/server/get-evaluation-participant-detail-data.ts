@@ -10,7 +10,7 @@ import {
 	buildParticipantDashboardSnapshot,
 	parseParticipantDashboardSnapshot,
 } from "./participant-dashboard-snapshot";
-import { roundScore } from "./shared";
+import { computeWeightedMean, roundScore } from "./scoring";
 
 type FactorFilter = "ALL" | "COMPETENCE" | "POTENTIAL";
 
@@ -90,20 +90,9 @@ function buildWeightedAverage(
 	}>,
 	key: "participantScore" | "benchmarkScore",
 ) {
-	let weightedValueSum = 0;
-	let weightSum = 0;
-
-	for (const group of groups) {
-		const score = group[key];
-		if (score === null || group.weightTotal <= 0) {
-			continue;
-		}
-
-		weightedValueSum += score * group.weightTotal;
-		weightSum += group.weightTotal;
-	}
-
-	return weightSum === 0 ? null : roundScore(weightedValueSum / weightSum);
+	return computeWeightedMean(
+		groups.map((group) => ({ score: group[key], weight: group.weightTotal })),
+	);
 }
 
 function buildViews(

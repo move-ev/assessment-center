@@ -2,7 +2,12 @@ import "server-only";
 
 import { z } from "zod";
 import { db } from "@/server/db";
-import { isAssignmentComplete, roundScore } from "./shared";
+import {
+	computeWeightedCriteriaScore,
+	computeWeightedMean,
+	roundScore,
+} from "./scoring";
+import { isAssignmentComplete } from "./shared";
 
 const factorTypeSchema = z.enum(["COMPETENCE", "POTENTIAL"]);
 
@@ -192,65 +197,30 @@ function buildTaskLookup(taskDefinitions: TaskDefinition[]) {
 	return new Map(taskDefinitions.map((task) => [task.id, task]));
 }
 
-function getCriterionAverage(
-	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
-	taskId: string,
-	criteriaId: string,
-) {
-	const values = assignments.flatMap((assignment) => {
-		if (assignment.taskId !== taskId) {
-			return [];
-		}
-
-		return assignment.quantitativeRatings
-			.filter((rating) => rating.criteriaId === criteriaId)
-			.map((rating) => rating.value);
-	});
-
-	if (values.length === 0) {
-		return null;
-	}
-
-	return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
 function buildParticipantGroupScores(
 	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
 	taskDefinitions: TaskDefinition[],
 ) {
-	return taskDefinitions.flatMap((task) =>
-		task.quantitativeGroups.map((group) => {
-			let weightedValueSum = 0;
-			let weightSum = 0;
+	return taskDefinitions.flatMap((task) => {
+		const ratingSets = assignments
+			.filter((assignment) => assignment.taskId === task.id)
+			.map((assignment) => assignment.quantitativeRatings);
 
-			for (const criterion of group.criteria) {
-				const criterionAverage = getCriterionAverage(
-					assignments,
-					task.id,
-					criterion.id,
-				);
-				if (criterionAverage === null) {
-					continue;
-				}
-
-				weightedValueSum += criterionAverage * criterion.weight;
-				weightSum += criterion.weight;
-			}
-
-			return {
-				axisId: group.axisId,
-				taskId: group.taskId,
-				taskName: group.taskName,
-				criteriaGroupId: group.criteriaGroupId,
-				criteriaGroupTitle: group.criteriaGroupTitle,
-				factorType: group.factorType,
-				criteriaCount: group.criteriaCount,
-				weightTotal: group.weightTotal,
-				participantScore:
-					weightSum === 0 ? null : roundScore(weightedValueSum / weightSum),
-			};
-		}),
-	);
+		return task.quantitativeGroups.map((group) => ({
+			axisId: group.axisId,
+			taskId: group.taskId,
+			taskName: group.taskName,
+			criteriaGroupId: group.criteriaGroupId,
+			criteriaGroupTitle: group.criteriaGroupTitle,
+			factorType: group.factorType,
+			criteriaCount: group.criteriaCount,
+			weightTotal: group.weightTotal,
+			participantScore: computeWeightedCriteriaScore(
+				group.criteria,
+				ratingSets,
+			),
+		}));
+	});
 }
 
 function buildBenchmarkScores(
@@ -289,19 +259,12 @@ function buildOverallScore(
 		weightTotal: number;
 	}>,
 ) {
-	let weightedValueSum = 0;
-	let weightSum = 0;
-
-	for (const group of groups) {
-		if (group.participantScore === null || group.weightTotal <= 0) {
-			continue;
-		}
-
-		weightedValueSum += group.participantScore * group.weightTotal;
-		weightSum += group.weightTotal;
-	}
-
-	return weightSum === 0 ? null : roundScore(weightedValueSum / weightSum);
+	return computeWeightedMean(
+		groups.map((group) => ({
+			score: group.participantScore,
+			weight: group.weightTotal,
+		})),
+	);
 }
 
 function buildParticipantDashboardSnapshotDocument(source: SnapshotSource) {
