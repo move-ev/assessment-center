@@ -16,6 +16,7 @@
 		"postinstall": "prisma generate",
 		"preview": "next build && next start",
 		"start": "next start",
+		"test": "node --test \"src/**/*.test.ts\"",
 		"typecheck": "tsc --noEmit",
 		"auth:generate": "auth migrate --config src/server/better-auth/index.ts"
 	},
