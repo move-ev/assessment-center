@@ -71,9 +71,12 @@ function InputOTPSlot({
 
 function InputOTPSeparator({ ...props }: React.ComponentProps<"div">) {
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: static visual separator between OTP groups; an hr would change styling
+		// biome-ignore lint/a11y/useFocusableInteractive: static visual separator, not an interactive splitter
 		<div
 			className="flex items-center [&_svg:not([class*='size-'])]:size-4"
 			data-slot="input-otp-separator"
+			// biome-ignore lint/a11y/useAriaPropsForRole: static separator needs no aria-valuenow; that is only required for focusable splitters
 			role="separator"
 			{...props}
 		>

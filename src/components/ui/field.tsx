@@ -74,6 +74,7 @@ function Field({
 	...props
 }: React.ComponentProps<"div"> & VariantProps<typeof fieldVariants>) {
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: valid ARIA role kept from shadcn/ui; switching to the native element would change default browser styling
 		<div
 			className={cn(fieldVariants({ orientation }), className)}
 			data-orientation={orientation}
@@ -193,15 +194,15 @@ function FieldError({
 			...new Map(errors.map((error) => [error?.message, error])).values(),
 		];
 
-		if (uniqueErrors?.length == 1) {
+		if (uniqueErrors?.length === 1) {
 			return uniqueErrors[0]?.message;
 		}
 
 		return (
 			<ul className="ml-4 flex list-disc flex-col gap-1">
 				{uniqueErrors.map(
-					(error, index) =>
-						error?.message && <li key={index}>{error.message}</li>,
+					(error) =>
+						error?.message && <li key={error.message}>{error.message}</li>,
 				)}
 			</ul>
 		);

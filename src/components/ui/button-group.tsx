@@ -27,6 +27,7 @@ function ButtonGroup({
 	...props
 }: React.ComponentProps<"div"> & VariantProps<typeof buttonGroupVariants>) {
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: valid ARIA role kept from shadcn/ui; switching to the native element would change default browser styling
 		<div
 			className={cn(buttonGroupVariants({ orientation }), className)}
 			data-orientation={orientation}

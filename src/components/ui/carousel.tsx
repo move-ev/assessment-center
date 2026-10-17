@@ -117,6 +117,7 @@ function Carousel({
 				canScrollNext,
 			}}
 		>
+			{/* biome-ignore lint/a11y/useSemanticElements: valid ARIA role kept from shadcn/ui; switching to the native element would change default browser styling */}
 			<div
 				aria-roledescription="carousel"
 				className={cn("relative", className)}
@@ -156,6 +157,7 @@ function CarouselItem({ className, ...props }: React.ComponentProps<"div">) {
 	const { orientation } = useCarousel();
 
 	return (
+		// biome-ignore lint/a11y/useSemanticElements: valid ARIA role kept from shadcn/ui; switching to the native element would change default browser styling
 		<div
 			aria-roledescription="slide"
 			className={cn(
