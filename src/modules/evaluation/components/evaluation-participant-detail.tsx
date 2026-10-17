@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { ArrowLeft, Users } from "lucide-react";
+import Link from "next/link";
 import {
 	Card,
 	CardContent,
@@ -36,7 +36,7 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 		<div className="space-y-6 p-6">
 			<div className="space-y-5">
 				<Link
-					className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+					className="inline-flex items-center gap-1.5 text-muted-foreground text-sm transition-colors hover:text-foreground"
 					href={ROUTES.acResults(acId)}
 				>
 					<ArrowLeft className="h-3.5 w-3.5" />
@@ -45,14 +45,14 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 
 				<div className="flex items-start justify-between gap-4">
 					<div className="flex items-center gap-4">
-						<div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
+						<div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-muted font-semibold text-muted-foreground text-sm">
 							{initials}
 						</div>
 						<div>
 							<h1 className="font-semibold text-2xl tracking-tight">
 								{data.participant.name}
 							</h1>
-							<p className="mt-0.5 text-sm text-muted-foreground">
+							<p className="mt-0.5 text-muted-foreground text-sm">
 								{data.participant.groupName ?? "Keine Gruppe"} ·{" "}
 								{completedAssignmentCount} / {totalAssignmentCount} Bewertungen
 								abgeschlossen
@@ -62,7 +62,7 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 
 					{overallScore !== null && (
 						<div className="shrink-0 text-right">
-							<p className="text-xs text-muted-foreground">Gesamtwert</p>
+							<p className="text-muted-foreground text-xs">Gesamtwert</p>
 							<p className="font-bold text-3xl tabular-nums">
 								{overallScore.toFixed(2)}
 							</p>
@@ -129,7 +129,9 @@ function TeamObservationsSection({
 									<p className="font-medium text-sm">{task.taskName}</p>
 									<p className="text-muted-foreground text-xs">
 										{task.entries.length}{" "}
-										{task.entries.length === 1 ? "Beobachtung" : "Beobachtungen"}
+										{task.entries.length === 1
+											? "Beobachtung"
+											: "Beobachtungen"}
 									</p>
 								</div>
 								<ul className="space-y-3">

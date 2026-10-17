@@ -1,11 +1,8 @@
 "use client";
 
+import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { PlusIcon, Trash2Icon, XIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Field, FieldLabel } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -17,6 +14,9 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Field, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { api } from "@/trpc/react";
 
 type Participant = { id: string; name: string };
@@ -83,15 +83,15 @@ function AcGroupsEditor({ acId }: Props) {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h2 className="text-base font-medium">Gruppen</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h2 className="font-medium text-base">Gruppen</h2>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Bewerbende in Gruppen einteilen. Jede/r Bewerbende gehört genau einer
 					Gruppe an.
 				</p>
 			</div>
 
 			{groups.length === 0 ? (
-				<p className="text-sm text-muted-foreground">
+				<p className="text-muted-foreground text-sm">
 					Noch keine Gruppen erstellt.
 				</p>
 			) : (
@@ -105,19 +105,19 @@ function AcGroupsEditor({ acId }: Props) {
 
 						return (
 							<GroupCard
-								key={group.id}
-								group={group}
 								availableParticipants={availableForGroup}
-								onRemoveGroup={() =>
-									removeGroupMutation.mutate({ id: group.id, acId })
-								}
+								group={group}
+								isRemoving={removeGroupMutation.isPending}
+								key={group.id}
 								onAssign={(participantId) =>
 									assignMutation.mutate({ groupId: group.id, participantId })
+								}
+								onRemoveGroup={() =>
+									removeGroupMutation.mutate({ id: group.id, acId })
 								}
 								onUnassign={(participantId) =>
 									unassignMutation.mutate({ groupId: group.id, participantId })
 								}
-								isRemoving={removeGroupMutation.isPending}
 							/>
 						);
 					})}
@@ -126,14 +126,14 @@ function AcGroupsEditor({ acId }: Props) {
 
 			{unassignedParticipants.length > 0 && (
 				<div className="rounded-lg border border-dashed px-4 py-3">
-					<p className="text-sm font-medium text-muted-foreground">
+					<p className="font-medium text-muted-foreground text-sm">
 						Nicht zugewiesen ({unassignedParticipants.length})
 					</p>
 					<ul className="mt-2 flex flex-wrap gap-2">
 						{unassignedParticipants.map((p) => (
 							<li
-								key={p.id}
 								className="rounded-md border bg-background px-2 py-1 text-xs"
+								key={p.id}
 							>
 								{p.name}
 							</li>
@@ -144,8 +144,8 @@ function AcGroupsEditor({ acId }: Props) {
 
 			<AddGroupForm
 				acId={acId}
-				onCreate={(name) => createGroupMutation.mutate({ acId, name })}
 				isPending={createGroupMutation.isPending}
+				onCreate={(name) => createGroupMutation.mutate({ acId, name })}
 			/>
 		</div>
 	);
@@ -175,15 +175,15 @@ function GroupCard({
 	return (
 		<div className="rounded-lg border bg-card">
 			<div className="flex items-center justify-between border-b px-4 py-3">
-				<p className="text-sm font-medium">{group.name}</p>
+				<p className="font-medium text-sm">{group.name}</p>
 				<AlertDialog>
 					<AlertDialogTrigger
 						render={
 							<Button
-								variant="ghost"
-								size="icon-sm"
-								disabled={isRemoving}
 								aria-label="Gruppe löschen"
+								disabled={isRemoving}
+								size="icon-sm"
+								variant="ghost"
 							>
 								<Trash2Icon className="h-4 w-4" />
 							</Button>
@@ -193,13 +193,13 @@ function GroupCard({
 						<AlertDialogHeader>
 							<AlertDialogTitle>Gruppe löschen?</AlertDialogTitle>
 							<AlertDialogDescription>
-								Die Gruppe &ldquo;{group.name}&rdquo; und alle Zuweisungen werden
-								entfernt.
+								Die Gruppe &ldquo;{group.name}&rdquo; und alle Zuweisungen
+								werden entfernt.
 							</AlertDialogDescription>
 						</AlertDialogHeader>
 						<AlertDialogFooter>
 							<AlertDialogCancel>Abbrechen</AlertDialogCancel>
-							<AlertDialogAction variant="destructive" onClick={onRemoveGroup}>
+							<AlertDialogAction onClick={onRemoveGroup} variant="destructive">
 								Löschen
 							</AlertDialogAction>
 						</AlertDialogFooter>
@@ -209,20 +209,20 @@ function GroupCard({
 
 			<div className="px-4 py-3">
 				{group.memberships.length === 0 ? (
-					<p className="text-sm text-muted-foreground">Keine Mitglieder</p>
+					<p className="text-muted-foreground text-sm">Keine Mitglieder</p>
 				) : (
 					<ul className="flex flex-wrap gap-2">
 						{group.memberships.map((m) => (
 							<li
+								className="flex items-center gap-1 rounded-md border bg-secondary px-2 py-1 font-medium text-xs"
 								key={m.participantId}
-								className="flex items-center gap-1 rounded-md border bg-secondary px-2 py-1 text-xs font-medium"
 							>
 								{m.participant.name}
 								<button
-									type="button"
-									onClick={() => onUnassign(m.participantId)}
-									className="ml-1 rounded text-muted-foreground hover:text-foreground"
 									aria-label={`${m.participant.name} entfernen`}
+									className="ml-1 rounded text-muted-foreground hover:text-foreground"
+									onClick={() => onUnassign(m.participantId)}
+									type="button"
 								>
 									<XIcon className="h-3 w-3" />
 								</button>
@@ -234,18 +234,18 @@ function GroupCard({
 				{unassignedForGroup.length > 0 && (
 					<div className="mt-3">
 						<label
+							className="text-muted-foreground text-xs"
 							htmlFor={`assign-${group.id}`}
-							className="text-xs text-muted-foreground"
 						>
 							Bewerbende zuweisen
 						</label>
 						<select
-							id={`assign-${group.id}`}
 							className="mt-1 block w-full max-w-xs rounded-md border bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-							value=""
+							id={`assign-${group.id}`}
 							onChange={(e) => {
 								if (e.target.value) onAssign(e.target.value);
 							}}
+							value=""
 						>
 							<option value="">Bewerbende wählen…</option>
 							{unassignedForGroup.map((p) => (
@@ -281,7 +281,7 @@ function AddGroupForm({ onCreate, isPending }: AddGroupFormProps) {
 
 	if (!showForm) {
 		return (
-			<Button type="button" variant="outline" onClick={() => setShowForm(true)}>
+			<Button onClick={() => setShowForm(true)} type="button" variant="outline">
 				<PlusIcon className="mr-2 h-4 w-4" />
 				Gruppe hinzufügen
 			</Button>
@@ -289,33 +289,30 @@ function AddGroupForm({ onCreate, isPending }: AddGroupFormProps) {
 	}
 
 	return (
-		<form
-			onSubmit={handleSubmit}
-			className="rounded-lg border bg-muted/30 p-4"
-		>
-			<p className="mb-4 text-sm font-medium">Neue Gruppe</p>
+		<form className="rounded-lg border bg-muted/30 p-4" onSubmit={handleSubmit}>
+			<p className="mb-4 font-medium text-sm">Neue Gruppe</p>
 			<Field>
 				<FieldLabel htmlFor="group-name">Gruppenname</FieldLabel>
 				<Input
-					id="group-name"
-					value={name}
-					onChange={(e) => setName(e.target.value)}
 					disabled={isPending}
+					id="group-name"
+					onChange={(e) => setName(e.target.value)}
 					placeholder="z. B. Gruppe A"
 					required
+					value={name}
 				/>
 			</Field>
 			<div className="mt-4 flex gap-2">
-				<Button type="submit" disabled={isPending || name.trim() === ""}>
+				<Button disabled={isPending || name.trim() === ""} type="submit">
 					{isPending ? "Erstellen..." : "Erstellen"}
 				</Button>
 				<Button
-					type="button"
-					variant="ghost"
 					onClick={() => {
 						setShowForm(false);
 						setName("");
 					}}
+					type="button"
+					variant="ghost"
 				>
 					Abbrechen
 				</Button>
@@ -328,7 +325,7 @@ function GroupsEditorSkeleton() {
 	return (
 		<div className="space-y-3">
 			{[1, 2].map((i) => (
-				<div key={i} className="h-24 animate-pulse rounded-lg bg-muted" />
+				<div className="h-24 animate-pulse rounded-lg bg-muted" key={i} />
 			))}
 		</div>
 	);

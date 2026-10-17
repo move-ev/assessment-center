@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation";
-import { AcSetupHub } from "@/modules/assessment-center";
 import { ROUTES } from "@/lib/routes";
+import { AcSetupHub } from "@/modules/assessment-center";
 import { getSession } from "@/server/better-auth/server";
 import { db } from "@/server/db";
 

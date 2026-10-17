@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
 import { ROUTES } from "@/lib/routes";
+import { cn } from "@/lib/utils";
 
 type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 
@@ -55,13 +55,13 @@ function AcNav({ acId, isAdmin, acStatus }: Props) {
 					return (
 						<li key={item.href}>
 							<Link
-								href={item.href}
 								className={cn(
-									"inline-block border-b-2 px-3 py-3 text-sm font-medium transition-colors",
+									"inline-block border-b-2 px-3 py-3 font-medium text-sm transition-colors",
 									isActive
 										? "border-primary text-foreground"
 										: "border-transparent text-muted-foreground hover:text-foreground",
 								)}
+								href={item.href}
 							>
 								{item.label}
 							</Link>

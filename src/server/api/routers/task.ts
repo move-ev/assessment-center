@@ -181,7 +181,13 @@ export const taskRouter = createTRPCRouter({
 					instructions: input.instructions ?? null,
 					isTeamTask: input.isTeamTask,
 				},
-				select: { id: true, name: true, description: true, instructions: true, isTeamTask: true },
+				select: {
+					id: true,
+					name: true,
+					description: true,
+					instructions: true,
+					isTeamTask: true,
+				},
 			});
 		}),
 
