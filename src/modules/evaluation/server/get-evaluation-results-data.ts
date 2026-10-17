@@ -2,7 +2,14 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 import { db } from "@/server/db";
-import { isAssignmentComplete, roundScore } from "./shared";
+import {
+	computeWeightedCriteriaScore,
+	computeWeightedMean,
+	roundScore,
+	type WeightedCriterion,
+	type WeightedScore,
+} from "./scoring";
+import { isAssignmentComplete } from "./shared";
 
 type QuantitativeRatingRecord = {
 	criteriaId: string;
@@ -279,6 +286,16 @@ function buildCriterionResults(data: QueryResult) {
 	});
 }
 
+function getScoredCriteria(
+	taskDefinition: TaskDefinition,
+): WeightedCriterion[] {
+	return taskDefinition.criteria.flatMap((criterion) =>
+		criterion.type === "QUANTITATIVE" && criterion.weight !== null
+			? [{ id: criterion.id, weight: criterion.weight }]
+			: [],
+	);
+}
+
 function buildParticipantTaskResult(
 	assignments: AssignmentRecord[],
 	taskDefinition: TaskDefinition,
@@ -288,11 +305,6 @@ function buildParticipantTaskResult(
 		return null;
 	}
 
-	const quantitativeCriteria = taskDefinition.criteria.filter(
-		(criteria) => criteria.type === "QUANTITATIVE" && criteria.weight !== null,
-	);
-	let weightedValueSum = 0;
-	let weightSum = 0;
 	let completedAssignments = 0;
 	let qualitativeEntries = 0;
 
@@ -302,32 +314,6 @@ function buildParticipantTaskResult(
 		}
 
 		qualitativeEntries += assignment.qualitativeRatings.length;
-	}
-
-	for (const criteria of quantitativeCriteria) {
-		const values: number[] = [];
-
-		for (const assignment of assignments) {
-			for (const rating of assignment.quantitativeRatings) {
-				if (rating.criteriaId === criteria.id) {
-					values.push(rating.value);
-				}
-			}
-		}
-
-		if (values.length === 0) {
-			continue;
-		}
-
-		const weight = criteria.weight;
-		if (weight === null) {
-			continue;
-		}
-
-		const averageValue =
-			values.reduce((sum, value) => sum + value, 0) / values.length;
-		weightedValueSum += averageValue * weight;
-		weightSum += weight;
 	}
 
 	const teamObservationCount = groupId
@@ -340,7 +326,10 @@ function buildParticipantTaskResult(
 		taskId: taskDefinition.id,
 		taskName: taskDefinition.name,
 		isTeamTask: taskDefinition.isTeamTask,
-		score: weightSum === 0 ? null : roundScore(weightedValueSum / weightSum),
+		score: computeWeightedCriteriaScore(
+			getScoredCriteria(taskDefinition),
+			assignments.map((assignment) => assignment.quantitativeRatings),
+		),
 		totalAssignments: assignments.length,
 		completedAssignments,
 		qualitativeEntries,
@@ -394,8 +383,7 @@ function buildParticipantResults(
 			.filter((result) => result !== null);
 
 		const sortedTaskResults = sortParticipantTaskResults(taskResults);
-		let weightedScoreSum = 0;
-		let weightedScoreWeight = 0;
+		const weightedTaskScores: WeightedScore[] = [];
 		let completedTaskCount = 0;
 		let completedAssignmentCount = 0;
 		let totalAssignmentCount = 0;
@@ -413,24 +401,17 @@ function buildParticipantResults(
 			}
 
 			const taskDefinition = taskLookup.get(taskResult.taskId);
-			const quantitativeWeight = taskDefinition?.criteria.reduce(
-				(sum, criteria) => {
-					const weight = criteria.weight;
-					if (criteria.type !== "QUANTITATIVE" || weight === null) {
-						return sum;
-					}
+			const quantitativeWeight = taskDefinition
+				? getScoredCriteria(taskDefinition).reduce(
+						(sum, criterion) => sum + criterion.weight,
+						0,
+					)
+				: 0;
 
-					return sum + weight;
-				},
-				0,
-			);
-
-			if (taskResult.score === null || !quantitativeWeight) {
-				continue;
-			}
-
-			weightedScoreSum += taskResult.score * quantitativeWeight;
-			weightedScoreWeight += quantitativeWeight;
+			weightedTaskScores.push({
+				score: taskResult.score,
+				weight: quantitativeWeight,
+			});
 		}
 
 		participants.push({
@@ -438,10 +419,7 @@ function buildParticipantResults(
 			name: participant.name,
 			groupId: group?.id ?? null,
 			groupName: group?.name ?? null,
-			overallScore:
-				weightedScoreWeight === 0
-					? null
-					: roundScore(weightedScoreSum / weightedScoreWeight),
+			overallScore: computeWeightedMean(weightedTaskScores),
 			completedTaskCount,
 			totalTaskCount: sortedTaskResults.length,
 			completedAssignmentCount,
