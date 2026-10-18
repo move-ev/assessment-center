@@ -15,20 +15,17 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import type { ReviewerBreakdownData } from "../server/get-participant-reviewer-breakdown";
+import { formatScore } from "./format-score";
 
-function formatScore(value: number | null): string {
-	return value === null ? "–" : value.toFixed(2);
-}
-
-function getScoreForAxis(
+function getScoreForTask(
 	scores: ReviewerBreakdownData["reviewers"][number]["scores"],
-	axisId: string,
+	taskId: string,
 ): number | null {
-	return scores.find((s) => s.axisId === axisId)?.score ?? null;
+	return scores.find((s) => s.taskId === taskId)?.score ?? null;
 }
 
 function ReviewerBreakdownCard({ data }: { data: ReviewerBreakdownData }) {
-	if (data.reviewers.length === 0 || data.axisGroups.length === 0) {
+	if (data.reviewers.length === 0 || data.tasks.length === 0) {
 		return null;
 	}
 
@@ -40,7 +37,7 @@ function ReviewerBreakdownCard({ data }: { data: ReviewerBreakdownData }) {
 					Bewertungen nach Beobachter
 				</CardTitle>
 				<CardDescription>
-					Einzelwertung je Beobachter und Kriteriengruppe
+					Teil-Score je Aufgabe aus den Bewertungen eines Beobachters
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -48,7 +45,7 @@ function ReviewerBreakdownCard({ data }: { data: ReviewerBreakdownData }) {
 					<Table>
 						<TableHeader>
 							<TableRow>
-								<TableHead className="min-w-48">Kriteriengruppe</TableHead>
+								<TableHead className="min-w-48">Aufgabe</TableHead>
 								{data.reviewers.map((reviewer) => (
 									<TableHead
 										className="min-w-28 text-right"
@@ -60,21 +57,11 @@ function ReviewerBreakdownCard({ data }: { data: ReviewerBreakdownData }) {
 							</TableRow>
 						</TableHeader>
 						<TableBody>
-							{data.axisGroups.map((group) => (
-								<TableRow key={group.axisId}>
-									<TableCell>
-										<p className="font-medium text-sm">
-											{group.criteriaGroupTitle}
-										</p>
-										<p className="text-muted-foreground text-xs">
-											{group.taskName}
-										</p>
-									</TableCell>
+							{data.tasks.map((task) => (
+								<TableRow key={task.taskId}>
+									<TableCell className="font-medium">{task.taskName}</TableCell>
 									{data.reviewers.map((reviewer) => {
-										const score = getScoreForAxis(
-											reviewer.scores,
-											group.axisId,
-										);
+										const score = getScoreForTask(reviewer.scores, task.taskId);
 										return (
 											<TableCell
 												className="text-right font-mono tabular-nums"

@@ -39,10 +39,7 @@ type TaskDefinition = {
 		type: "QUANTITATIVE" | "QUALITATIVE";
 		weight: number | null;
 		isOptional: boolean;
-		criteriaGroup: {
-			title: string;
-			factorType: "POTENTIAL" | "COMPETENCE";
-		};
+		criteriaGroup: { title: string };
 	}>;
 	teamObservations: Array<{
 		groupId: string;
@@ -62,6 +59,8 @@ type ParticipantTaskResult = {
 	taskId: string;
 	taskName: string;
 	isTeamTask: boolean;
+	/** Weight of the task in the overall score. */
+	scoreWeight: number;
 	score: number | null;
 	totalAssignments: number;
 	completedAssignments: number;
@@ -105,7 +104,6 @@ export type EvaluationCriterionResult = {
 	taskId: string;
 	taskName: string;
 	criteriaGroupTitle: string;
-	criteriaGroupFactorType: "POTENTIAL" | "COMPETENCE";
 	name: string;
 	type: "QUANTITATIVE" | "QUALITATIVE";
 	weight: number | null;
@@ -156,12 +154,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 							type: true,
 							weight: true,
 							isOptional: true,
-							criteriaGroup: {
-								select: {
-									title: true,
-									factorType: true,
-								},
-							},
+							criteriaGroup: { select: { title: true } },
 						},
 						orderBy: { createdAt: "asc" },
 					},
@@ -268,7 +261,6 @@ function buildCriterionResults(data: QueryResult) {
 				taskId: task.id,
 				taskName: task.name,
 				criteriaGroupTitle: criteria.criteriaGroup.title,
-				criteriaGroupFactorType: criteria.criteriaGroup.factorType,
 				name: criteria.name,
 				type: criteria.type,
 				weight: criteria.weight,
@@ -327,6 +319,7 @@ function buildParticipantTaskResult(
 		taskId: taskDefinition.id,
 		taskName: taskDefinition.name,
 		isTeamTask: taskDefinition.isTeamTask,
+		scoreWeight: taskDefinition.scoreWeight,
 		score: computeWeightedCriteriaScore(
 			getScoredCriteria(taskDefinition.criteria),
 			assignments.map((assignment) => assignment.quantitativeRatings),
@@ -403,7 +396,7 @@ function buildParticipantResults(
 
 			weightedTaskScores.push({
 				score: taskResult.score,
-				weight: taskLookup.get(taskResult.taskId)?.scoreWeight ?? 0,
+				weight: taskResult.scoreWeight,
 			});
 		}
 
