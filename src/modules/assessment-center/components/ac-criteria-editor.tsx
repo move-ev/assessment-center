@@ -40,7 +40,6 @@ import {
 import { api } from "@/trpc/react";
 
 type CriteriaType = "QUANTITATIVE" | "QUALITATIVE";
-type CriteriaGroupFactorType = "POTENTIAL" | "COMPETENCE";
 
 type Criterion = {
 	id: string;
@@ -57,7 +56,6 @@ type Criterion = {
 type CriteriaGroup = {
 	id: string;
 	title: string;
-	factorType: CriteriaGroupFactorType;
 	criteria: Criterion[];
 };
 
@@ -229,17 +227,9 @@ function CriteriaGroupCard({
 	return (
 		<div className="space-y-3 rounded-xl border bg-card p-4">
 			<div className="flex flex-wrap items-start justify-between gap-3">
-				<div className="space-y-1">
-					<div className="flex flex-wrap items-center gap-2">
-						<h4 className="font-medium text-sm">{group.title}</h4>
-						<GroupFactorBadge factorType={group.factorType} />
-						<Badge variant="outline">{group.criteria.length} Kriterien</Badge>
-					</div>
-					<p className="text-muted-foreground text-xs">
-						{group.factorType === "POTENTIAL"
-							? "Potenzial-Faktoren"
-							: "Kompetenz-Faktoren"}
-					</p>
+				<div className="flex flex-wrap items-center gap-2">
+					<h4 className="font-medium text-sm">{group.title}</h4>
+					<Badge variant="outline">{group.criteria.length} Kriterien</Badge>
 				</div>
 				<div className="flex shrink-0 gap-1">
 					<Button
@@ -414,9 +404,6 @@ function CriteriaGroupDialog({
 	group,
 }: CriteriaGroupDialogProps) {
 	const [title, setTitle] = useState(group?.title ?? "");
-	const [factorType, setFactorType] = useState<CriteriaGroupFactorType>(
-		group?.factorType ?? "COMPETENCE",
-	);
 	const isEditing = group !== undefined;
 
 	const createMutation = api.task.addCriteriaGroup.useMutation({
@@ -451,7 +438,6 @@ function CriteriaGroupDialog({
 				taskId,
 				acId,
 				title,
-				factorType,
 			});
 			return;
 		}
@@ -460,7 +446,6 @@ function CriteriaGroupDialog({
 			taskId,
 			acId,
 			title,
-			factorType,
 		});
 	}
 
@@ -495,22 +480,6 @@ function CriteriaGroupDialog({
 									errors={zodErrors.title.map((message) => ({ message }))}
 								/>
 							) : null}
-						</Field>
-						<Field>
-							<FieldLabel htmlFor="criteria-group-factor-type">
-								Gruppentyp
-							</FieldLabel>
-							<NativeSelect
-								disabled={mutation.isPending}
-								id="criteria-group-factor-type"
-								onChange={(e) =>
-									setFactorType(e.target.value as CriteriaGroupFactorType)
-								}
-								value={factorType}
-							>
-								<option value="COMPETENCE">Kompetenz-Faktoren</option>
-								<option value="POTENTIAL">Potenzial-Faktoren</option>
-							</NativeSelect>
 						</Field>
 					</FieldGroup>
 				</form>
@@ -651,7 +620,7 @@ function CriterionDialog({
 							>
 								{criteriaGroups.map((group) => (
 									<option key={group.id} value={group.id}>
-										{group.title} ({getFactorTypeLabel(group.factorType)})
+										{group.title}
 									</option>
 								))}
 							</NativeSelect>
@@ -792,18 +761,6 @@ function AnchorField({ stars, value, onChange, disabled }: AnchorFieldProps) {
 	);
 }
 
-function GroupFactorBadge({
-	factorType,
-}: {
-	factorType: CriteriaGroupFactorType;
-}) {
-	return (
-		<Badge variant={factorType === "POTENTIAL" ? "secondary" : "outline"}>
-			{getFactorTypeLabel(factorType)}
-		</Badge>
-	);
-}
-
 function NativeSelect(props: SelectHTMLAttributes<HTMLSelectElement>) {
 	return (
 		<select
@@ -811,10 +768,6 @@ function NativeSelect(props: SelectHTMLAttributes<HTMLSelectElement>) {
 			className="block w-full rounded-md border bg-background px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
 		/>
 	);
-}
-
-function getFactorTypeLabel(factorType: CriteriaGroupFactorType) {
-	return factorType === "POTENTIAL" ? "Potenzial" : "Kompetenz";
 }
 
 export { AcCriteriaEditor };

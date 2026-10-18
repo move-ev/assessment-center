@@ -24,11 +24,3 @@ export const CriteriaType = {
 } as const
 
 export type CriteriaType = (typeof CriteriaType)[keyof typeof CriteriaType]
-
-
-export const CriteriaGroupFactorType = {
-  POTENTIAL: 'POTENTIAL',
-  COMPETENCE: 'COMPETENCE'
-} as const
-
-export type CriteriaGroupFactorType = (typeof CriteriaGroupFactorType)[keyof typeof CriteriaGroupFactorType]

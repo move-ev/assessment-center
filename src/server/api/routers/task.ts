@@ -6,7 +6,6 @@ import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 const LOCKED_MSG =
 	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
-const criteriaGroupFactorTypeSchema = z.enum(["POTENTIAL", "COMPETENCE"]);
 /** Anchor text under the rating scale; blank means no anchor. */
 const anchorTextSchema = z.string().trim().max(RATING_ANCHOR_MAX_LENGTH);
 
@@ -73,7 +72,6 @@ export const taskRouter = createTRPCRouter({
 						select: {
 							id: true,
 							title: true,
-							factorType: true,
 							criteria: {
 								where: { deletedAt: null },
 								select: {
@@ -287,7 +285,6 @@ export const taskRouter = createTRPCRouter({
 				taskId: z.string(),
 				acId: z.string(),
 				title: z.string().trim().min(1, "Titel ist erforderlich"),
-				factorType: criteriaGroupFactorTypeSchema,
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -322,16 +319,8 @@ export const taskRouter = createTRPCRouter({
 			}
 
 			return ctx.db.reviewCriteriaGroup.create({
-				data: {
-					taskId: input.taskId,
-					title: input.title,
-					factorType: input.factorType,
-				},
-				select: {
-					id: true,
-					title: true,
-					factorType: true,
-				},
+				data: { taskId: input.taskId, title: input.title },
+				select: { id: true, title: true },
 			});
 		}),
 
@@ -342,7 +331,6 @@ export const taskRouter = createTRPCRouter({
 				taskId: z.string(),
 				acId: z.string(),
 				title: z.string().trim().min(1, "Titel ist erforderlich"),
-				factorType: criteriaGroupFactorTypeSchema,
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -381,15 +369,8 @@ export const taskRouter = createTRPCRouter({
 
 			return ctx.db.reviewCriteriaGroup.update({
 				where: { id: input.id },
-				data: {
-					title: input.title,
-					factorType: input.factorType,
-				},
-				select: {
-					id: true,
-					title: true,
-					factorType: true,
-				},
+				data: { title: input.title },
+				select: { id: true, title: true },
 			});
 		}),
 

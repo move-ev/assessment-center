@@ -79,7 +79,6 @@ type TaskData = {
 	criteriaGroups: Array<{
 		id: string;
 		title: string;
-		factorType: "POTENTIAL" | "COMPETENCE";
 		criteria: Array<{
 			id: string;
 			criteriaGroupId: string;

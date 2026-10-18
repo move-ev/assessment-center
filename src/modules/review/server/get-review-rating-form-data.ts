@@ -23,7 +23,6 @@ export type ReviewRatingFormData = {
 	criteriaGroups: Array<{
 		id: string;
 		title: string;
-		factorType: "POTENTIAL" | "COMPETENCE";
 		criteria: Array<
 			| {
 					id: string;
@@ -79,7 +78,6 @@ export async function getReviewRatingFormData(
 						select: {
 							id: true,
 							title: true,
-							factorType: true,
 							criteria: {
 								where: { deletedAt: null },
 								select: {
@@ -174,7 +172,6 @@ export async function getReviewRatingFormData(
 		criteriaGroups: assignment.task.criteriaGroups.map((group) => ({
 			id: group.id,
 			title: group.title,
-			factorType: group.factorType,
 			criteria: group.criteria.map((criteria) => {
 				if (criteria.type === "QUANTITATIVE") {
 					const rating = quantitativeRatings.get(criteria.id);
