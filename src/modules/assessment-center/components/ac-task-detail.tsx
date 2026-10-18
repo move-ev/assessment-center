@@ -75,6 +75,7 @@ type TaskData = {
 	description: string | null;
 	instructions: string | null;
 	isTeamTask: boolean;
+	scoreWeight: number;
 	criteriaGroups: Array<{
 		id: string;
 		title: string;
@@ -102,6 +103,10 @@ function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 	const [description, setDescription] = useState(task.description ?? "");
 	const [instructions, setInstructions] = useState(task.instructions ?? "");
 	const [isTeamTask, setIsTeamTask] = useState(task.isTeamTask);
+	const [scoreWeight, setScoreWeight] = useState(task.scoreWeight.toString());
+	const parsedScoreWeight = Number.parseFloat(scoreWeight);
+	const isScoreWeightValid =
+		Number.isFinite(parsedScoreWeight) && parsedScoreWeight > 0;
 
 	const updateMutation = api.task.update.useMutation({
 		onSuccess: async () => {
@@ -125,6 +130,7 @@ function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 			description: description.trim() !== "" ? description : undefined,
 			instructions: instructions.trim() !== "" ? instructions : undefined,
 			isTeamTask,
+			scoreWeight: parsedScoreWeight,
 		});
 	}
 
@@ -191,10 +197,35 @@ function TaskEditForm({ acId, task, utils }: TaskEditFormProps) {
 						Bewerbende bearbeiten diese Aufgabe gemeinsam als Gruppe.
 					</p>
 				</Field>
+				<Field>
+					<FieldLabel htmlFor="task-score-weight">Teil-Gewicht</FieldLabel>
+					<Input
+						disabled={updateMutation.isPending}
+						id="task-score-weight"
+						min="0.01"
+						onChange={(e) => setScoreWeight(e.target.value)}
+						required
+						step="0.01"
+						type="number"
+						value={scoreWeight}
+					/>
+					<p className="text-muted-foreground text-xs">
+						Gewicht dieser Aufgabe im Gesamtscore, z. B. 0,5 / 1 / 1,5.
+					</p>
+					{zodErrors?.scoreWeight && (
+						<FieldError
+							errors={zodErrors.scoreWeight.map((m) => ({ message: m }))}
+						/>
+					)}
+				</Field>
 			</FieldGroup>
 			<div className="mt-6">
 				<Button
-					disabled={updateMutation.isPending || name.trim() === ""}
+					disabled={
+						updateMutation.isPending ||
+						name.trim() === "" ||
+						!isScoreWeightValid
+					}
 					type="submit"
 				>
 					{updateMutation.isPending ? "Speichert..." : "Speichern"}

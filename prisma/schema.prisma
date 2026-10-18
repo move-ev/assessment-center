@@ -236,6 +236,9 @@ model Task {
   description        String?
   instructions       String?
   isTeamTask         Boolean          @default(false)
+  /// Weight of this task in the overall score (e.g. 0.5 / 1 / 1.5). Must be > 0.
+  /// Enforced via check constraint in migration.
+  scoreWeight        Float            @default(1)
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
   deletedAt          DateTime?

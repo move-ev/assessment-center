@@ -20,8 +20,18 @@ export type TaskModel = runtime.Types.Result.DefaultSelection<Prisma.$TaskPayloa
 
 export type AggregateTask = {
   _count: TaskCountAggregateOutputType | null
+  _avg: TaskAvgAggregateOutputType | null
+  _sum: TaskSumAggregateOutputType | null
   _min: TaskMinAggregateOutputType | null
   _max: TaskMaxAggregateOutputType | null
+}
+
+export type TaskAvgAggregateOutputType = {
+  scoreWeight: number | null
+}
+
+export type TaskSumAggregateOutputType = {
+  scoreWeight: number | null
 }
 
 export type TaskMinAggregateOutputType = {
@@ -31,6 +41,7 @@ export type TaskMinAggregateOutputType = {
   description: string | null
   instructions: string | null
   isTeamTask: boolean | null
+  scoreWeight: number | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -43,6 +54,7 @@ export type TaskMaxAggregateOutputType = {
   description: string | null
   instructions: string | null
   isTeamTask: boolean | null
+  scoreWeight: number | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -55,12 +67,21 @@ export type TaskCountAggregateOutputType = {
   description: number
   instructions: number
   isTeamTask: number
+  scoreWeight: number
   createdAt: number
   updatedAt: number
   deletedAt: number
   _all: number
 }
 
+
+export type TaskAvgAggregateInputType = {
+  scoreWeight?: true
+}
+
+export type TaskSumAggregateInputType = {
+  scoreWeight?: true
+}
 
 export type TaskMinAggregateInputType = {
   id?: true
@@ -69,6 +90,7 @@ export type TaskMinAggregateInputType = {
   description?: true
   instructions?: true
   isTeamTask?: true
+  scoreWeight?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -81,6 +103,7 @@ export type TaskMaxAggregateInputType = {
   description?: true
   instructions?: true
   isTeamTask?: true
+  scoreWeight?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -93,6 +116,7 @@ export type TaskCountAggregateInputType = {
   description?: true
   instructions?: true
   isTeamTask?: true
+  scoreWeight?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -137,6 +161,18 @@ export type TaskAggregateArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: TaskAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: TaskSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: TaskMinAggregateInputType
@@ -167,6 +203,8 @@ export type TaskGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
   take?: number
   skip?: number
   _count?: TaskCountAggregateInputType | true
+  _avg?: TaskAvgAggregateInputType
+  _sum?: TaskSumAggregateInputType
   _min?: TaskMinAggregateInputType
   _max?: TaskMaxAggregateInputType
 }
@@ -178,10 +216,13 @@ export type TaskGroupByOutputType = {
   description: string | null
   instructions: string | null
   isTeamTask: boolean
+  scoreWeight: number
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
   _count: TaskCountAggregateOutputType | null
+  _avg: TaskAvgAggregateOutputType | null
+  _sum: TaskSumAggregateOutputType | null
   _min: TaskMinAggregateOutputType | null
   _max: TaskMaxAggregateOutputType | null
 }
@@ -211,6 +252,7 @@ export type TaskWhereInput = {
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   instructions?: Prisma.StringNullableFilter<"Task"> | string | null
   isTeamTask?: Prisma.BoolFilter<"Task"> | boolean
+  scoreWeight?: Prisma.FloatFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
@@ -229,6 +271,7 @@ export type TaskOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   instructions?: Prisma.SortOrderInput | Prisma.SortOrder
   isTeamTask?: Prisma.SortOrder
+  scoreWeight?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -250,6 +293,7 @@ export type TaskWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   instructions?: Prisma.StringNullableFilter<"Task"> | string | null
   isTeamTask?: Prisma.BoolFilter<"Task"> | boolean
+  scoreWeight?: Prisma.FloatFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
@@ -268,12 +312,15 @@ export type TaskOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   instructions?: Prisma.SortOrderInput | Prisma.SortOrder
   isTeamTask?: Prisma.SortOrder
+  scoreWeight?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.TaskCountOrderByAggregateInput
+  _avg?: Prisma.TaskAvgOrderByAggregateInput
   _max?: Prisma.TaskMaxOrderByAggregateInput
   _min?: Prisma.TaskMinOrderByAggregateInput
+  _sum?: Prisma.TaskSumOrderByAggregateInput
 }
 
 export type TaskScalarWhereWithAggregatesInput = {
@@ -286,6 +333,7 @@ export type TaskScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   instructions?: Prisma.StringNullableWithAggregatesFilter<"Task"> | string | null
   isTeamTask?: Prisma.BoolWithAggregatesFilter<"Task"> | boolean
+  scoreWeight?: Prisma.FloatWithAggregatesFilter<"Task"> | number
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Task"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Task"> | Date | string | null
@@ -297,6 +345,7 @@ export type TaskCreateInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -315,6 +364,7 @@ export type TaskUncheckedCreateInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -331,6 +381,7 @@ export type TaskUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -349,6 +400,7 @@ export type TaskUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -366,6 +418,7 @@ export type TaskCreateManyInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -377,6 +430,7 @@ export type TaskUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -389,6 +443,7 @@ export type TaskUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -411,9 +466,14 @@ export type TaskCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   isTeamTask?: Prisma.SortOrder
+  scoreWeight?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+}
+
+export type TaskAvgOrderByAggregateInput = {
+  scoreWeight?: Prisma.SortOrder
 }
 
 export type TaskMaxOrderByAggregateInput = {
@@ -423,6 +483,7 @@ export type TaskMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   isTeamTask?: Prisma.SortOrder
+  scoreWeight?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -435,9 +496,14 @@ export type TaskMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   instructions?: Prisma.SortOrder
   isTeamTask?: Prisma.SortOrder
+  scoreWeight?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+}
+
+export type TaskSumOrderByAggregateInput = {
+  scoreWeight?: Prisma.SortOrder
 }
 
 export type TaskScalarRelationFilter = {
@@ -485,6 +551,14 @@ export type TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput = {
   update?: Prisma.TaskUpdateWithWhereUniqueWithoutAssessmentCenterInput | Prisma.TaskUpdateWithWhereUniqueWithoutAssessmentCenterInput[]
   updateMany?: Prisma.TaskUpdateManyWithWhereWithoutAssessmentCenterInput | Prisma.TaskUpdateManyWithWhereWithoutAssessmentCenterInput[]
   deleteMany?: Prisma.TaskScalarWhereInput | Prisma.TaskScalarWhereInput[]
+}
+
+export type FloatFieldUpdateOperationsInput = {
+  set?: number
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
 }
 
 export type TaskCreateNestedOneWithoutScheduleEntriesInput = {
@@ -563,6 +637,7 @@ export type TaskCreateWithoutAssessmentCenterInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -579,6 +654,7 @@ export type TaskUncheckedCreateWithoutAssessmentCenterInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -625,6 +701,7 @@ export type TaskScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Task"> | string | null
   instructions?: Prisma.StringNullableFilter<"Task"> | string | null
   isTeamTask?: Prisma.BoolFilter<"Task"> | boolean
+  scoreWeight?: Prisma.FloatFilter<"Task"> | number
   createdAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Task"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Task"> | Date | string | null
@@ -636,6 +713,7 @@ export type TaskCreateWithoutScheduleEntriesInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -653,6 +731,7 @@ export type TaskUncheckedCreateWithoutScheduleEntriesInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -684,6 +763,7 @@ export type TaskUpdateWithoutScheduleEntriesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -701,6 +781,7 @@ export type TaskUncheckedUpdateWithoutScheduleEntriesInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -716,6 +797,7 @@ export type TaskCreateWithoutCriteriaGroupsInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -733,6 +815,7 @@ export type TaskUncheckedCreateWithoutCriteriaGroupsInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -764,6 +847,7 @@ export type TaskUpdateWithoutCriteriaGroupsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -781,6 +865,7 @@ export type TaskUncheckedUpdateWithoutCriteriaGroupsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -796,6 +881,7 @@ export type TaskCreateWithoutCriteriaInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -813,6 +899,7 @@ export type TaskUncheckedCreateWithoutCriteriaInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -844,6 +931,7 @@ export type TaskUpdateWithoutCriteriaInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -861,6 +949,7 @@ export type TaskUncheckedUpdateWithoutCriteriaInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -876,6 +965,7 @@ export type TaskCreateWithoutReviewerAssignmentsInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -893,6 +983,7 @@ export type TaskUncheckedCreateWithoutReviewerAssignmentsInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -924,6 +1015,7 @@ export type TaskUpdateWithoutReviewerAssignmentsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -941,6 +1033,7 @@ export type TaskUncheckedUpdateWithoutReviewerAssignmentsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -956,6 +1049,7 @@ export type TaskCreateWithoutTeamObservationsInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -973,6 +1067,7 @@ export type TaskUncheckedCreateWithoutTeamObservationsInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1004,6 +1099,7 @@ export type TaskUpdateWithoutTeamObservationsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1021,6 +1117,7 @@ export type TaskUncheckedUpdateWithoutTeamObservationsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1036,6 +1133,7 @@ export type TaskCreateManyAssessmentCenterInput = {
   description?: string | null
   instructions?: string | null
   isTeamTask?: boolean
+  scoreWeight?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1047,6 +1145,7 @@ export type TaskUpdateWithoutAssessmentCenterInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1063,6 +1162,7 @@ export type TaskUncheckedUpdateWithoutAssessmentCenterInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1079,6 +1179,7 @@ export type TaskUncheckedUpdateManyWithoutAssessmentCenterInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   instructions?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isTeamTask?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scoreWeight?: Prisma.FloatFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1158,6 +1259,7 @@ export type TaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   description?: boolean
   instructions?: boolean
   isTeamTask?: boolean
+  scoreWeight?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1177,6 +1279,7 @@ export type TaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   instructions?: boolean
   isTeamTask?: boolean
+  scoreWeight?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1190,6 +1293,7 @@ export type TaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   description?: boolean
   instructions?: boolean
   isTeamTask?: boolean
+  scoreWeight?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1203,12 +1307,13 @@ export type TaskSelectScalar = {
   description?: boolean
   instructions?: boolean
   isTeamTask?: boolean
+  scoreWeight?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "description" | "instructions" | "isTeamTask" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["task"]>
+export type TaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "description" | "instructions" | "isTeamTask" | "scoreWeight" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["task"]>
 export type TaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
   criteriaGroups?: boolean | Prisma.Task$criteriaGroupsArgs<ExtArgs>
@@ -1242,6 +1347,11 @@ export type $TaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     description: string | null
     instructions: string | null
     isTeamTask: boolean
+    /**
+     * Weight of this task in the overall score (e.g. 0.5 / 1 / 1.5). Must be > 0.
+     * Enforced via check constraint in migration.
+     */
+    scoreWeight: number
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1680,6 +1790,7 @@ export interface TaskFieldRefs {
   readonly description: Prisma.FieldRef<"Task", 'String'>
   readonly instructions: Prisma.FieldRef<"Task", 'String'>
   readonly isTeamTask: Prisma.FieldRef<"Task", 'Boolean'>
+  readonly scoreWeight: Prisma.FieldRef<"Task", 'Float'>
   readonly createdAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Task", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Task", 'DateTime'>

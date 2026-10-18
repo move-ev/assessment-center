@@ -57,6 +57,18 @@ describe("computeWeightedMean", () => {
 		assert.equal(computeWeightedMean(entries), 3.5);
 	});
 
+	it("weights task scores by task weight, as in the assessment matrix", () => {
+		// Selbstpräsentation 0,5 · Gruppencase 1 · Einzelinterview 1,5
+		const entries = [
+			{ score: 90, weight: 0.5 },
+			{ score: 80, weight: 1 },
+			{ score: 70, weight: 1.5 },
+		];
+
+		// (45 + 80 + 105) / 3 = 76.666… → 76.67
+		assert.equal(computeWeightedMean(entries), 76.67);
+	});
+
 	it("returns null when no entry contributes", () => {
 		assert.equal(computeWeightedMean([]), null);
 		assert.equal(computeWeightedMean([{ score: null, weight: 2 }]), null);

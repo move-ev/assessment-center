@@ -30,6 +30,7 @@ export const taskRouter = createTRPCRouter({
 					name: true,
 					description: true,
 					isTeamTask: true,
+					scoreWeight: true,
 					_count: {
 						select: { criteria: { where: { deletedAt: null } } },
 					},
@@ -53,6 +54,7 @@ export const taskRouter = createTRPCRouter({
 					description: true,
 					instructions: true,
 					isTeamTask: true,
+					scoreWeight: true,
 					criteriaGroups: {
 						where: { deletedAt: null },
 						select: {
@@ -95,6 +97,10 @@ export const taskRouter = createTRPCRouter({
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
 				isTeamTask: z.boolean().default(false),
+				scoreWeight: z
+					.number()
+					.positive("Gewicht muss größer als 0 sein")
+					.default(1),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -127,8 +133,15 @@ export const taskRouter = createTRPCRouter({
 					name: input.name,
 					description: input.description ?? null,
 					isTeamTask: input.isTeamTask,
+					scoreWeight: input.scoreWeight,
 				},
-				select: { id: true, name: true, description: true, isTeamTask: true },
+				select: {
+					id: true,
+					name: true,
+					description: true,
+					isTeamTask: true,
+					scoreWeight: true,
+				},
 			});
 		}),
 
@@ -141,6 +154,7 @@ export const taskRouter = createTRPCRouter({
 				description: z.string().trim().optional(),
 				instructions: z.string().trim().optional(),
 				isTeamTask: z.boolean(),
+				scoreWeight: z.number().positive("Gewicht muss größer als 0 sein"),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -181,6 +195,7 @@ export const taskRouter = createTRPCRouter({
 					description: input.description ?? null,
 					instructions: input.instructions ?? null,
 					isTeamTask: input.isTeamTask,
+					scoreWeight: input.scoreWeight,
 				},
 				select: {
 					id: true,
@@ -188,6 +203,7 @@ export const taskRouter = createTRPCRouter({
 					description: true,
 					instructions: true,
 					isTeamTask: true,
+					scoreWeight: true,
 				},
 			});
 		}),

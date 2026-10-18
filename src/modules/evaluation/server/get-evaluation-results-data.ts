@@ -31,6 +31,7 @@ type TaskDefinition = {
 	id: string;
 	name: string;
 	isTeamTask: boolean;
+	scoreWeight: number;
 	criteria: Array<{
 		id: string;
 		name: string;
@@ -141,6 +142,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 					id: true,
 					name: true,
 					isTeamTask: true,
+					scoreWeight: true,
 					criteria: {
 						where: { deletedAt: null },
 						select: {
@@ -404,17 +406,9 @@ function buildParticipantResults(
 				completedTaskCount += 1;
 			}
 
-			const taskDefinition = taskLookup.get(taskResult.taskId);
-			const quantitativeWeight = taskDefinition
-				? getScoredCriteria(taskDefinition).reduce(
-						(sum, criterion) => sum + criterion.weight,
-						0,
-					)
-				: 0;
-
 			weightedTaskScores.push({
 				score: taskResult.score,
-				weight: quantitativeWeight,
+				weight: taskLookup.get(taskResult.taskId)?.scoreWeight ?? 0,
 			});
 		}
 

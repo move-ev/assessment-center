@@ -10,6 +10,7 @@ import {
 	computeWeightedCriteriaScore,
 	computeWeightedMean,
 	roundScore,
+	type WeightedCriterion,
 } from "./scoring";
 
 const factorTypeSchema = z.enum(["COMPETENCE", "POTENTIAL"]);
@@ -40,7 +41,9 @@ const participantDashboardParticipantSchema = z.object({
 });
 
 export const participantDashboardSnapshotSchema = z.object({
-	version: z.literal(1),
+	// v2: overall score weighted by task weight. Older snapshots fail to parse
+	// and are rebuilt from the (locked) ratings when read.
+	version: z.literal(2),
 	createdAt: z.string().datetime(),
 	participants: z.array(participantDashboardParticipantSchema),
 });
@@ -65,7 +68,10 @@ type QuantitativeGroupDefinition = {
 type TaskDefinition = {
 	id: string;
 	name: string;
+	scoreWeight: number;
 	criteria: CompletionCriterion[];
+	/** Same criteria, order and filter as the task score on the results page. */
+	scoredCriteria: WeightedCriterion[];
 	quantitativeGroups: QuantitativeGroupDefinition[];
 };
 
@@ -87,6 +93,7 @@ async function fetchParticipantDashboardSnapshotSource(acId: string) {
 				select: {
 					id: true,
 					name: true,
+					scoreWeight: true,
 					criteriaGroups: {
 						where: { deletedAt: null },
 						select: {
@@ -106,7 +113,8 @@ async function fetchParticipantDashboardSnapshotSource(acId: string) {
 					},
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true, type: true, isOptional: true },
+						select: { id: true, type: true, isOptional: true, weight: true },
+						orderBy: { createdAt: "asc" },
 					},
 				},
 				orderBy: { createdAt: "asc" },
@@ -162,7 +170,13 @@ function buildTaskDefinitions(source: SnapshotSource) {
 	return source.tasks.map((task) => ({
 		id: task.id,
 		name: task.name,
+		scoreWeight: task.scoreWeight,
 		criteria: task.criteria,
+		scoredCriteria: task.criteria.flatMap((criterion) =>
+			criterion.type === "QUANTITATIVE" && criterion.weight !== null
+				? [{ id: criterion.id, weight: criterion.weight }]
+				: [],
+		),
 		quantitativeGroups: task.criteriaGroups
 			.map((group) => {
 				const criteria = group.criteria.flatMap((criterion) => {
@@ -205,9 +219,7 @@ function buildParticipantGroupScores(
 	taskDefinitions: TaskDefinition[],
 ) {
 	return taskDefinitions.flatMap((task) => {
-		const ratingSets = assignments
-			.filter((assignment) => assignment.taskId === task.id)
-			.map((assignment) => assignment.quantitativeRatings);
+		const ratingSets = getTaskRatingSets(assignments, task.id);
 
 		return task.quantitativeGroups.map((group) => ({
 			axisId: group.axisId,
@@ -256,16 +268,27 @@ function buildBenchmarkScores(
 	);
 }
 
+function getTaskRatingSets(
+	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
+	taskId: string,
+) {
+	return assignments
+		.filter((assignment) => assignment.taskId === taskId)
+		.map((assignment) => assignment.quantitativeRatings);
+}
+
+/** Overall score: task scores weighted by task weight, as on the results page. */
 function buildOverallScore(
-	groups: Array<{
-		participantScore: number | null;
-		weightTotal: number;
-	}>,
+	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
+	taskDefinitions: TaskDefinition[],
 ) {
 	return computeWeightedMean(
-		groups.map((group) => ({
-			score: group.participantScore,
-			weight: group.weightTotal,
+		taskDefinitions.map((task) => ({
+			score: computeWeightedCriteriaScore(
+				task.scoredCriteria,
+				getTaskRatingSets(assignments, task.id),
+			),
+			weight: task.scoreWeight,
 		})),
 	);
 }
@@ -293,7 +316,10 @@ function buildParticipantDashboardSnapshotDocument(source: SnapshotSource) {
 			id: participant.id,
 			name: participant.name,
 			groupName: participant.groupMemberships[0]?.group.name ?? null,
-			overallScore: buildOverallScore(groups),
+			overallScore: buildOverallScore(
+				participant.reviewerAssignments,
+				taskDefinitions,
+			),
 			completedAssignmentCount,
 			totalAssignmentCount: participant.reviewerAssignments.length,
 			scoredGroupCount: groups.filter(
@@ -306,7 +332,7 @@ function buildParticipantDashboardSnapshotDocument(source: SnapshotSource) {
 	const benchmarkScores = buildBenchmarkScores(participants);
 
 	return participantDashboardSnapshotSchema.parse({
-		version: 1,
+		version: 2,
 		createdAt: new Date().toISOString(),
 		participants: participants.map((participant) => ({
 			...participant,
