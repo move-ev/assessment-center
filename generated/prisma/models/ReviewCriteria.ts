@@ -42,6 +42,7 @@ export type ReviewCriteriaMinAggregateOutputType = {
   description: string | null
   type: $Enums.CriteriaType | null
   weight: number | null
+  isOptional: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -55,6 +56,7 @@ export type ReviewCriteriaMaxAggregateOutputType = {
   description: string | null
   type: $Enums.CriteriaType | null
   weight: number | null
+  isOptional: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -68,6 +70,7 @@ export type ReviewCriteriaCountAggregateOutputType = {
   description: number
   type: number
   weight: number
+  isOptional: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -91,6 +94,7 @@ export type ReviewCriteriaMinAggregateInputType = {
   description?: true
   type?: true
   weight?: true
+  isOptional?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -104,6 +108,7 @@ export type ReviewCriteriaMaxAggregateInputType = {
   description?: true
   type?: true
   weight?: true
+  isOptional?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -117,6 +122,7 @@ export type ReviewCriteriaCountAggregateInputType = {
   description?: true
   type?: true
   weight?: true
+  isOptional?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -217,6 +223,7 @@ export type ReviewCriteriaGroupByOutputType = {
   description: string | null
   type: $Enums.CriteriaType
   weight: number | null
+  isOptional: boolean
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -253,6 +260,7 @@ export type ReviewCriteriaWhereInput = {
   description?: Prisma.StringNullableFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeFilter<"ReviewCriteria"> | $Enums.CriteriaType
   weight?: Prisma.FloatNullableFilter<"ReviewCriteria"> | number | null
+  isOptional?: Prisma.BoolFilter<"ReviewCriteria"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteria"> | Date | string | null
@@ -270,6 +278,7 @@ export type ReviewCriteriaOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
+  isOptional?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -290,6 +299,7 @@ export type ReviewCriteriaWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeFilter<"ReviewCriteria"> | $Enums.CriteriaType
   weight?: Prisma.FloatNullableFilter<"ReviewCriteria"> | number | null
+  isOptional?: Prisma.BoolFilter<"ReviewCriteria"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteria"> | Date | string | null
@@ -307,6 +317,7 @@ export type ReviewCriteriaOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   type?: Prisma.SortOrder
   weight?: Prisma.SortOrderInput | Prisma.SortOrder
+  isOptional?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -328,6 +339,7 @@ export type ReviewCriteriaScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeWithAggregatesFilter<"ReviewCriteria"> | $Enums.CriteriaType
   weight?: Prisma.FloatNullableWithAggregatesFilter<"ReviewCriteria"> | number | null
+  isOptional?: Prisma.BoolWithAggregatesFilter<"ReviewCriteria"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ReviewCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReviewCriteria"> | Date | string | null
@@ -339,6 +351,7 @@ export type ReviewCriteriaCreateInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -356,6 +369,7 @@ export type ReviewCriteriaUncheckedCreateInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -369,6 +383,7 @@ export type ReviewCriteriaUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -386,6 +401,7 @@ export type ReviewCriteriaUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -401,6 +417,7 @@ export type ReviewCriteriaCreateManyInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -412,6 +429,7 @@ export type ReviewCriteriaUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -425,6 +443,7 @@ export type ReviewCriteriaUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -448,6 +467,7 @@ export type ReviewCriteriaCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
   weight?: Prisma.SortOrder
+  isOptional?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -465,6 +485,7 @@ export type ReviewCriteriaMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
   weight?: Prisma.SortOrder
+  isOptional?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -478,6 +499,7 @@ export type ReviewCriteriaMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   type?: Prisma.SortOrder
   weight?: Prisma.SortOrder
+  isOptional?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -622,6 +644,7 @@ export type ReviewCriteriaCreateWithoutTaskInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -637,6 +660,7 @@ export type ReviewCriteriaUncheckedCreateWithoutTaskInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -681,6 +705,7 @@ export type ReviewCriteriaScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"ReviewCriteria"> | string | null
   type?: Prisma.EnumCriteriaTypeFilter<"ReviewCriteria"> | $Enums.CriteriaType
   weight?: Prisma.FloatNullableFilter<"ReviewCriteria"> | number | null
+  isOptional?: Prisma.BoolFilter<"ReviewCriteria"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteria"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteria"> | Date | string | null
@@ -692,6 +717,7 @@ export type ReviewCriteriaCreateWithoutCriteriaGroupInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -707,6 +733,7 @@ export type ReviewCriteriaUncheckedCreateWithoutCriteriaGroupInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -746,6 +773,7 @@ export type ReviewCriteriaCreateWithoutQuantitativeRatingsInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -762,6 +790,7 @@ export type ReviewCriteriaUncheckedCreateWithoutQuantitativeRatingsInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -790,6 +819,7 @@ export type ReviewCriteriaUpdateWithoutQuantitativeRatingsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -806,6 +836,7 @@ export type ReviewCriteriaUncheckedUpdateWithoutQuantitativeRatingsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -818,6 +849,7 @@ export type ReviewCriteriaCreateWithoutQualitativeRatingsInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -834,6 +866,7 @@ export type ReviewCriteriaUncheckedCreateWithoutQualitativeRatingsInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -862,6 +895,7 @@ export type ReviewCriteriaUpdateWithoutQualitativeRatingsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -878,6 +912,7 @@ export type ReviewCriteriaUncheckedUpdateWithoutQualitativeRatingsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -891,6 +926,7 @@ export type ReviewCriteriaCreateManyTaskInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -902,6 +938,7 @@ export type ReviewCriteriaUpdateWithoutTaskInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -917,6 +954,7 @@ export type ReviewCriteriaUncheckedUpdateWithoutTaskInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -931,6 +969,7 @@ export type ReviewCriteriaUncheckedUpdateManyWithoutTaskInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -943,6 +982,7 @@ export type ReviewCriteriaCreateManyCriteriaGroupInput = {
   description?: string | null
   type: $Enums.CriteriaType
   weight?: number | null
+  isOptional?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -954,6 +994,7 @@ export type ReviewCriteriaUpdateWithoutCriteriaGroupInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -969,6 +1010,7 @@ export type ReviewCriteriaUncheckedUpdateWithoutCriteriaGroupInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -983,6 +1025,7 @@ export type ReviewCriteriaUncheckedUpdateManyWithoutCriteriaGroupInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumCriteriaTypeFieldUpdateOperationsInput | $Enums.CriteriaType
   weight?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  isOptional?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1036,6 +1079,7 @@ export type ReviewCriteriaSelect<ExtArgs extends runtime.Types.Extensions.Intern
   description?: boolean
   type?: boolean
   weight?: boolean
+  isOptional?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1054,6 +1098,7 @@ export type ReviewCriteriaSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   description?: boolean
   type?: boolean
   weight?: boolean
+  isOptional?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1069,6 +1114,7 @@ export type ReviewCriteriaSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   description?: boolean
   type?: boolean
   weight?: boolean
+  isOptional?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -1084,12 +1130,13 @@ export type ReviewCriteriaSelectScalar = {
   description?: boolean
   type?: boolean
   weight?: boolean
+  isOptional?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type ReviewCriteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "criteriaGroupId" | "name" | "description" | "type" | "weight" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reviewCriteria"]>
+export type ReviewCriteriaOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "criteriaGroupId" | "name" | "description" | "type" | "weight" | "isOptional" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reviewCriteria"]>
 export type ReviewCriteriaInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   criteriaGroup?: boolean | Prisma.ReviewCriteriaGroupDefaultArgs<ExtArgs>
@@ -1126,6 +1173,12 @@ export type $ReviewCriteriaPayload<ExtArgs extends runtime.Types.Extensions.Inte
      * Null when type = QUALITATIVE.
      */
     weight: number | null
+    /**
+     * Optional criteria do not block completion of a rating sheet and only
+     * count towards the score when rated. Free-text (QUALITATIVE) criteria
+     * never block completion, regardless of this flag.
+     */
+    isOptional: boolean
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1563,6 +1616,7 @@ export interface ReviewCriteriaFieldRefs {
   readonly description: Prisma.FieldRef<"ReviewCriteria", 'String'>
   readonly type: Prisma.FieldRef<"ReviewCriteria", 'CriteriaType'>
   readonly weight: Prisma.FieldRef<"ReviewCriteria", 'Float'>
+  readonly isOptional: Prisma.FieldRef<"ReviewCriteria", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ReviewCriteria", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ReviewCriteria", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"ReviewCriteria", 'DateTime'>

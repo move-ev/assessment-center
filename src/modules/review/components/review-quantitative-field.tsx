@@ -23,6 +23,7 @@ type Props = {
 		name: string;
 		description: string | null;
 		weight: number;
+		isOptional: boolean;
 		value: number | null;
 	};
 	onPersisted: (criterionId: string, isComplete: boolean) => void;
@@ -118,7 +119,14 @@ function ReviewQuantitativeField({
 							</p>
 						)}
 					</div>
-					<Badge variant="outline">Gewichtung {criterion.weight}</Badge>
+					<div className="flex flex-wrap gap-2">
+						{criterion.isOptional ? (
+							<Badge variant="secondary">Optional</Badge>
+						) : (
+							<Badge variant="outline">Pflicht</Badge>
+						)}
+						<Badge variant="outline">Gewichtung {criterion.weight}</Badge>
+					</div>
 				</div>
 				<div className="flex flex-wrap gap-2">
 					{RATING_VALUES.map((rating) => (

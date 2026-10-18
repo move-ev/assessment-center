@@ -1,13 +1,16 @@
 import "server-only";
 
 import { z } from "zod";
+import {
+	type CompletionCriterion,
+	getAssignmentCompletion,
+} from "@/lib/review-completion";
 import { db } from "@/server/db";
 import {
 	computeWeightedCriteriaScore,
 	computeWeightedMean,
 	roundScore,
 } from "./scoring";
-import { isAssignmentComplete } from "./shared";
 
 const factorTypeSchema = z.enum(["COMPETENCE", "POTENTIAL"]);
 
@@ -62,7 +65,7 @@ type QuantitativeGroupDefinition = {
 type TaskDefinition = {
 	id: string;
 	name: string;
-	criteriaCount: number;
+	criteria: CompletionCriterion[];
 	quantitativeGroups: QuantitativeGroupDefinition[];
 };
 
@@ -103,7 +106,7 @@ async function fetchParticipantDashboardSnapshotSource(acId: string) {
 					},
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true },
+						select: { id: true, type: true, isOptional: true },
 					},
 				},
 				orderBy: { createdAt: "asc" },
@@ -159,7 +162,7 @@ function buildTaskDefinitions(source: SnapshotSource) {
 	return source.tasks.map((task) => ({
 		id: task.id,
 		name: task.name,
-		criteriaCount: task.criteria.length,
+		criteria: task.criteria,
 		quantitativeGroups: task.criteriaGroups
 			.map((group) => {
 				const criteria = group.criteria.flatMap((criterion) => {
@@ -282,7 +285,7 @@ function buildParticipantDashboardSnapshotDocument(source: SnapshotSource) {
 					return false;
 				}
 
-				return isAssignmentComplete(assignment, task.criteriaCount);
+				return getAssignmentCompletion(task.criteria, assignment).isComplete;
 			},
 		).length;
 

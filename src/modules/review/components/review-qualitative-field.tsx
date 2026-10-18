@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
@@ -76,7 +77,10 @@ function ReviewQualitativeField({
 	return (
 		<Card>
 			<CardHeader className="space-y-1">
-				<CardTitle className="text-base">{criterion.name}</CardTitle>
+				<div className="flex flex-wrap items-start justify-between gap-3">
+					<CardTitle className="text-base">{criterion.name}</CardTitle>
+					<Badge variant="secondary">Freitext · optional</Badge>
+				</div>
 				{criterion.description && (
 					<p className="text-muted-foreground text-sm">
 						{criterion.description}

@@ -38,7 +38,8 @@ function ReviewParticipantList({ acId, taskId, data }: Props) {
 				<h1 className="font-medium text-xl">{data.task.name}</h1>
 				<p className="text-muted-foreground text-sm">
 					{data.participants.length} Bewerbende zugewiesen,{" "}
-					{data.task.criteriaCount} Kriterien pro Bewertung.
+					{data.task.criteriaCount} Kriterien pro Bewertung, davon{" "}
+					{data.task.requiredCriteriaCount} Pflicht.
 				</p>
 			</header>
 
@@ -73,9 +74,9 @@ function ReviewParticipantList({ acId, taskId, data }: Props) {
 										</Badge>
 									</TableCell>
 									<TableCell className="text-muted-foreground">
-										{participant.criteriaCount === 0
+										{participant.requiredCriteriaCount === 0
 											? "–"
-											: `${participant.completedCriteriaCount} / ${participant.criteriaCount}`}
+											: `${participant.completedRequiredCount} / ${participant.requiredCriteriaCount} Pflicht`}
 									</TableCell>
 									<TableCell>
 										<Link

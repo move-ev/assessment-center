@@ -1,6 +1,10 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
+import {
+	type CompletionCriterion,
+	getAssignmentCompletion,
+} from "@/lib/review-completion";
 import { db } from "@/server/db";
 
 type AssignmentRecord = {
@@ -76,7 +80,7 @@ async function fetchOverviewSourceData(acId: string) {
 					isTeamTask: true,
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true },
+						select: { id: true, type: true, isOptional: true },
 					},
 				},
 				orderBy: { createdAt: "asc" },
@@ -132,21 +136,14 @@ async function fetchOverviewSourceData(acId: string) {
 	});
 }
 
-function getCompletedCriteriaCount(assignment: AssignmentRecord) {
-	const completedCriteriaIds = new Set<string>();
+type TaskLookupEntry = {
+	id: string;
+	name: string;
+	isTeamTask: boolean;
+	criteria: CompletionCriterion[];
+};
 
-	for (const rating of assignment.quantitativeRatings) {
-		completedCriteriaIds.add(rating.criteriaId);
-	}
-
-	for (const rating of assignment.qualitativeRatings) {
-		completedCriteriaIds.add(rating.criteriaId);
-	}
-
-	return completedCriteriaIds.size;
-}
-
-function buildTaskLookup(data: QueryResult) {
+function buildTaskLookup(data: QueryResult): Map<string, TaskLookupEntry> {
 	return new Map(
 		data.tasks.map((task) => [
 			task.id,
@@ -154,10 +151,23 @@ function buildTaskLookup(data: QueryResult) {
 				id: task.id,
 				name: task.name,
 				isTeamTask: task.isTeamTask,
-				criteriaCount: task.criteria.length,
+				criteria: task.criteria,
 			},
 		]),
 	);
+}
+
+function toGroupTaskOverview(
+	task: TaskLookupEntry,
+	scheduledDates: Date[],
+): GroupTaskOverview {
+	return {
+		id: task.id,
+		name: task.name,
+		isTeamTask: task.isTeamTask,
+		criteriaCount: task.criteria.length,
+		scheduledDates,
+	};
 }
 
 function buildGroupTaskMap(
@@ -181,10 +191,7 @@ function buildGroupTaskMap(
 				continue;
 			}
 
-			taskMap.set(task.id, {
-				...task,
-				scheduledDates: [entry.day.date],
-			});
+			taskMap.set(task.id, toGroupTaskOverview(task, [entry.day.date]));
 		}
 
 		taskMapByGroup.set(group.id, taskMap);
@@ -213,10 +220,7 @@ function getParticipantTaskSummaries(
 
 		currentSummary.totalAssignments += 1;
 
-		if (
-			task.criteriaCount > 0 &&
-			getCompletedCriteriaCount(assignment) >= task.criteriaCount
-		) {
+		if (getAssignmentCompletion(task.criteria, assignment).isComplete) {
 			currentSummary.completedAssignments += 1;
 		}
 
@@ -284,10 +288,7 @@ function buildGroups(
 					continue;
 				}
 
-				group.tasks.set(taskId, {
-					...task,
-					scheduledDates: [],
-				});
+				group.tasks.set(taskId, toGroupTaskOverview(task, []));
 			}
 		}
 
@@ -373,14 +374,14 @@ function buildSummary(
 
 			totalAssignments += 1;
 
-			if (task.criteriaCount === 0) {
+			if (task.criteria.length === 0) {
 				assignmentsWithoutCriteria += 1;
 				continue;
 			}
 
 			reviewableAssignments += 1;
 
-			if (getCompletedCriteriaCount(assignment) >= task.criteriaCount) {
+			if (getAssignmentCompletion(task.criteria, assignment).isComplete) {
 				completedAssignments += 1;
 			}
 		}

@@ -68,6 +68,7 @@ export const taskRouter = createTRPCRouter({
 									description: true,
 									type: true,
 									weight: true,
+									isOptional: true,
 								},
 								orderBy: { createdAt: "asc" },
 							},
@@ -422,6 +423,7 @@ export const taskRouter = createTRPCRouter({
 				description: z.string().trim().optional(),
 				type: criteriaTypeSchema,
 				weight: z.number().positive().optional(),
+				isOptional: z.boolean().default(false),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -470,6 +472,7 @@ export const taskRouter = createTRPCRouter({
 					description: input.description ?? null,
 					type: input.type,
 					weight: input.type === "QUANTITATIVE" ? (input.weight ?? null) : null,
+					isOptional: input.type === "QUANTITATIVE" && input.isOptional,
 				},
 				select: {
 					id: true,
@@ -478,6 +481,7 @@ export const taskRouter = createTRPCRouter({
 					description: true,
 					type: true,
 					weight: true,
+					isOptional: true,
 				},
 			});
 		}),
@@ -493,6 +497,7 @@ export const taskRouter = createTRPCRouter({
 				description: z.string().trim().optional(),
 				type: criteriaTypeSchema,
 				weight: z.number().positive().optional(),
+				isOptional: z.boolean(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -556,6 +561,7 @@ export const taskRouter = createTRPCRouter({
 					description: input.description ?? null,
 					type: input.type,
 					weight: input.type === "QUANTITATIVE" ? (input.weight ?? null) : null,
+					isOptional: input.type === "QUANTITATIVE" && input.isOptional,
 				},
 				select: {
 					id: true,
@@ -564,6 +570,7 @@ export const taskRouter = createTRPCRouter({
 					description: true,
 					type: true,
 					weight: true,
+					isOptional: true,
 				},
 			});
 		}),

@@ -2,7 +2,7 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 import { db } from "@/server/db";
-import { getCompletedCriteriaCount, getReviewSession } from "./shared";
+import { getReviewSession } from "./shared";
 
 export type ReviewRatingFormData = {
 	task: {
@@ -20,10 +20,6 @@ export type ReviewRatingFormData = {
 			name: string;
 		} | null;
 	};
-	progress: {
-		completedCriteriaCount: number;
-		totalCriteriaCount: number;
-	};
 	criteriaGroups: Array<{
 		id: string;
 		title: string;
@@ -35,6 +31,7 @@ export type ReviewRatingFormData = {
 					description: string | null;
 					type: "QUANTITATIVE";
 					weight: number;
+					isOptional: boolean;
 					value: number | null;
 			  }
 			| {
@@ -89,6 +86,7 @@ export async function getReviewRatingFormData(
 									description: true,
 									type: true,
 									weight: true,
+									isOptional: true,
 								},
 								orderBy: { createdAt: "asc" },
 							},
@@ -169,13 +167,6 @@ export async function getReviewRatingFormData(
 			name: assignment.participant.name,
 			group,
 		},
-		progress: {
-			completedCriteriaCount: getCompletedCriteriaCount(assignment),
-			totalCriteriaCount: assignment.task.criteriaGroups.reduce(
-				(count, group) => count + group.criteria.length,
-				0,
-			),
-		},
 		criteriaGroups: assignment.task.criteriaGroups.map((group) => ({
 			id: group.id,
 			title: group.title,
@@ -189,6 +180,7 @@ export async function getReviewRatingFormData(
 						description: criteria.description,
 						type: "QUANTITATIVE" as const,
 						weight: criteria.weight ?? 0,
+						isOptional: criteria.isOptional,
 						value: rating?.value ?? null,
 					};
 				}
