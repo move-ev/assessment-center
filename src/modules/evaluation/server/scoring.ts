@@ -7,6 +7,25 @@ export type WeightedCriterion = {
 	weight: number;
 };
 
+/**
+ * The criteria that make up a task score: quantitative criteria with a
+ * weight. Callers pass the task's non-deleted criteria ordered by creation,
+ * so every page sums the same weights in the same order.
+ */
+export function getScoredCriteria(
+	criteria: Array<{
+		id: string;
+		type: "QUANTITATIVE" | "QUALITATIVE";
+		weight: number | null;
+	}>,
+): WeightedCriterion[] {
+	return criteria.flatMap((criterion) =>
+		criterion.type === "QUANTITATIVE" && criterion.weight !== null
+			? [{ id: criterion.id, weight: criterion.weight }]
+			: [],
+	);
+}
+
 export type CriterionRating = {
 	criteriaId: string;
 	value: number;

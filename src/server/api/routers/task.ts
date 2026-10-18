@@ -6,6 +6,8 @@ const LOCKED_MSG =
 	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 const criteriaGroupFactorTypeSchema = z.enum(["POTENTIAL", "COMPETENCE"]);
+/** Weight of a task in the overall score; mirrors the DB check constraint. */
+const scoreWeightSchema = z.number().positive("Gewicht muss größer als 0 sein");
 
 function assertCriteriaWeight(
 	type: z.infer<typeof criteriaTypeSchema>,
@@ -97,10 +99,7 @@ export const taskRouter = createTRPCRouter({
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
 				isTeamTask: z.boolean().default(false),
-				scoreWeight: z
-					.number()
-					.positive("Gewicht muss größer als 0 sein")
-					.default(1),
+				scoreWeight: scoreWeightSchema.default(1),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -154,7 +153,7 @@ export const taskRouter = createTRPCRouter({
 				description: z.string().trim().optional(),
 				instructions: z.string().trim().optional(),
 				isTeamTask: z.boolean(),
-				scoreWeight: z.number().positive("Gewicht muss größer als 0 sein"),
+				scoreWeight: scoreWeightSchema,
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {

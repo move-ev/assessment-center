@@ -6,8 +6,8 @@ import { db } from "@/server/db";
 import {
 	computeWeightedCriteriaScore,
 	computeWeightedMean,
+	getScoredCriteria,
 	roundScore,
-	type WeightedCriterion,
 	type WeightedScore,
 } from "./scoring";
 
@@ -290,16 +290,6 @@ function buildCriterionResults(data: QueryResult) {
 	});
 }
 
-function getScoredCriteria(
-	taskDefinition: TaskDefinition,
-): WeightedCriterion[] {
-	return taskDefinition.criteria.flatMap((criterion) =>
-		criterion.type === "QUANTITATIVE" && criterion.weight !== null
-			? [{ id: criterion.id, weight: criterion.weight }]
-			: [],
-	);
-}
-
 function buildParticipantTaskResult(
 	assignments: AssignmentRecord[],
 	taskDefinition: TaskDefinition,
@@ -333,7 +323,7 @@ function buildParticipantTaskResult(
 		taskName: taskDefinition.name,
 		isTeamTask: taskDefinition.isTeamTask,
 		score: computeWeightedCriteriaScore(
-			getScoredCriteria(taskDefinition),
+			getScoredCriteria(taskDefinition.criteria),
 			assignments.map((assignment) => assignment.quantitativeRatings),
 		),
 		totalAssignments: assignments.length,

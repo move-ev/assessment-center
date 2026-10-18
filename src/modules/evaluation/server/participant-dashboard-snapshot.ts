@@ -9,6 +9,7 @@ import { db } from "@/server/db";
 import {
 	computeWeightedCriteriaScore,
 	computeWeightedMean,
+	getScoredCriteria,
 	roundScore,
 	type WeightedCriterion,
 } from "./scoring";
@@ -41,8 +42,10 @@ const participantDashboardParticipantSchema = z.object({
 });
 
 export const participantDashboardSnapshotSchema = z.object({
-	// v2: overall score weighted by task weight. Older snapshots fail to parse
-	// and are rebuilt from the (locked) ratings when read.
+	// v2: overall score weighted by task weight. Older snapshots fail to parse,
+	// so readers rebuild the snapshot from current data instead (see
+	// getEvaluationParticipantDetailData). Ratings of a completed AC are locked,
+	// so the rebuilt numbers only differ by the new formula.
 	version: z.literal(2),
 	createdAt: z.string().datetime(),
 	participants: z.array(participantDashboardParticipantSchema),
@@ -78,6 +81,9 @@ type TaskDefinition = {
 type SnapshotSource = NonNullable<
 	Awaited<ReturnType<typeof fetchParticipantDashboardSnapshotSource>>
 >;
+
+type SnapshotAssignment =
+	SnapshotSource["participants"][number]["reviewerAssignments"][number];
 
 export type ParticipantDashboardSnapshot = z.infer<
 	typeof participantDashboardSnapshotSchema
@@ -172,11 +178,7 @@ function buildTaskDefinitions(source: SnapshotSource) {
 		name: task.name,
 		scoreWeight: task.scoreWeight,
 		criteria: task.criteria,
-		scoredCriteria: task.criteria.flatMap((criterion) =>
-			criterion.type === "QUANTITATIVE" && criterion.weight !== null
-				? [{ id: criterion.id, weight: criterion.weight }]
-				: [],
-		),
+		scoredCriteria: getScoredCriteria(task.criteria),
 		quantitativeGroups: task.criteriaGroups
 			.map((group) => {
 				const criteria = group.criteria.flatMap((criterion) => {
@@ -215,7 +217,7 @@ function buildTaskLookup(taskDefinitions: TaskDefinition[]) {
 }
 
 function buildParticipantGroupScores(
-	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
+	assignments: SnapshotAssignment[],
 	taskDefinitions: TaskDefinition[],
 ) {
 	return taskDefinitions.flatMap((task) => {
@@ -268,10 +270,7 @@ function buildBenchmarkScores(
 	);
 }
 
-function getTaskRatingSets(
-	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
-	taskId: string,
-) {
+function getTaskRatingSets(assignments: SnapshotAssignment[], taskId: string) {
 	return assignments
 		.filter((assignment) => assignment.taskId === taskId)
 		.map((assignment) => assignment.quantitativeRatings);
@@ -279,7 +278,7 @@ function getTaskRatingSets(
 
 /** Overall score: task scores weighted by task weight, as on the results page. */
 function buildOverallScore(
-	assignments: SnapshotSource["participants"][number]["reviewerAssignments"],
+	assignments: SnapshotAssignment[],
 	taskDefinitions: TaskDefinition[],
 ) {
 	return computeWeightedMean(
