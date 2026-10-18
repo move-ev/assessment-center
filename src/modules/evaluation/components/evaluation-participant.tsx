@@ -126,6 +126,28 @@ function SummaryCard({
 	);
 }
 
+type RankingBand = NonNullable<
+	EvaluationResultsData["participants"][number]["rankingBand"]
+>;
+
+const RANKING_BAND_STYLE: Record<
+	RankingBand,
+	{ label: string; row: string; badge: string }
+> = {
+	TOP: {
+		label: "Top 15 %",
+		row: "bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60",
+		badge:
+			"border-green-200 bg-green-100 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300",
+	},
+	BOTTOM: {
+		label: "Untere 15 %",
+		row: "bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60",
+		badge:
+			"border-red-200 bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300",
+	},
+};
+
 function ParticipantTable({
 	acId,
 	participants,
@@ -148,8 +170,29 @@ function ParticipantTable({
 			</TableHeader>
 			<TableBody>
 				{participants.map((participant, index) => (
-					<TableRow key={participant.id}>
-						<TableCell className="font-medium">{index + 1}</TableCell>
+					<TableRow
+						className={
+							participant.rankingBand
+								? RANKING_BAND_STYLE[participant.rankingBand].row
+								: undefined
+						}
+						key={participant.id}
+					>
+						<TableCell className="font-medium">
+							<div className="flex items-center gap-2">
+								{index + 1}
+								{participant.rankingBand && (
+									<Badge
+										className={
+											RANKING_BAND_STYLE[participant.rankingBand].badge
+										}
+										variant="outline"
+									>
+										{RANKING_BAND_STYLE[participant.rankingBand].label}
+									</Badge>
+								)}
+							</div>
+						</TableCell>
 						<TableCell className="font-medium">
 							<Link
 								className="text-primary underline-offset-4 hover:underline"

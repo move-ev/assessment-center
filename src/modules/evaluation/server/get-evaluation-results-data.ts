@@ -3,6 +3,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
+import { getRankingBand, type RankingBand } from "./ranking";
 import {
 	computeWeightedCriteriaScore,
 	computeWeightedMean,
@@ -81,6 +82,8 @@ type ParticipantResult = {
 	qualitativeEntries: number;
 	teamObservationCount: number;
 	taskResults: ParticipantTaskResult[];
+	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
+	rankingBand: RankingBand | null;
 };
 
 type TaskResult = {
@@ -351,7 +354,7 @@ function buildParticipantResults(
 	data: QueryResult,
 	taskLookup: ReturnType<typeof buildTaskLookup>,
 ) {
-	const participants: ParticipantResult[] = [];
+	const participants: Array<Omit<ParticipantResult, "rankingBand">> = [];
 
 	for (const participant of data.participants) {
 		const group = participant.groupMemberships[0]?.group ?? null;
@@ -418,6 +421,12 @@ function buildParticipantResults(
 		});
 	}
 
+	return withRankingBands(sortByOverallScore(participants));
+}
+
+function sortByOverallScore<
+	T extends { name: string; overallScore: number | null },
+>(participants: T[]): T[] {
 	return participants.sort((left, right) => {
 		if (left.overallScore === null && right.overallScore !== null) {
 			return 1;
@@ -433,6 +442,23 @@ function buildParticipantResults(
 
 		return left.name.localeCompare(right.name, "de-DE");
 	});
+}
+
+/** Expects participants sorted by overall score, those without a score last. */
+function withRankingBands(
+	participants: Array<Omit<ParticipantResult, "rankingBand">>,
+): ParticipantResult[] {
+	const rankedCount = participants.filter(
+		(participant) => participant.overallScore !== null,
+	).length;
+
+	return participants.map((participant, index) => ({
+		...participant,
+		rankingBand:
+			participant.overallScore === null
+				? null
+				: getRankingBand(index + 1, rankedCount),
+	}));
 }
 
 function buildTaskResults(
