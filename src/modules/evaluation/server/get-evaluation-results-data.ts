@@ -3,6 +3,7 @@ import "server-only";
 import { notFound } from "next/navigation";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
+import { getRankingBand, type RankingBand } from "./ranking";
 import {
 	computeWeightedCriteriaScore,
 	computeWeightedMean,
@@ -81,7 +82,11 @@ type ParticipantResult = {
 	qualitativeEntries: number;
 	teamObservationCount: number;
 	taskResults: ParticipantTaskResult[];
+	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
+	rankingBand: RankingBand | null;
 };
+
+type UnrankedParticipantResult = Omit<ParticipantResult, "rankingBand">;
 
 type TaskResult = {
 	id: string;
@@ -351,7 +356,7 @@ function buildParticipantResults(
 	data: QueryResult,
 	taskLookup: ReturnType<typeof buildTaskLookup>,
 ) {
-	const participants: ParticipantResult[] = [];
+	const participants: UnrankedParticipantResult[] = [];
 
 	for (const participant of data.participants) {
 		const group = participant.groupMemberships[0]?.group ?? null;
@@ -418,6 +423,12 @@ function buildParticipantResults(
 		});
 	}
 
+	return rankParticipants(participants);
+}
+
+function sortByOverallScore<
+	T extends { name: string; overallScore: number | null },
+>(participants: T[]): T[] {
 	return participants.sort((left, right) => {
 		if (left.overallScore === null && right.overallScore !== null) {
 			return 1;
@@ -433,6 +444,28 @@ function buildParticipantResults(
 
 		return left.name.localeCompare(right.name, "de-DE");
 	});
+}
+
+/**
+ * Sorts by overall score (those without a score last) and marks the top and
+ * bottom of the ranking. Both happen here because the marking depends on the
+ * sort order.
+ */
+function rankParticipants(
+	participants: UnrankedParticipantResult[],
+): ParticipantResult[] {
+	const sorted = sortByOverallScore(participants);
+	const rankedCount = sorted.filter(
+		(participant) => participant.overallScore !== null,
+	).length;
+
+	return sorted.map((participant, index) => ({
+		...participant,
+		rankingBand:
+			participant.overallScore === null
+				? null
+				: getRankingBand(index + 1, rankedCount),
+	}));
 }
 
 function buildTaskResults(
