@@ -1,6 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
+import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
 import {
 	computeWeightedCriteriaScore,
@@ -9,7 +10,6 @@ import {
 	type WeightedCriterion,
 	type WeightedScore,
 } from "./scoring";
-import { isAssignmentComplete } from "./shared";
 
 type QuantitativeRatingRecord = {
 	criteriaId: string;
@@ -36,6 +36,7 @@ type TaskDefinition = {
 		name: string;
 		type: "QUANTITATIVE" | "QUALITATIVE";
 		weight: number | null;
+		isOptional: boolean;
 		criteriaGroup: {
 			title: string;
 			factorType: "POTENTIAL" | "COMPETENCE";
@@ -147,6 +148,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 							name: true,
 							type: true,
 							weight: true,
+							isOptional: true,
 							criteriaGroup: {
 								select: {
 									title: true,
@@ -309,7 +311,9 @@ function buildParticipantTaskResult(
 	let qualitativeEntries = 0;
 
 	for (const assignment of assignments) {
-		if (isAssignmentComplete(assignment, taskDefinition.criteria.length)) {
+		if (
+			getAssignmentCompletion(taskDefinition.criteria, assignment).isComplete
+		) {
 			completedAssignments += 1;
 		}
 
@@ -476,7 +480,7 @@ function buildTaskResults(
 				);
 
 				for (const assignment of assignments) {
-					if (isAssignmentComplete(assignment, task.criteria.length)) {
+					if (getAssignmentCompletion(task.criteria, assignment).isComplete) {
 						completedAssignmentCount += 1;
 					}
 				}

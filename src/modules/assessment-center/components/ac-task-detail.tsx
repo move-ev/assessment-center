@@ -86,6 +86,7 @@ type TaskData = {
 			description: string | null;
 			type: "QUANTITATIVE" | "QUALITATIVE";
 			weight: number | null;
+			isOptional: boolean;
 		}>;
 	}>;
 };

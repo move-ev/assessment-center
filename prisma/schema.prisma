@@ -308,6 +308,10 @@ model ReviewCriteria {
   /// Required when type = QUANTITATIVE. Must be > 0.
   /// Null when type = QUALITATIVE.
   weight          Float?
+  /// Optional criteria do not block completion of a rating sheet and only
+  /// count towards the score when rated. Free-text (QUALITATIVE) criteria
+  /// never block completion, regardless of this flag.
+  isOptional      Boolean             @default(false)
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   deletedAt       DateTime?

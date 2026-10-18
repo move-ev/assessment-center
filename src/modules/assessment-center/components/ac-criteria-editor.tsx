@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
 	Dialog,
 	DialogContent,
@@ -43,6 +44,7 @@ type Criterion = {
 	description: string | null;
 	type: CriteriaType;
 	weight: number | null;
+	isOptional: boolean;
 };
 
 type CriteriaGroup = {
@@ -332,6 +334,9 @@ function CriterionRow({
 					>
 						{criterion.type === "QUANTITATIVE" ? "Quantitativ" : "Qualitativ"}
 					</Badge>
+					{criterion.isOptional ? (
+						<Badge variant="outline">Optional</Badge>
+					) : null}
 					{criterion.weight !== null ? (
 						<span className="text-muted-foreground text-xs">
 							Gewicht: {criterion.weight}
@@ -545,6 +550,7 @@ function CriterionDialog({
 		criteria?.type ?? "QUANTITATIVE",
 	);
 	const [weight, setWeight] = useState(criteria?.weight?.toString() ?? "");
+	const [isOptional, setIsOptional] = useState(criteria?.isOptional ?? false);
 	const isEditing = criteria !== undefined;
 
 	const createMutation = api.task.addCriteria.useMutation({
@@ -590,6 +596,7 @@ function CriterionDialog({
 				description: description.trim() !== "" ? description : undefined,
 				type,
 				weight: normalizedWeight,
+				isOptional: type === "QUANTITATIVE" && isOptional,
 			});
 			return;
 		}
@@ -602,6 +609,7 @@ function CriterionDialog({
 			description: description.trim() !== "" ? description : undefined,
 			type,
 			weight: normalizedWeight,
+			isOptional: type === "QUANTITATIVE" && isOptional,
 		});
 	}
 
@@ -689,6 +697,22 @@ function CriterionDialog({
 									type="number"
 									value={weight}
 								/>
+							</Field>
+						) : null}
+						{type === "QUANTITATIVE" ? (
+							<Field orientation="horizontal">
+								<Checkbox
+									checked={isOptional}
+									disabled={mutation.isPending}
+									id="criteria-optional"
+									onCheckedChange={setIsOptional}
+								/>
+								<FieldLabel htmlFor="criteria-optional">
+									Optional{" "}
+									<span className="font-normal text-muted-foreground">
+										(zählt nur, wenn bewertet; blockiert den Abschluss nicht)
+									</span>
+								</FieldLabel>
 							</Field>
 						) : null}
 					</FieldGroup>

@@ -1,11 +1,8 @@
 import "server-only";
 
+import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
-import {
-	getCompletedCriteriaCount,
-	getReviewSession,
-	isAssignmentComplete,
-} from "./shared";
+import { getReviewSession } from "./shared";
 
 export type ReviewTaskListItem = {
 	id: string;
@@ -33,7 +30,7 @@ export async function getReviewTaskListData(
 					isTeamTask: true,
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true },
+						select: { id: true, type: true, isOptional: true },
 					},
 				},
 			},
@@ -67,7 +64,7 @@ export async function getReviewTaskListData(
 		current.participantCount += 1;
 
 		if (
-			isAssignmentComplete(criteriaCount, getCompletedCriteriaCount(assignment))
+			getAssignmentCompletion(assignment.task.criteria, assignment).isComplete
 		) {
 			current.completedParticipantCount += 1;
 		}

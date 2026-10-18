@@ -1,12 +1,12 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { db } from "@/server/db";
 import {
-	getCompletedCriteriaCount,
-	getReviewSession,
-	isAssignmentComplete,
-} from "./shared";
+	getAssignmentCompletion,
+	type ReviewCompletionStatus,
+} from "@/lib/review-completion";
+import { db } from "@/server/db";
+import { getReviewSession } from "./shared";
 
 export type ReviewParticipantListData = {
 	task: {
@@ -14,15 +14,16 @@ export type ReviewParticipantListData = {
 		name: string;
 		isTeamTask: boolean;
 		criteriaCount: number;
+		requiredCriteriaCount: number;
 	};
 	participants: Array<{
 		id: string;
 		name: string;
 		groupName: string | null;
-		completedCriteriaCount: number;
-		criteriaCount: number;
+		completedRequiredCount: number;
+		requiredCriteriaCount: number;
 		isComplete: boolean;
-		status: "NOT_STARTED" | "IN_PROGRESS" | "COMPLETED" | "NO_CRITERIA";
+		status: ReviewCompletionStatus;
 	}>;
 };
 
@@ -54,7 +55,7 @@ export async function getReviewParticipantListData(
 					isTeamTask: true,
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true },
+						select: { id: true, type: true, isOptional: true },
 					},
 				},
 			},
@@ -75,51 +76,30 @@ export async function getReviewParticipantListData(
 		notFound();
 	}
 
-	const criteriaCount = firstAssignment.task.criteria.length;
+	const { criteria } = firstAssignment.task;
 
 	return {
 		task: {
 			id: firstAssignment.task.id,
 			name: firstAssignment.task.name,
 			isTeamTask: firstAssignment.task.isTeamTask,
-			criteriaCount,
+			criteriaCount: criteria.length,
+			requiredCriteriaCount: getAssignmentCompletion(criteria, firstAssignment)
+				.requiredCount,
 		},
 		participants: assignments.map((assignment) => {
-			const completedCriteriaCount = getCompletedCriteriaCount(assignment);
-			const isComplete = isAssignmentComplete(
-				criteriaCount,
-				completedCriteriaCount,
-			);
+			const completion = getAssignmentCompletion(criteria, assignment);
 
 			return {
 				id: assignment.participant.id,
 				name: assignment.participant.name,
 				groupName:
 					assignment.participant.groupMemberships[0]?.group.name ?? null,
-				completedCriteriaCount,
-				criteriaCount,
-				isComplete,
-				status: getParticipantStatus(criteriaCount, completedCriteriaCount),
+				completedRequiredCount: completion.completedRequiredCount,
+				requiredCriteriaCount: completion.requiredCount,
+				isComplete: completion.isComplete,
+				status: completion.status,
 			};
 		}),
 	};
-}
-
-function getParticipantStatus(
-	criteriaCount: number,
-	completedCriteriaCount: number,
-) {
-	if (criteriaCount === 0) {
-		return "NO_CRITERIA" as const;
-	}
-
-	if (completedCriteriaCount === 0) {
-		return "NOT_STARTED" as const;
-	}
-
-	if (completedCriteriaCount >= criteriaCount) {
-		return "COMPLETED" as const;
-	}
-
-	return "IN_PROGRESS" as const;
 }

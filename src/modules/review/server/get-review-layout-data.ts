@@ -1,11 +1,8 @@
 import "server-only";
 
+import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
-import {
-	getCompletedCriteriaCount,
-	getReviewSession,
-	isAssignmentComplete,
-} from "./shared";
+import { getReviewSession } from "./shared";
 
 export type ReviewLayoutData = {
 	reviewerName: string;
@@ -29,7 +26,7 @@ export async function getReviewLayoutData(
 				select: {
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true },
+						select: { id: true, type: true, isOptional: true },
 					},
 				},
 			},
@@ -48,14 +45,13 @@ export async function getReviewLayoutData(
 	let completedAssignments = 0;
 
 	for (const assignment of assignments) {
-		const criteriaCount = assignment.task.criteria.length;
-		const completedCriteriaCount = getCompletedCriteriaCount(assignment);
-
-		if (criteriaCount > 0) {
+		if (assignment.task.criteria.length > 0) {
 			reviewableAssignments += 1;
 		}
 
-		if (isAssignmentComplete(criteriaCount, completedCriteriaCount)) {
+		if (
+			getAssignmentCompletion(assignment.task.criteria, assignment).isComplete
+		) {
 			completedAssignments += 1;
 		}
 	}

@@ -4,6 +4,10 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import {
+	getReviewCompletion,
+	type ReviewCompletion,
+} from "@/lib/review-completion";
 import { ROUTES } from "@/lib/routes";
 import type { ReviewRatingFormData } from "../server/get-review-rating-form-data";
 import { ReviewQualitativeField } from "./review-qualitative-field";
@@ -33,15 +37,21 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 			),
 	);
 
-	const completedCriteriaCount = Array.from(completion.values()).filter(
-		Boolean,
-	).length;
-	const progressPercent =
-		data.progress.totalCriteriaCount === 0
-			? 0
-			: Math.round(
-					(completedCriteriaCount / data.progress.totalCriteriaCount) * 100,
-				);
+	const progress = getReviewCompletion(
+		data.criteriaGroups.flatMap((group) =>
+			group.criteria.map((criteria) => ({
+				id: criteria.id,
+				type: criteria.type,
+				isOptional: criteria.type === "QUANTITATIVE" && criteria.isOptional,
+			})),
+		),
+		new Set(
+			Array.from(completion.entries())
+				.filter(([, isFilled]) => isFilled)
+				.map(([criteriaId]) => criteriaId),
+		),
+	);
+	const progressPercent = getProgressPercent(progress);
 
 	const handlePersisted = useCallback(
 		(criteriaId: string, isComplete: boolean) => {
@@ -84,8 +94,9 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 						{data.task.isTeamTask ? "Teamaufgabe" : "Einzelaufgabe"}
 					</Badge>
 					<Badge variant="outline">
-						{completedCriteriaCount} / {data.progress.totalCriteriaCount}{" "}
-						Kriterien
+						{progress.requiredCount === 0
+							? "Keine Pflicht-Kriterien"
+							: `${progress.completedRequiredCount} / ${progress.requiredCount} Pflicht-Kriterien`}
 					</Badge>
 				</div>
 				<div className="space-y-2">
@@ -169,6 +180,16 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 				</TaskInstructionsSheet>
 			)}
 		</div>
+	);
+}
+
+function getProgressPercent(progress: ReviewCompletion): number {
+	if (progress.requiredCount === 0) {
+		return progress.isComplete ? 100 : 0;
+	}
+
+	return Math.round(
+		(progress.completedRequiredCount / progress.requiredCount) * 100,
 	);
 }
 
