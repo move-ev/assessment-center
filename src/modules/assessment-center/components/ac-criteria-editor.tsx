@@ -32,6 +32,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { api } from "@/trpc/react";
 
 type CriteriaType = "QUANTITATIVE" | "QUALITATIVE";
@@ -45,6 +46,8 @@ type Criterion = {
 	type: CriteriaType;
 	weight: number | null;
 	isOptional: boolean;
+	anchorStar2: string | null;
+	anchorStar4: string | null;
 };
 
 type CriteriaGroup = {
@@ -551,6 +554,8 @@ function CriterionDialog({
 	);
 	const [weight, setWeight] = useState(criteria?.weight?.toString() ?? "");
 	const [isOptional, setIsOptional] = useState(criteria?.isOptional ?? false);
+	const [anchorStar2, setAnchorStar2] = useState(criteria?.anchorStar2 ?? "");
+	const [anchorStar4, setAnchorStar4] = useState(criteria?.anchorStar4 ?? "");
 	const isEditing = criteria !== undefined;
 
 	const createMutation = api.task.addCriteria.useMutation({
@@ -597,6 +602,8 @@ function CriterionDialog({
 				type,
 				weight: normalizedWeight,
 				isOptional,
+				anchorStar2,
+				anchorStar4,
 			});
 			return;
 		}
@@ -610,6 +617,8 @@ function CriterionDialog({
 			type,
 			weight: normalizedWeight,
 			isOptional,
+			anchorStar2,
+			anchorStar4,
 		});
 	}
 
@@ -714,6 +723,40 @@ function CriterionDialog({
 									</span>
 								</FieldLabel>
 							</Field>
+						) : null}
+						{type === "QUANTITATIVE" ? (
+							<>
+								<Field>
+									<FieldLabel htmlFor="criteria-anchor-2">
+										Anker 2 Sterne{" "}
+										<span className="font-normal text-muted-foreground">
+											(optional, „Erwartung kaum erfüllt“)
+										</span>
+									</FieldLabel>
+									<Textarea
+										disabled={mutation.isPending}
+										id="criteria-anchor-2"
+										maxLength={1000}
+										onChange={(e) => setAnchorStar2(e.target.value)}
+										value={anchorStar2}
+									/>
+								</Field>
+								<Field>
+									<FieldLabel htmlFor="criteria-anchor-4">
+										Anker 4 Sterne{" "}
+										<span className="font-normal text-muted-foreground">
+											(optional, „Erwartung erfüllt“)
+										</span>
+									</FieldLabel>
+									<Textarea
+										disabled={mutation.isPending}
+										id="criteria-anchor-4"
+										maxLength={1000}
+										onChange={(e) => setAnchorStar4(e.target.value)}
+										value={anchorStar4}
+									/>
+								</Field>
+							</>
 						) : null}
 					</FieldGroup>
 				</form>

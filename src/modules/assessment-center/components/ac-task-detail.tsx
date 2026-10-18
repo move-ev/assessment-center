@@ -88,6 +88,8 @@ type TaskData = {
 			type: "QUANTITATIVE" | "QUALITATIVE";
 			weight: number | null;
 			isOptional: boolean;
+			anchorStar2: string | null;
+			anchorStar4: string | null;
 		}>;
 	}>;
 };
