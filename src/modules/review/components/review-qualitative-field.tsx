@@ -36,11 +36,8 @@ function ReviewQualitativeField({
 	const normalizedText = useMemo(() => text.trim(), [text]);
 
 	useEffect(() => {
-		onPersisted(criterion.id, normalizedText !== "");
-	}, [criterion.id, normalizedText, onPersisted]);
-
-	useEffect(() => {
-		if (normalizedText === "" || normalizedText === lastSaved.current) {
+		if (normalizedText === lastSaved.current) {
+			setSaveState((current) => (current === "saving" ? "saved" : current));
 			return;
 		}
 
@@ -56,7 +53,7 @@ function ReviewQualitativeField({
 				});
 				lastSaved.current = normalizedText;
 				setSaveState("saved");
-				onPersisted(criterion.id, true);
+				onPersisted(criterion.id, normalizedText !== "");
 			} catch (error) {
 				setSaveState("error");
 				toast.error(getErrorMessage(error));
@@ -95,9 +92,7 @@ function ReviewQualitativeField({
 					value={text}
 				/>
 				<p className="text-muted-foreground text-xs">
-					{normalizedText === ""
-						? "Dieses Feld ist erforderlich."
-						: getSaveStateLabel(saveState)}
+					{getSaveStateLabel(saveState)}
 				</p>
 			</CardContent>
 		</Card>
@@ -117,7 +112,7 @@ function getSaveStateLabel(state: "idle" | "saving" | "saved" | "error") {
 		return "Speichern fehlgeschlagen";
 	}
 
-	return "Änderungen werden automatisch gespeichert";
+	return "Optional. Leere Eingaben entfernen die Antwort.";
 }
 
 function getErrorMessage(error: unknown) {

@@ -15,7 +15,7 @@ const qualitativeInput = z.object({
 	taskId: z.string(),
 	participantId: z.string(),
 	criteriaId: z.string(),
-	text: z.string().trim().min(1).max(10_000),
+	text: z.string().trim().max(10_000),
 });
 
 const teamObservationInput = z.object({
@@ -188,6 +188,19 @@ export const ratingRouter = createTRPCRouter({
 					code: "BAD_REQUEST",
 					message: "Dieses Kriterium erwartet keine Textbewertung",
 				});
+			}
+
+			if (input.text === "") {
+				await ctx.db.qualitativeRating.updateMany({
+					where: {
+						reviewerAssignmentId: access.id,
+						criteriaId: input.criteriaId,
+						deletedAt: null,
+					},
+					data: { deletedAt: new Date() },
+				});
+
+				return { text: null as string | null };
 			}
 
 			return ctx.db.qualitativeRating.upsert({
