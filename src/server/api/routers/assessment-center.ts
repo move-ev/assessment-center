@@ -1,8 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { Prisma } from "../../../../generated/prisma/client";
 import { buildParticipantDashboardSnapshot } from "@/modules/evaluation/server/participant-dashboard-snapshot";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { Prisma } from "../../../../generated/prisma/client";
 
 const LOCKED_MSG =
 	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";

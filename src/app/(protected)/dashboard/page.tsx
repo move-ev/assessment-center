@@ -6,5 +6,5 @@ export default async function DashboardPage() {
 	const userName = session?.user.name ?? "";
 	const isAdmin = session?.user.role === "admin";
 
-	return <DashboardPageContent userName={userName} isAdmin={isAdmin} />;
+	return <DashboardPageContent isAdmin={isAdmin} userName={userName} />;
 }

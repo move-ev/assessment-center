@@ -81,8 +81,7 @@ function ReviewQuantitativeField({
 
 	const commitSelection = useCallback(
 		(nextValue: number) => {
-			const isRetryWithSameValue =
-				nextValue === value && saveState === "error";
+			const isRetryWithSameValue = nextValue === value && saveState === "error";
 			setValue(nextValue);
 
 			if (saveTimer.current !== null) {
@@ -162,7 +161,7 @@ function ReviewQuantitativeField({
 						<DialogTitle className="font-heading text-lg">
 							Bewertung {pendingExtreme} vergeben?
 						</DialogTitle>
-						<DialogDescription className="text-muted-foreground text-[13px] leading-relaxed">
+						<DialogDescription className="text-[13px] text-muted-foreground leading-relaxed">
 							{pendingExtreme === 5
 								? "Eine 5 steht für eine herausragende Leistung und sollte nur in Ausnahmefällen vergeben werden."
 								: "Eine 1 steht für eine extrem schwache Leistung und sollte nur in Ausnahmefällen vergeben werden."}
