@@ -32,6 +32,8 @@ export type ReviewRatingFormData = {
 					type: "QUANTITATIVE";
 					weight: number;
 					isOptional: boolean;
+					anchorStar2: string | null;
+					anchorStar4: string | null;
 					value: number | null;
 			  }
 			| {
@@ -87,6 +89,8 @@ export async function getReviewRatingFormData(
 									type: true,
 									weight: true,
 									isOptional: true,
+									anchorStar2: true,
+									anchorStar4: true,
 								},
 								orderBy: { createdAt: "asc" },
 							},
@@ -181,6 +185,8 @@ export async function getReviewRatingFormData(
 						type: "QUANTITATIVE" as const,
 						weight: criteria.weight ?? 0,
 						isOptional: criteria.isOptional,
+						anchorStar2: criteria.anchorStar2,
+						anchorStar4: criteria.anchorStar4,
 						value: rating?.value ?? null,
 					};
 				}

@@ -315,6 +315,11 @@ model ReviewCriteria {
   /// count towards the score when rated. Free-text (QUALITATIVE) criteria
   /// never block completion, regardless of this flag.
   isOptional      Boolean             @default(false)
+  /// Optional anchor texts shown under the rating scale: what 2 stars
+  /// ("Erwartung kaum erfüllt") and 4 stars ("Erwartung erfüllt") look like.
+  /// Only used for QUANTITATIVE criteria; null when not set.
+  anchorStar2     String?
+  anchorStar4     String?
   createdAt       DateTime            @default(now())
   updatedAt       DateTime            @updatedAt
   deletedAt       DateTime?

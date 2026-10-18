@@ -308,6 +308,9 @@ testable with `bun run test` without any setup.
   Required criteria are quantitative and not marked optional; free-text
   criteria never block completion. Used by the review lists, the rating form's
   live progress, the live overview, the results and the dashboard snapshot.
+- `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and
+  4-star anchor texts, shared by the criteria editor, the rating view and the
+  task router.
 
 ---
 

@@ -1,11 +1,22 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { RATING_ANCHOR_MAX_LENGTH } from "@/lib/rating-anchors";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 const LOCKED_MSG =
 	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 const criteriaGroupFactorTypeSchema = z.enum(["POTENTIAL", "COMPETENCE"]);
+/** Anchor text under the rating scale; blank means no anchor. */
+const anchorTextSchema = z.string().trim().max(RATING_ANCHOR_MAX_LENGTH);
+
+function toAnchorText(
+	type: z.infer<typeof criteriaTypeSchema>,
+	text: string | undefined,
+): string | null {
+	return type === "QUANTITATIVE" && text ? text : null;
+}
+
 /** Weight of a task in the overall score; mirrors the DB check constraint. */
 const scoreWeightSchema = z.number().positive("Gewicht muss größer als 0 sein");
 
@@ -73,6 +84,8 @@ export const taskRouter = createTRPCRouter({
 									type: true,
 									weight: true,
 									isOptional: true,
+									anchorStar2: true,
+									anchorStar4: true,
 								},
 								orderBy: { createdAt: "asc" },
 							},
@@ -439,6 +452,8 @@ export const taskRouter = createTRPCRouter({
 				type: criteriaTypeSchema,
 				weight: z.number().positive().optional(),
 				isOptional: z.boolean().default(false),
+				anchorStar2: anchorTextSchema.optional(),
+				anchorStar4: anchorTextSchema.optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -488,6 +503,8 @@ export const taskRouter = createTRPCRouter({
 					type: input.type,
 					weight: input.type === "QUANTITATIVE" ? (input.weight ?? null) : null,
 					isOptional: input.type === "QUANTITATIVE" && input.isOptional,
+					anchorStar2: toAnchorText(input.type, input.anchorStar2),
+					anchorStar4: toAnchorText(input.type, input.anchorStar4),
 				},
 				select: {
 					id: true,
@@ -497,6 +514,8 @@ export const taskRouter = createTRPCRouter({
 					type: true,
 					weight: true,
 					isOptional: true,
+					anchorStar2: true,
+					anchorStar4: true,
 				},
 			});
 		}),
@@ -513,6 +532,8 @@ export const taskRouter = createTRPCRouter({
 				type: criteriaTypeSchema,
 				weight: z.number().positive().optional(),
 				isOptional: z.boolean(),
+				anchorStar2: anchorTextSchema,
+				anchorStar4: anchorTextSchema,
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -577,6 +598,8 @@ export const taskRouter = createTRPCRouter({
 					type: input.type,
 					weight: input.type === "QUANTITATIVE" ? (input.weight ?? null) : null,
 					isOptional: input.type === "QUANTITATIVE" && input.isOptional,
+					anchorStar2: toAnchorText(input.type, input.anchorStar2),
+					anchorStar4: toAnchorText(input.type, input.anchorStar4),
 				},
 				select: {
 					id: true,
@@ -586,6 +609,8 @@ export const taskRouter = createTRPCRouter({
 					type: true,
 					weight: true,
 					isOptional: true,
+					anchorStar2: true,
+					anchorStar4: true,
 				},
 			});
 		}),

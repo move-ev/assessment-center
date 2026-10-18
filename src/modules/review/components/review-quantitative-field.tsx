@@ -11,6 +11,7 @@ import {
 	DialogDescription,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { RATING_ANCHOR_LABELS } from "@/lib/rating-anchors";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
@@ -24,6 +25,8 @@ type Props = {
 		description: string | null;
 		weight: number;
 		isOptional: boolean;
+		anchorStar2: string | null;
+		anchorStar4: string | null;
 		value: number | null;
 	};
 	onPersisted: (criterionId: string, isComplete: boolean) => void;
@@ -146,7 +149,11 @@ function ReviewQuantitativeField({
 					))}
 				</div>
 			</CardHeader>
-			<CardContent>
+			<CardContent className="space-y-3">
+				<RatingAnchors
+					anchorStar2={criterion.anchorStar2}
+					anchorStar4={criterion.anchorStar4}
+				/>
 				<p className="text-muted-foreground text-xs">
 					{value === null
 						? "Wähle einen Wert von 1 bis 5."
@@ -204,6 +211,38 @@ function ReviewQuantitativeField({
 }
 
 const RATING_VALUES = [1, 2, 3, 4, 5] as const;
+
+function RatingAnchors({
+	anchorStar2,
+	anchorStar4,
+}: {
+	anchorStar2: string | null;
+	anchorStar4: string | null;
+}) {
+	const anchors = [
+		{ stars: 2, label: RATING_ANCHOR_LABELS[2], text: anchorStar2 },
+		{ stars: 4, label: RATING_ANCHOR_LABELS[4], text: anchorStar4 },
+	].filter((anchor) => anchor.text !== null);
+
+	if (anchors.length === 0) {
+		return null;
+	}
+
+	return (
+		<dl className="space-y-2 rounded-2xl bg-muted/50 p-3 text-sm">
+			{anchors.map((anchor) => (
+				<div className="space-y-0.5" key={anchor.stars}>
+					<dt className="font-medium">
+						{anchor.stars} · {anchor.label}
+					</dt>
+					<dd className="whitespace-pre-line text-muted-foreground">
+						{anchor.text}
+					</dd>
+				</div>
+			))}
+		</dl>
+	);
+}
 
 function getSaveStateLabel(state: "idle" | "saving" | "saved" | "error") {
 	if (state === "saving") {

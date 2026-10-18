@@ -32,6 +32,11 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+	RATING_ANCHOR_LABELS,
+	RATING_ANCHOR_MAX_LENGTH,
+} from "@/lib/rating-anchors";
 import { api } from "@/trpc/react";
 
 type CriteriaType = "QUANTITATIVE" | "QUALITATIVE";
@@ -45,6 +50,8 @@ type Criterion = {
 	type: CriteriaType;
 	weight: number | null;
 	isOptional: boolean;
+	anchorStar2: string | null;
+	anchorStar4: string | null;
 };
 
 type CriteriaGroup = {
@@ -551,6 +558,8 @@ function CriterionDialog({
 	);
 	const [weight, setWeight] = useState(criteria?.weight?.toString() ?? "");
 	const [isOptional, setIsOptional] = useState(criteria?.isOptional ?? false);
+	const [anchorStar2, setAnchorStar2] = useState(criteria?.anchorStar2 ?? "");
+	const [anchorStar4, setAnchorStar4] = useState(criteria?.anchorStar4 ?? "");
 	const isEditing = criteria !== undefined;
 
 	const createMutation = api.task.addCriteria.useMutation({
@@ -597,6 +606,8 @@ function CriterionDialog({
 				type,
 				weight: normalizedWeight,
 				isOptional,
+				anchorStar2,
+				anchorStar4,
 			});
 			return;
 		}
@@ -610,6 +621,8 @@ function CriterionDialog({
 			type,
 			weight: normalizedWeight,
 			isOptional,
+			anchorStar2,
+			anchorStar4,
 		});
 	}
 
@@ -715,6 +728,22 @@ function CriterionDialog({
 								</FieldLabel>
 							</Field>
 						) : null}
+						{type === "QUANTITATIVE" ? (
+							<>
+								<AnchorField
+									disabled={mutation.isPending}
+									onChange={setAnchorStar2}
+									stars={2}
+									value={anchorStar2}
+								/>
+								<AnchorField
+									disabled={mutation.isPending}
+									onChange={setAnchorStar4}
+									stars={4}
+									value={anchorStar4}
+								/>
+							</>
+						) : null}
 					</FieldGroup>
 				</form>
 				<DialogFooter>
@@ -731,6 +760,35 @@ function CriterionDialog({
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+type AnchorFieldProps = {
+	stars: keyof typeof RATING_ANCHOR_LABELS;
+	value: string;
+	onChange: (value: string) => void;
+	disabled: boolean;
+};
+
+function AnchorField({ stars, value, onChange, disabled }: AnchorFieldProps) {
+	const id = `criteria-anchor-${stars}`;
+
+	return (
+		<Field>
+			<FieldLabel htmlFor={id}>
+				Anker {stars} Sterne{" "}
+				<span className="font-normal text-muted-foreground">
+					(optional, „{RATING_ANCHOR_LABELS[stars]}“)
+				</span>
+			</FieldLabel>
+			<Textarea
+				disabled={disabled}
+				id={id}
+				maxLength={RATING_ANCHOR_MAX_LENGTH}
+				onChange={(e) => onChange(e.target.value)}
+				value={value}
+			/>
+		</Field>
 	);
 }
 

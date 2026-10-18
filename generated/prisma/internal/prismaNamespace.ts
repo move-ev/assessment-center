@@ -2064,6 +2064,8 @@ export const ReviewCriteriaScalarFieldEnum = {
   type: 'type',
   weight: 'weight',
   isOptional: 'isOptional',
+  anchorStar2: 'anchorStar2',
+  anchorStar4: 'anchorStar4',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
