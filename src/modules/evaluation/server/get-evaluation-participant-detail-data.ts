@@ -66,7 +66,7 @@ const VIEW_DEFINITIONS: Array<{
 	filter: FactorFilter;
 	label: string;
 }> = [
-	{ filter: "ALL", label: "Gesamt" },
+	{ filter: "ALL", label: "Alle Faktoren" },
 	{ filter: "COMPETENCE", label: "Kompetenz" },
 	{ filter: "POTENTIAL", label: "Potenzial" },
 ];
