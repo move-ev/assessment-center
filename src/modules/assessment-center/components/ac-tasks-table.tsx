@@ -46,6 +46,7 @@ type Task = {
 	name: string;
 	description: string | null;
 	isTeamTask: boolean;
+	scoreWeight: number;
 	_count: { criteria: number };
 };
 
@@ -90,6 +91,7 @@ function AcTasksTable({ acId }: Props) {
 							<TableHead>Name</TableHead>
 							<TableHead>Typ</TableHead>
 							<TableHead>Kriterien</TableHead>
+							<TableHead>Teil-Gewicht</TableHead>
 							<TableHead className="w-24" />
 						</TableRow>
 					</TableHeader>
@@ -144,6 +146,9 @@ function TaskTableRow({
 			</TableCell>
 			<TableCell className="text-muted-foreground">
 				{task._count.criteria}
+			</TableCell>
+			<TableCell className="text-muted-foreground">
+				{task.scoreWeight.toLocaleString("de-DE")}
 			</TableCell>
 			<TableCell onClick={(e) => e.stopPropagation()}>
 				<div className="flex justify-end gap-1">

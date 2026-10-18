@@ -241,6 +241,7 @@ export const TaskScalarFieldEnum = {
   description: 'description',
   instructions: 'instructions',
   isTeamTask: 'isTeamTask',
+  scoreWeight: 'scoreWeight',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
