@@ -18,6 +18,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
+import { RANKING_BAND_PERCENT, type RankingBand } from "../server/ranking";
 import { EvaluationCriteria } from "./evaluation-criteria";
 import { EvaluationExport } from "./evaluation-export";
 import { EvaluationTask } from "./evaluation-task";
@@ -126,22 +127,18 @@ function SummaryCard({
 	);
 }
 
-type RankingBand = NonNullable<
-	EvaluationResultsData["participants"][number]["rankingBand"]
->;
-
 const RANKING_BAND_STYLE: Record<
 	RankingBand,
 	{ label: string; row: string; badge: string }
 > = {
 	TOP: {
-		label: "Top 15 %",
+		label: `Top ${RANKING_BAND_PERCENT} %`,
 		row: "bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60",
 		badge:
 			"border-green-200 bg-green-100 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300",
 	},
 	BOTTOM: {
-		label: "Untere 15 %",
+		label: `Untere ${RANKING_BAND_PERCENT} %`,
 		row: "bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60",
 		badge:
 			"border-red-200 bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300",

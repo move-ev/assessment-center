@@ -86,6 +86,8 @@ type ParticipantResult = {
 	rankingBand: RankingBand | null;
 };
 
+type UnrankedParticipantResult = Omit<ParticipantResult, "rankingBand">;
+
 type TaskResult = {
 	id: string;
 	name: string;
@@ -354,7 +356,7 @@ function buildParticipantResults(
 	data: QueryResult,
 	taskLookup: ReturnType<typeof buildTaskLookup>,
 ) {
-	const participants: Array<Omit<ParticipantResult, "rankingBand">> = [];
+	const participants: UnrankedParticipantResult[] = [];
 
 	for (const participant of data.participants) {
 		const group = participant.groupMemberships[0]?.group ?? null;
@@ -421,7 +423,7 @@ function buildParticipantResults(
 		});
 	}
 
-	return withRankingBands(sortByOverallScore(participants));
+	return rankParticipants(participants);
 }
 
 function sortByOverallScore<
@@ -444,15 +446,20 @@ function sortByOverallScore<
 	});
 }
 
-/** Expects participants sorted by overall score, those without a score last. */
-function withRankingBands(
-	participants: Array<Omit<ParticipantResult, "rankingBand">>,
+/**
+ * Sorts by overall score (those without a score last) and marks the top and
+ * bottom of the ranking. Both happen here because the marking depends on the
+ * sort order.
+ */
+function rankParticipants(
+	participants: UnrankedParticipantResult[],
 ): ParticipantResult[] {
-	const rankedCount = participants.filter(
+	const sorted = sortByOverallScore(participants);
+	const rankedCount = sorted.filter(
 		(participant) => participant.overallScore !== null,
 	).length;
 
-	return participants.map((participant, index) => ({
+	return sorted.map((participant, index) => ({
 		...participant,
 		rankingBand:
 			participant.overallScore === null

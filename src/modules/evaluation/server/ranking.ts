@@ -1,6 +1,7 @@
 export type RankingBand = "TOP" | "BOTTOM";
 
-const BAND_SHARE = 0.15;
+/** Share of the ranking marked at each end, in percent. */
+export const RANKING_BAND_PERCENT = 15;
 
 /**
  * Marks the top and bottom 15 % of a ranking by position (1-based rank among
@@ -11,7 +12,7 @@ export function getRankingBand(
 	position: number,
 	rankedCount: number,
 ): RankingBand | null {
-	const bandSize = Math.floor(rankedCount * BAND_SHARE);
+	const bandSize = Math.floor((rankedCount * RANKING_BAND_PERCENT) / 100);
 
 	if (position <= bandSize) {
 		return "TOP";
