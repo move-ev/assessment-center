@@ -596,7 +596,7 @@ function CriterionDialog({
 				description: description.trim() !== "" ? description : undefined,
 				type,
 				weight: normalizedWeight,
-				isOptional: type === "QUANTITATIVE" && isOptional,
+				isOptional,
 			});
 			return;
 		}
@@ -609,7 +609,7 @@ function CriterionDialog({
 			description: description.trim() !== "" ? description : undefined,
 			type,
 			weight: normalizedWeight,
-			isOptional: type === "QUANTITATIVE" && isOptional,
+			isOptional,
 		});
 	}
 

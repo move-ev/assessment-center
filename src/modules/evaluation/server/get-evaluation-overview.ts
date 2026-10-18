@@ -1,7 +1,10 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { getAssignmentCompletion } from "@/lib/review-completion";
+import {
+	type CompletionCriterion,
+	getAssignmentCompletion,
+} from "@/lib/review-completion";
 import { db } from "@/server/db";
 
 type AssignmentRecord = {
@@ -133,7 +136,14 @@ async function fetchOverviewSourceData(acId: string) {
 	});
 }
 
-function buildTaskLookup(data: QueryResult) {
+type TaskLookupEntry = {
+	id: string;
+	name: string;
+	isTeamTask: boolean;
+	criteria: CompletionCriterion[];
+};
+
+function buildTaskLookup(data: QueryResult): Map<string, TaskLookupEntry> {
 	return new Map(
 		data.tasks.map((task) => [
 			task.id,
@@ -146,11 +156,6 @@ function buildTaskLookup(data: QueryResult) {
 		]),
 	);
 }
-
-type TaskLookupEntry =
-	ReturnType<typeof buildTaskLookup> extends Map<string, infer Entry>
-		? Entry
-		: never;
 
 function toGroupTaskOverview(
 	task: TaskLookupEntry,

@@ -497,7 +497,7 @@ export const taskRouter = createTRPCRouter({
 				description: z.string().trim().optional(),
 				type: criteriaTypeSchema,
 				weight: z.number().positive().optional(),
-				isOptional: z.boolean().default(false),
+				isOptional: z.boolean(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {

@@ -44,6 +44,35 @@ describe("getReviewCompletion", () => {
 		assert.equal(statusFor(["preparation", "structure"]), "COMPLETED");
 	});
 
+	it("measures progress against required criteria only", () => {
+		const criteria = [
+			{ id: "preparation", type: "QUANTITATIVE" as const, isOptional: false },
+			{ id: "structure", type: "QUANTITATIVE" as const, isOptional: false },
+			{ id: "delivery", type: "QUANTITATIVE" as const, isOptional: false },
+			{ id: "follow-up", type: "QUANTITATIVE" as const, isOptional: true },
+			{ id: "notes", type: "QUALITATIVE" as const, isOptional: false },
+		];
+		const percentFor = (rated: string[]) =>
+			getReviewCompletion(criteria, new Set(rated)).progressPercent;
+
+		assert.equal(percentFor(["follow-up", "notes"]), 0);
+		// 1 of 3 required → 33 %
+		assert.equal(percentFor(["preparation"]), 33);
+		assert.equal(percentFor(["preparation", "structure", "delivery"]), 100);
+	});
+
+	it("without required criteria, progress jumps from 0 to 100 on first entry", () => {
+		const criteria = [
+			{ id: "notes", type: "QUALITATIVE" as const, isOptional: false },
+		];
+
+		assert.equal(getReviewCompletion(criteria, new Set()).progressPercent, 0);
+		assert.equal(
+			getReviewCompletion(criteria, new Set(["notes"])).progressPercent,
+			100,
+		);
+	});
+
 	it("reports a task without criteria as such, never as complete", () => {
 		const completion = getReviewCompletion([], new Set());
 

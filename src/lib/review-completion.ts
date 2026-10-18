@@ -14,6 +14,8 @@ export type ReviewCompletion = {
 	requiredCount: number;
 	completedRequiredCount: number;
 	isComplete: boolean;
+	/** Share of required criteria rated, 0–100. Without required criteria: 0 or 100. */
+	progressPercent: number;
 	status: ReviewCompletionStatus;
 };
 
@@ -22,7 +24,7 @@ export type RatedAssignment = {
 	qualitativeRatings: Array<{ criteriaId: string }>;
 };
 
-export function getRatedCriteriaIds(assignment: RatedAssignment): Set<string> {
+function getRatedCriteriaIds(assignment: RatedAssignment): Set<string> {
 	return new Set([
 		...assignment.quantitativeRatings.map((rating) => rating.criteriaId),
 		...assignment.qualitativeRatings.map((rating) => rating.criteriaId),
@@ -59,6 +61,11 @@ export function getReviewCompletion(
 		requiredCount: required.length,
 		completedRequiredCount,
 		isComplete,
+		progressPercent: getProgressPercent(
+			required.length,
+			completedRequiredCount,
+			isComplete,
+		),
 		status: getStatus(criteria.length, isComplete, hasAnyEntry),
 	};
 }
@@ -68,6 +75,18 @@ export function getAssignmentCompletion(
 	assignment: RatedAssignment,
 ): ReviewCompletion {
 	return getReviewCompletion(criteria, getRatedCriteriaIds(assignment));
+}
+
+function getProgressPercent(
+	requiredCount: number,
+	completedRequiredCount: number,
+	isComplete: boolean,
+): number {
+	if (requiredCount === 0) {
+		return isComplete ? 100 : 0;
+	}
+
+	return Math.round((completedRequiredCount / requiredCount) * 100);
 }
 
 function getStatus(

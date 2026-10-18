@@ -294,6 +294,23 @@ export const ROUTES = {
 
 ---
 
+## Shared Domain Rules
+
+Pure domain rules that more than one module needs live in `src/lib/`, not in
+either module. A module must not import another module's internals, so a rule
+shared by `review` and `evaluation` cannot live in one of them.
+
+Code here is framework-free: no database access, no `server-only`, no React.
+That keeps it usable on the server and in client components alike, and
+testable with `bun run test` without any setup.
+
+- `src/lib/review-completion.ts`: when a rating sheet counts as complete.
+  Required criteria are quantitative and not marked optional; free-text
+  criteria never block completion. Used by the review lists, the rating form's
+  live progress, the live overview, the results and the dashboard snapshot.
+
+---
+
 ## UX Notes
 
 ### Reviewer rating form

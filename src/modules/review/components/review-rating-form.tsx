@@ -4,10 +4,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-	getReviewCompletion,
-	type ReviewCompletion,
-} from "@/lib/review-completion";
+import { getReviewCompletion } from "@/lib/review-completion";
 import { ROUTES } from "@/lib/routes";
 import type { ReviewRatingFormData } from "../server/get-review-rating-form-data";
 import { ReviewQualitativeField } from "./review-qualitative-field";
@@ -51,7 +48,6 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 				.map(([criteriaId]) => criteriaId),
 		),
 	);
-	const progressPercent = getProgressPercent(progress);
 
 	const handlePersisted = useCallback(
 		(criteriaId: string, isComplete: boolean) => {
@@ -102,9 +98,11 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 				<div className="space-y-2">
 					<div className="flex items-center justify-between gap-3 text-sm">
 						<span className="font-medium">Formularfortschritt</span>
-						<span className="text-muted-foreground">{progressPercent}%</span>
+						<span className="text-muted-foreground">
+							{progress.progressPercent}%
+						</span>
 					</div>
-					<Progress value={progressPercent} />
+					<Progress value={progress.progressPercent} />
 				</div>
 				{data.task.description && (
 					<p className="text-muted-foreground text-sm">
@@ -180,16 +178,6 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 				</TaskInstructionsSheet>
 			)}
 		</div>
-	);
-}
-
-function getProgressPercent(progress: ReviewCompletion): number {
-	if (progress.requiredCount === 0) {
-		return progress.isComplete ? 100 : 0;
-	}
-
-	return Math.round(
-		(progress.completedRequiredCount / progress.requiredCount) * 100,
 	);
 }
 
