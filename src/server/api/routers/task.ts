@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { RATING_ANCHOR_MAX_LENGTH } from "@/lib/rating-anchors";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 const LOCKED_MSG =
@@ -7,7 +8,7 @@ const LOCKED_MSG =
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 const criteriaGroupFactorTypeSchema = z.enum(["POTENTIAL", "COMPETENCE"]);
 /** Anchor text under the rating scale; blank means no anchor. */
-const anchorTextSchema = z.string().trim().max(1000).optional();
+const anchorTextSchema = z.string().trim().max(RATING_ANCHOR_MAX_LENGTH);
 
 function toAnchorText(
 	type: z.infer<typeof criteriaTypeSchema>,
@@ -451,8 +452,8 @@ export const taskRouter = createTRPCRouter({
 				type: criteriaTypeSchema,
 				weight: z.number().positive().optional(),
 				isOptional: z.boolean().default(false),
-				anchorStar2: anchorTextSchema,
-				anchorStar4: anchorTextSchema,
+				anchorStar2: anchorTextSchema.optional(),
+				anchorStar4: anchorTextSchema.optional(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {

@@ -33,6 +33,10 @@ import {
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import {
+	RATING_ANCHOR_LABELS,
+	RATING_ANCHOR_MAX_LENGTH,
+} from "@/lib/rating-anchors";
 import { api } from "@/trpc/react";
 
 type CriteriaType = "QUANTITATIVE" | "QUALITATIVE";
@@ -726,36 +730,18 @@ function CriterionDialog({
 						) : null}
 						{type === "QUANTITATIVE" ? (
 							<>
-								<Field>
-									<FieldLabel htmlFor="criteria-anchor-2">
-										Anker 2 Sterne{" "}
-										<span className="font-normal text-muted-foreground">
-											(optional, „Erwartung kaum erfüllt“)
-										</span>
-									</FieldLabel>
-									<Textarea
-										disabled={mutation.isPending}
-										id="criteria-anchor-2"
-										maxLength={1000}
-										onChange={(e) => setAnchorStar2(e.target.value)}
-										value={anchorStar2}
-									/>
-								</Field>
-								<Field>
-									<FieldLabel htmlFor="criteria-anchor-4">
-										Anker 4 Sterne{" "}
-										<span className="font-normal text-muted-foreground">
-											(optional, „Erwartung erfüllt“)
-										</span>
-									</FieldLabel>
-									<Textarea
-										disabled={mutation.isPending}
-										id="criteria-anchor-4"
-										maxLength={1000}
-										onChange={(e) => setAnchorStar4(e.target.value)}
-										value={anchorStar4}
-									/>
-								</Field>
+								<AnchorField
+									disabled={mutation.isPending}
+									onChange={setAnchorStar2}
+									stars={2}
+									value={anchorStar2}
+								/>
+								<AnchorField
+									disabled={mutation.isPending}
+									onChange={setAnchorStar4}
+									stars={4}
+									value={anchorStar4}
+								/>
 							</>
 						) : null}
 					</FieldGroup>
@@ -774,6 +760,35 @@ function CriterionDialog({
 				</DialogFooter>
 			</DialogContent>
 		</Dialog>
+	);
+}
+
+type AnchorFieldProps = {
+	stars: keyof typeof RATING_ANCHOR_LABELS;
+	value: string;
+	onChange: (value: string) => void;
+	disabled: boolean;
+};
+
+function AnchorField({ stars, value, onChange, disabled }: AnchorFieldProps) {
+	const id = `criteria-anchor-${stars}`;
+
+	return (
+		<Field>
+			<FieldLabel htmlFor={id}>
+				Anker {stars} Sterne{" "}
+				<span className="font-normal text-muted-foreground">
+					(optional, „{RATING_ANCHOR_LABELS[stars]}“)
+				</span>
+			</FieldLabel>
+			<Textarea
+				disabled={disabled}
+				id={id}
+				maxLength={RATING_ANCHOR_MAX_LENGTH}
+				onChange={(e) => onChange(e.target.value)}
+				value={value}
+			/>
+		</Field>
 	);
 }
 

@@ -11,6 +11,7 @@ import {
 	DialogDescription,
 	DialogTitle,
 } from "@/components/ui/dialog";
+import { RATING_ANCHOR_LABELS } from "@/lib/rating-anchors";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
@@ -219,8 +220,8 @@ function RatingAnchors({
 	anchorStar4: string | null;
 }) {
 	const anchors = [
-		{ stars: 2, label: "Erwartung kaum erfüllt", text: anchorStar2 },
-		{ stars: 4, label: "Erwartung erfüllt", text: anchorStar4 },
+		{ stars: 2, label: RATING_ANCHOR_LABELS[2], text: anchorStar2 },
+		{ stars: 4, label: RATING_ANCHOR_LABELS[4], text: anchorStar4 },
 	].filter((anchor) => anchor.text !== null);
 
 	if (anchors.length === 0) {
