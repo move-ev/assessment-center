@@ -7,11 +7,12 @@
 #
 # Neon: migrations need a session-level lock that the pooler does not
 # provide, so they use the direct connection. The Neon integration for Vercel
-# sets DATABASE_URL_UNPOOLED; DIRECT_DATABASE_URL overrides it if set.
+# sets DATABASE_URL_UNPOOLED; DIRECT_DATABASE_URL overrides it if set. If
+# neither is set the build stops instead of migrating through the pooler.
 set -eu
 
 if [ "${VERCEL_ENV:-}" = "production" ]; then
-	DATABASE_URL="${DIRECT_DATABASE_URL:-${DATABASE_URL_UNPOOLED:-$DATABASE_URL}}" \
+	DATABASE_URL="${DIRECT_DATABASE_URL:-${DATABASE_URL_UNPOOLED:?set DIRECT_DATABASE_URL or DATABASE_URL_UNPOOLED}}" \
 		prisma migrate deploy
 fi
 

@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import type { Prisma } from "../../../../generated/prisma/client";
 
 const quantitativeInput = z.object({
 	acId: z.string(),
@@ -133,6 +134,33 @@ async function getCriteria(
 	return criteria;
 }
 
+/**
+ * Runs a rating write while holding a share lock on the AC row. Anonymizing
+ * updates that row first, so it waits for writes in flight, and writes that
+ * start later see ANONYMIZED and are refused. Without the lock a write that
+ * passed the access check could land after anonymization deleted free texts.
+ */
+async function writeUnlessAnonymized<T>(
+	db: ReviewAccessContext["db"],
+	acId: string,
+	write: (tx: Prisma.TransactionClient) => Promise<T>,
+): Promise<T> {
+	return db.$transaction(async (tx) => {
+		const [ac] = await tx.$queryRaw<Array<{ status: string }>>`
+			SELECT status FROM "AssessmentCenter" WHERE id = ${acId} FOR SHARE`;
+
+		if (ac?.status === "ANONYMIZED") {
+			throw new TRPCError({
+				code: "FORBIDDEN",
+				message:
+					"Anonymisierte Assessment Center können nicht mehr bewertet werden",
+			});
+		}
+
+		return write(tx);
+	});
+}
+
 export const ratingRouter = createTRPCRouter({
 	upsertQuantitative: protectedProcedure
 		.input(quantitativeInput)
@@ -154,28 +182,30 @@ export const ratingRouter = createTRPCRouter({
 				});
 			}
 
-			return ctx.db.quantitativeRating.upsert({
-				where: {
-					reviewerAssignmentId_criteriaId: {
+			return writeUnlessAnonymized(ctx.db, input.acId, (tx) =>
+				tx.quantitativeRating.upsert({
+					where: {
+						reviewerAssignmentId_criteriaId: {
+							reviewerAssignmentId: access.id,
+							criteriaId: input.criteriaId,
+						},
+					},
+					create: {
 						reviewerAssignmentId: access.id,
 						criteriaId: input.criteriaId,
+						value: input.value,
 					},
-				},
-				create: {
-					reviewerAssignmentId: access.id,
-					criteriaId: input.criteriaId,
-					value: input.value,
-				},
-				update: {
-					value: input.value,
-					deletedAt: null,
-				},
-				select: {
-					id: true,
-					value: true,
-					updatedAt: true,
-				},
-			});
+					update: {
+						value: input.value,
+						deletedAt: null,
+					},
+					select: {
+						id: true,
+						value: true,
+						updatedAt: true,
+					},
+				}),
+			);
 		}),
 
 	upsertQualitative: protectedProcedure
@@ -198,28 +228,30 @@ export const ratingRouter = createTRPCRouter({
 				});
 			}
 
-			return ctx.db.qualitativeRating.upsert({
-				where: {
-					reviewerAssignmentId_criteriaId: {
+			return writeUnlessAnonymized(ctx.db, input.acId, (tx) =>
+				tx.qualitativeRating.upsert({
+					where: {
+						reviewerAssignmentId_criteriaId: {
+							reviewerAssignmentId: access.id,
+							criteriaId: input.criteriaId,
+						},
+					},
+					create: {
 						reviewerAssignmentId: access.id,
 						criteriaId: input.criteriaId,
+						text: input.text,
 					},
-				},
-				create: {
-					reviewerAssignmentId: access.id,
-					criteriaId: input.criteriaId,
-					text: input.text,
-				},
-				update: {
-					text: input.text,
-					deletedAt: null,
-				},
-				select: {
-					id: true,
-					text: true,
-					updatedAt: true,
-				},
-			});
+					update: {
+						text: input.text,
+						deletedAt: null,
+					},
+					select: {
+						id: true,
+						text: true,
+						updatedAt: true,
+					},
+				}),
+			);
 		}),
 
 	upsertTeamObservation: protectedProcedure
@@ -246,42 +278,46 @@ export const ratingRouter = createTRPCRouter({
 			}
 
 			if (input.notes === "") {
-				await ctx.db.teamTaskObservation.updateMany({
-					where: {
-						taskId: input.taskId,
-						groupId,
-						reviewerId: access.reviewerId,
-						deletedAt: null,
-					},
-					data: { deletedAt: new Date() },
-				});
+				await writeUnlessAnonymized(ctx.db, input.acId, (tx) =>
+					tx.teamTaskObservation.updateMany({
+						where: {
+							taskId: input.taskId,
+							groupId,
+							reviewerId: access.reviewerId,
+							deletedAt: null,
+						},
+						data: { deletedAt: new Date() },
+					}),
+				);
 
 				return { notes: null as string | null };
 			}
 
-			return ctx.db.teamTaskObservation.upsert({
-				where: {
-					taskId_groupId_reviewerId: {
+			return writeUnlessAnonymized(ctx.db, input.acId, (tx) =>
+				tx.teamTaskObservation.upsert({
+					where: {
+						taskId_groupId_reviewerId: {
+							taskId: input.taskId,
+							groupId,
+							reviewerId: access.reviewerId,
+						},
+					},
+					create: {
 						taskId: input.taskId,
 						groupId,
 						reviewerId: access.reviewerId,
+						notes: input.notes,
 					},
-				},
-				create: {
-					taskId: input.taskId,
-					groupId,
-					reviewerId: access.reviewerId,
-					notes: input.notes,
-				},
-				update: {
-					notes: input.notes,
-					deletedAt: null,
-				},
-				select: {
-					id: true,
-					notes: true,
-					updatedAt: true,
-				},
-			});
+					update: {
+						notes: input.notes,
+						deletedAt: null,
+					},
+					select: {
+						id: true,
+						notes: true,
+						updatedAt: true,
+					},
+				}),
+			);
 		}),
 });

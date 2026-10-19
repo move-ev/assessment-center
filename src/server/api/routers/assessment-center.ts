@@ -521,71 +521,75 @@ export const assessmentCenterRouter = createTRPCRouter({
 
 			const assessmentCenterId = input.id;
 
-			await ctx.db.$transaction(async (tx) => {
-				// Status first and conditional: locks the row, so a concurrent
-				// reopen waits and then finds the AC anonymized.
-				const { count } = await tx.assessmentCenter.updateMany({
-					where: { id: assessmentCenterId, status: "COMPLETED" },
-					data: { status: "ANONYMIZED", anonymizedAt: new Date() },
-				});
-
-				if (count === 0) {
-					throw new TRPCError({
-						code: "CONFLICT",
-						message: "Der Status des Assessment Centers hat sich geändert",
+			await ctx.db.$transaction(
+				async (tx) => {
+					// Status first and conditional: locks the row, so a concurrent
+					// reopen waits and then finds the AC anonymized.
+					const { count } = await tx.assessmentCenter.updateMany({
+						where: { id: assessmentCenterId, status: "COMPLETED" },
+						data: { status: "ANONYMIZED", anonymizedAt: new Date() },
 					});
-				}
 
-				await tx.participant.deleteMany({
-					where: { assessmentCenterId, deletedAt: { not: null } },
-				});
-				await tx.qualitativeRating.deleteMany({
-					where: {
-						reviewerAssignment: { participant: { assessmentCenterId } },
-					},
-				});
-				await tx.quantitativeRating.updateMany({
-					where: {
-						reviewerAssignment: { participant: { assessmentCenterId } },
-						notes: { not: null },
-					},
-					data: { notes: null },
-				});
-				await tx.teamTaskObservation.deleteMany({
-					where: { task: { assessmentCenterId } },
-				});
+					if (count === 0) {
+						throw new TRPCError({
+							code: "CONFLICT",
+							message: "Der Status des Assessment Centers hat sich geändert",
+						});
+					}
 
-				const [participants, groups] = await Promise.all([
-					tx.participant.findMany({
-						where: { assessmentCenterId },
-						select: { id: true },
-					}),
-					tx.participantGroup.findMany({
-						where: { assessmentCenterId },
-						select: { id: true },
-						orderBy: { createdAt: "asc" },
-					}),
-				]);
-
-				const participantNames = assignPseudonyms(
-					participants.map((participant) => participant.id),
-					"Bewerbende",
-				);
-				for (const [id, name] of participantNames) {
-					await tx.participant.update({
-						where: { id },
-						data: { name, email: null, avatarUrl: null, avatarFileKey: null },
+					await tx.participant.deleteMany({
+						where: { assessmentCenterId, deletedAt: { not: null } },
 					});
-				}
+					await tx.qualitativeRating.deleteMany({
+						where: {
+							reviewerAssignment: { participant: { assessmentCenterId } },
+						},
+					});
+					await tx.quantitativeRating.updateMany({
+						where: {
+							reviewerAssignment: { participant: { assessmentCenterId } },
+							notes: { not: null },
+						},
+						data: { notes: null },
+					});
+					await tx.teamTaskObservation.deleteMany({
+						where: { task: { assessmentCenterId } },
+					});
 
-				const groupNames = numberInOrder(
-					groups.map((group) => group.id),
-					"Gruppe",
-				);
-				for (const [id, name] of groupNames) {
-					await tx.participantGroup.update({ where: { id }, data: { name } });
-				}
-			});
+					const [participants, groups] = await Promise.all([
+						tx.participant.findMany({
+							where: { assessmentCenterId },
+							select: { id: true },
+						}),
+						tx.participantGroup.findMany({
+							where: { assessmentCenterId },
+							select: { id: true },
+							orderBy: { createdAt: "asc" },
+						}),
+					]);
+
+					const participantNames = assignPseudonyms(
+						participants.map((participant) => participant.id),
+						"Bewerbende",
+					);
+					for (const [id, name] of participantNames) {
+						await tx.participant.update({
+							where: { id },
+							data: { name, email: null, avatarUrl: null, avatarFileKey: null },
+						});
+					}
+
+					const groupNames = numberInOrder(
+						groups.map((group) => group.id),
+						"Gruppe",
+					);
+					for (const [id, name] of groupNames) {
+						await tx.participantGroup.update({ where: { id }, data: { name } });
+					}
+				},
+				// One update per participant; generous limit for large ACs.
+				{ timeout: 30_000 },
+			);
 		}),
 
 	/** Deletes the AC with everything attached to it (cascade), e.g. demos. */
