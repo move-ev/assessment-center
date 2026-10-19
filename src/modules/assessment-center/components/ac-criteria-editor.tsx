@@ -32,6 +32,7 @@ import {
 	FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Textarea } from "@/components/ui/textarea";
 import {
 	RATING_ANCHOR_LABELS,
@@ -608,113 +609,115 @@ function CriterionDialog({
 						{isEditing ? "Kriterium bearbeiten" : "Kriterium hinzufügen"}
 					</DialogTitle>
 				</DialogHeader>
-				<form id="criterion-form" onSubmit={handleSubmit}>
-					<FieldGroup>
-						<Field>
-							<FieldLabel htmlFor="criteria-group">Gruppe</FieldLabel>
-							<NativeSelect
-								disabled={mutation.isPending}
-								id="criteria-group"
-								onChange={(e) => setCriteriaGroupId(e.target.value)}
-								value={criteriaGroupId}
-							>
-								{criteriaGroups.map((group) => (
-									<option key={group.id} value={group.id}>
-										{group.title}
-									</option>
-								))}
-							</NativeSelect>
-						</Field>
-						<Field>
-							<FieldLabel htmlFor="criteria-name">Name</FieldLabel>
-							<Input
-								disabled={mutation.isPending}
-								id="criteria-name"
-								onChange={(e) => setName(e.target.value)}
-								required
-								value={name}
-							/>
-							{zodErrors?.name ? (
-								<FieldError
-									errors={zodErrors.name.map((message) => ({ message }))}
-								/>
-							) : null}
-						</Field>
-						<Field>
-							<FieldLabel htmlFor="criteria-description">
-								Beschreibung{" "}
-								<span className="font-normal text-muted-foreground">
-									(optional)
-								</span>
-							</FieldLabel>
-							<Input
-								disabled={mutation.isPending}
-								id="criteria-description"
-								onChange={(e) => setDescription(e.target.value)}
-								value={description}
-							/>
-						</Field>
-						<Field>
-							<FieldLabel htmlFor="criteria-type">Typ</FieldLabel>
-							<NativeSelect
-								disabled={mutation.isPending}
-								id="criteria-type"
-								onChange={(e) => setType(e.target.value as CriteriaType)}
-								value={type}
-							>
-								<option value="QUANTITATIVE">Quantitativ (0-5 Skala)</option>
-								<option value="QUALITATIVE">Qualitativ (Freitext)</option>
-							</NativeSelect>
-						</Field>
-						{type === "QUANTITATIVE" ? (
+				<ScrollArea className={"h-128 w-full"}>
+					<form id="criterion-form" onSubmit={handleSubmit}>
+						<FieldGroup>
 							<Field>
-								<FieldLabel htmlFor="criteria-weight">Gewichtung</FieldLabel>
+								<FieldLabel htmlFor="criteria-group">Gruppe</FieldLabel>
+								<NativeSelect
+									disabled={mutation.isPending}
+									id="criteria-group"
+									onChange={(e) => setCriteriaGroupId(e.target.value)}
+									value={criteriaGroupId}
+								>
+									{criteriaGroups.map((group) => (
+										<option key={group.id} value={group.id}>
+											{group.title}
+										</option>
+									))}
+								</NativeSelect>
+							</Field>
+							<Field>
+								<FieldLabel htmlFor="criteria-name">Name</FieldLabel>
 								<Input
 									disabled={mutation.isPending}
-									id="criteria-weight"
-									min="0.01"
-									onChange={(e) => setWeight(e.target.value)}
+									id="criteria-name"
+									onChange={(e) => setName(e.target.value)}
 									required
-									step="0.01"
-									type="number"
-									value={weight}
+									value={name}
 								/>
+								{zodErrors?.name ? (
+									<FieldError
+										errors={zodErrors.name.map((message) => ({ message }))}
+									/>
+								) : null}
 							</Field>
-						) : null}
-						{type === "QUANTITATIVE" ? (
-							<Field orientation="horizontal">
-								<Checkbox
-									checked={isOptional}
-									disabled={mutation.isPending}
-									id="criteria-optional"
-									onCheckedChange={setIsOptional}
-								/>
-								<FieldLabel htmlFor="criteria-optional">
-									Optional{" "}
+							<Field>
+								<FieldLabel htmlFor="criteria-description">
+									Beschreibung{" "}
 									<span className="font-normal text-muted-foreground">
-										(zählt nur, wenn bewertet; blockiert den Abschluss nicht)
+										(optional)
 									</span>
 								</FieldLabel>
+								<Input
+									disabled={mutation.isPending}
+									id="criteria-description"
+									onChange={(e) => setDescription(e.target.value)}
+									value={description}
+								/>
 							</Field>
-						) : null}
-						{type === "QUANTITATIVE" ? (
-							<>
-								<AnchorField
+							<Field>
+								<FieldLabel htmlFor="criteria-type">Typ</FieldLabel>
+								<NativeSelect
 									disabled={mutation.isPending}
-									onChange={setAnchorStar2}
-									stars={2}
-									value={anchorStar2}
-								/>
-								<AnchorField
-									disabled={mutation.isPending}
-									onChange={setAnchorStar4}
-									stars={4}
-									value={anchorStar4}
-								/>
-							</>
-						) : null}
-					</FieldGroup>
-				</form>
+									id="criteria-type"
+									onChange={(e) => setType(e.target.value as CriteriaType)}
+									value={type}
+								>
+									<option value="QUANTITATIVE">Quantitativ (0-5 Skala)</option>
+									<option value="QUALITATIVE">Qualitativ (Freitext)</option>
+								</NativeSelect>
+							</Field>
+							{type === "QUANTITATIVE" ? (
+								<Field>
+									<FieldLabel htmlFor="criteria-weight">Gewichtung</FieldLabel>
+									<Input
+										disabled={mutation.isPending}
+										id="criteria-weight"
+										min="0.01"
+										onChange={(e) => setWeight(e.target.value)}
+										required
+										step="0.01"
+										type="number"
+										value={weight}
+									/>
+								</Field>
+							) : null}
+							{type === "QUANTITATIVE" ? (
+								<Field orientation="horizontal">
+									<Checkbox
+										checked={isOptional}
+										disabled={mutation.isPending}
+										id="criteria-optional"
+										onCheckedChange={setIsOptional}
+									/>
+									<FieldLabel htmlFor="criteria-optional">
+										Optional{" "}
+										<span className="font-normal text-muted-foreground">
+											(zählt nur, wenn bewertet; blockiert den Abschluss nicht)
+										</span>
+									</FieldLabel>
+								</Field>
+							) : null}
+							{type === "QUANTITATIVE" ? (
+								<>
+									<AnchorField
+										disabled={mutation.isPending}
+										onChange={setAnchorStar2}
+										stars={2}
+										value={anchorStar2}
+									/>
+									<AnchorField
+										disabled={mutation.isPending}
+										onChange={setAnchorStar4}
+										stars={4}
+										value={anchorStar4}
+									/>
+								</>
+							) : null}
+						</FieldGroup>
+					</form>
+				</ScrollArea>
 				<DialogFooter>
 					<Button onClick={onClose} type="button" variant="outline">
 						Abbrechen
