@@ -437,4 +437,30 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: { status: "ACTIVE" },
 			});
 		}),
+
+	/** Deletes the AC with everything attached to it (cascade), e.g. demos. */
+	delete: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können Assessment Center löschen",
+				});
+			}
+
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id },
+				select: { id: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			await ctx.db.assessmentCenter.delete({ where: { id: input.id } });
+		}),
 });

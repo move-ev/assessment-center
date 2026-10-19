@@ -14,7 +14,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { ROUTES } from "@/lib/routes";
 import { api } from "@/trpc/react";
+import { AcConfirmByNameDialog } from "./ac-confirm-by-name-dialog";
 
 type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 
@@ -180,6 +182,10 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 			<Separator />
 
 			<StatusSection acId={acId} currentStatus={ac.status} utils={utils} />
+
+			<Separator />
+
+			<DeleteSection acId={acId} acName={ac.name} utils={utils} />
 		</div>
 	);
 }
@@ -399,6 +405,52 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 					Schließe alle 7 Einrichtungsschritte ab, um das AC zu aktivieren.
 				</p>
 			)}
+		</div>
+	);
+}
+
+type DeleteSectionProps = {
+	acId: string;
+	acName: string;
+	utils: ReturnType<typeof api.useUtils>;
+};
+
+function DeleteSection({ acId, acName, utils }: DeleteSectionProps) {
+	const router = useRouter();
+	const deleteMutation = api.assessmentCenter.delete.useMutation({
+		onSuccess: async () => {
+			await utils.assessmentCenter.listForUser.invalidate();
+			toast.success("Assessment Center wurde gelöscht");
+			router.push(ROUTES.dashboard());
+		},
+		onError: (error) => toast.error(error.message),
+	});
+
+	return (
+		<div className="space-y-4">
+			<div>
+				<h3 className="font-medium text-sm">AC löschen</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
+					Löscht das Assessment Center endgültig mit allen Bewerbenden,
+					Aufgaben, Bewertungen und Beobachtungen, zum Beispiel nach einer Demo.
+				</p>
+			</div>
+			<AcConfirmByNameDialog
+				acName={acName}
+				confirmLabel="Endgültig löschen"
+				description={
+					<p>
+						Alle Daten dieses Assessment Centers werden gelöscht. Das lässt sich
+						nicht rückgängig machen. Die Benutzerkonten der Beobachter bleiben
+						erhalten.
+					</p>
+				}
+				isPending={deleteMutation.isPending}
+				onConfirm={() => deleteMutation.mutate({ id: acId })}
+				pendingLabel="Löscht..."
+				title="Assessment Center löschen?"
+				triggerLabel="AC löschen"
+			/>
 		</div>
 	);
 }
