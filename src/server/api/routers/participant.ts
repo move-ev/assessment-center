@@ -139,13 +139,8 @@ export const participantRouter = createTRPCRouter({
 				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
 			}
 
-			await ctx.db.participantGroupMembership.deleteMany({
-				where: { participantId: input.id },
-			});
-
-			await ctx.db.participant.update({
-				where: { id: input.id },
-				data: { deletedAt: new Date() },
-			});
+			// Hard delete for data protection: memberships, assignments and their
+			// ratings go with the participant (cascade).
+			await ctx.db.participant.delete({ where: { id: input.id } });
 		}),
 });
