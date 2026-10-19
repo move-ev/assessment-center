@@ -39,22 +39,7 @@ function EvaluationCriteria({ criteria }: Props) {
 				{criteria.map((criterion) => (
 					<TableRow key={criterion.id}>
 						<TableCell className="font-medium">{criterion.taskName}</TableCell>
-						<TableCell>
-							<div className="space-y-1">
-								<p>{criterion.criteriaGroupTitle}</p>
-								<Badge
-									variant={
-										criterion.criteriaGroupFactorType === "POTENTIAL"
-											? "secondary"
-											: "outline"
-									}
-								>
-									{criterion.criteriaGroupFactorType === "POTENTIAL"
-										? "Potenzial"
-										: "Kompetenz"}
-								</Badge>
-							</div>
-						</TableCell>
+						<TableCell>{criterion.criteriaGroupTitle}</TableCell>
 						<TableCell>{criterion.name}</TableCell>
 						<TableCell>
 							<Badge

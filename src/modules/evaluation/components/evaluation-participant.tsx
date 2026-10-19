@@ -18,10 +18,11 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
-import { RANKING_BAND_PERCENT, type RankingBand } from "../server/ranking";
+import type { RankingBand } from "../server/ranking";
 import { EvaluationCriteria } from "./evaluation-criteria";
 import { EvaluationExport } from "./evaluation-export";
 import { EvaluationTask } from "./evaluation-task";
+import { RankingBandBadge } from "./ranking-band-badge";
 
 type Props = {
 	acId: string;
@@ -127,22 +128,10 @@ function SummaryCard({
 	);
 }
 
-const RANKING_BAND_STYLE: Record<
-	RankingBand,
-	{ label: string; row: string; badge: string }
-> = {
-	TOP: {
-		label: `Top ${RANKING_BAND_PERCENT} %`,
-		row: "bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60",
-		badge:
-			"border-green-200 bg-green-100 text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-300",
-	},
-	BOTTOM: {
-		label: `Untere ${RANKING_BAND_PERCENT} %`,
-		row: "bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60",
-		badge:
-			"border-red-200 bg-red-100 text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-300",
-	},
+const RANKING_BAND_ROW: Record<RankingBand, string> = {
+	TOP: "bg-green-50 hover:bg-green-100 dark:bg-green-950/40 dark:hover:bg-green-950/60",
+	BOTTOM:
+		"bg-red-50 hover:bg-red-100 dark:bg-red-950/40 dark:hover:bg-red-950/60",
 };
 
 function ParticipantTable({
@@ -170,7 +159,7 @@ function ParticipantTable({
 					<TableRow
 						className={
 							participant.rankingBand
-								? RANKING_BAND_STYLE[participant.rankingBand].row
+								? RANKING_BAND_ROW[participant.rankingBand]
 								: undefined
 						}
 						key={participant.id}
@@ -179,14 +168,7 @@ function ParticipantTable({
 							<div className="flex items-center gap-2">
 								{index + 1}
 								{participant.rankingBand && (
-									<Badge
-										className={
-											RANKING_BAND_STYLE[participant.rankingBand].badge
-										}
-										variant="outline"
-									>
-										{RANKING_BAND_STYLE[participant.rankingBand].label}
-									</Badge>
+									<RankingBandBadge band={participant.rankingBand} />
 								)}
 							</div>
 						</TableCell>

@@ -2,21 +2,12 @@ import "server-only";
 
 import { notFound } from "next/navigation";
 import { db } from "@/server/db";
+import { getEvaluationResultsData } from "./get-evaluation-results-data";
 import {
 	getParticipantReviewerBreakdown,
 	type ReviewerBreakdownData,
 } from "./get-participant-reviewer-breakdown";
-import {
-	buildParticipantDashboardSnapshot,
-	parseParticipantDashboardSnapshot,
-} from "./participant-dashboard-snapshot";
-import { computeWeightedMean, roundScore } from "./scoring";
-
-type FactorFilter = "ALL" | "COMPETENCE" | "POTENTIAL";
-
-type ParticipantDashboardGroup = NonNullable<
-	ReturnType<typeof parseParticipantDashboardSnapshot>
->["participants"][number]["groups"][number];
+import type { RankingBand } from "./ranking";
 
 export type EvaluationParticipantDetailData = {
 	participant: {
@@ -24,31 +15,21 @@ export type EvaluationParticipantDetailData = {
 		name: string;
 		groupName: string | null;
 		overallScore: number | null;
+		/** 1-based position in the ranking, null without an overall score. */
+		rank: number | null;
+		/** Number of participants with an overall score. */
+		rankedCount: number;
+		rankingBand: RankingBand | null;
 		completedAssignmentCount: number;
 		totalAssignmentCount: number;
-		scoredGroupCount: number;
-		totalGroupCount: number;
 	};
-	views: Array<{
-		filter: FactorFilter;
-		label: string;
-		participantAverage: number | null;
-		benchmarkAverage: number | null;
-		deltaAverage: number | null;
-		groupCount: number;
-		scoredGroupCount: number;
-		groups: Array<{
-			axisId: string;
-			taskId: string;
-			taskName: string;
-			criteriaGroupId: string;
-			criteriaGroupTitle: string;
-			factorType: "COMPETENCE" | "POTENTIAL";
-			criteriaCount: number;
-			participantScore: number | null;
-			benchmarkScore: number | null;
-			delta: number | null;
-		}>;
+	taskScores: Array<{
+		taskId: string;
+		taskName: string;
+		scoreWeight: number;
+		score: number | null;
+		completedAssignments: number;
+		totalAssignments: number;
 	}>;
 	reviewerBreakdown: ReviewerBreakdownData;
 	teamObservations: Array<{
@@ -61,113 +42,6 @@ export type EvaluationParticipantDetailData = {
 		}>;
 	}>;
 };
-
-const VIEW_DEFINITIONS: Array<{
-	filter: FactorFilter;
-	label: string;
-}> = [
-	{ filter: "ALL", label: "Alle Faktoren" },
-	{ filter: "COMPETENCE", label: "Kompetenz" },
-	{ filter: "POTENTIAL", label: "Potenzial" },
-];
-
-function getFilteredGroups(
-	groups: ParticipantDashboardGroup[],
-	filter: FactorFilter,
-) {
-	if (filter === "ALL") {
-		return groups;
-	}
-
-	return groups.filter((group) => group.factorType === filter);
-}
-
-function buildWeightedAverage(
-	groups: Array<{
-		participantScore: number | null;
-		benchmarkScore: number | null;
-		weightTotal: number;
-	}>,
-	key: "participantScore" | "benchmarkScore",
-) {
-	return computeWeightedMean(
-		groups.map((group) => ({ score: group[key], weight: group.weightTotal })),
-	);
-}
-
-function buildViews(
-	groups: ParticipantDashboardGroup[],
-): EvaluationParticipantDetailData["views"] {
-	return VIEW_DEFINITIONS.map((definition) => {
-		const filteredGroups = getFilteredGroups(groups, definition.filter).map(
-			(group) => ({
-				axisId: group.axisId,
-				taskId: group.taskId,
-				taskName: group.taskName,
-				criteriaGroupId: group.criteriaGroupId,
-				criteriaGroupTitle: group.criteriaGroupTitle,
-				factorType: group.factorType,
-				criteriaCount: group.criteriaCount,
-				participantScore: group.participantScore,
-				benchmarkScore: group.benchmarkScore,
-				delta:
-					group.participantScore === null || group.benchmarkScore === null
-						? null
-						: roundScore(group.participantScore - group.benchmarkScore),
-				weightTotal: group.weightTotal,
-			}),
-		);
-		const participantAverage = buildWeightedAverage(
-			filteredGroups,
-			"participantScore",
-		);
-		const benchmarkAverage = buildWeightedAverage(
-			filteredGroups,
-			"benchmarkScore",
-		);
-
-		return {
-			filter: definition.filter,
-			label: definition.label,
-			participantAverage,
-			benchmarkAverage,
-			deltaAverage:
-				participantAverage === null || benchmarkAverage === null
-					? null
-					: roundScore(participantAverage - benchmarkAverage),
-			groupCount: filteredGroups.length,
-			scoredGroupCount: filteredGroups.filter(
-				(group) => group.participantScore !== null,
-			).length,
-			groups: filteredGroups.map(
-				({ weightTotal: _weightTotal, ...group }) => group,
-			),
-		};
-	});
-}
-
-async function fetchParticipantSnapshot(acId: string, participantId: string) {
-	const assessmentCenter = await db.assessmentCenter.findFirst({
-		where: { id: acId, deletedAt: null },
-		select: {
-			id: true,
-			participantDashboardSnapshot: true,
-		},
-	});
-
-	if (!assessmentCenter) {
-		notFound();
-	}
-
-	const snapshot =
-		parseParticipantDashboardSnapshot(
-			assessmentCenter.participantDashboardSnapshot,
-		) ?? (await buildParticipantDashboardSnapshot(acId));
-
-	return snapshot.participants.find(
-		(participant) => participant.id === participantId,
-	);
-}
 
 async function fetchParticipantGroupId(acId: string, participantId: string) {
 	const membership = await db.participantGroupMembership.findFirst({
@@ -241,23 +115,36 @@ async function fetchTeamObservations(
 	return Array.from(byTask.values());
 }
 
+/**
+ * Reads the participant from the same results as the ranking, so overall
+ * score, rank and task scores match the results page exactly. Trade-off: this
+ * evaluates the whole AC to show one participant, which is fine at AC sizes.
+ */
 export async function getEvaluationParticipantDetailData(
 	acId: string,
 	participantId: string,
 ): Promise<EvaluationParticipantDetailData> {
-	const [participant, reviewerBreakdown] = await Promise.all([
-		fetchParticipantSnapshot(acId, participantId),
+	const [results, reviewerBreakdown, groupId] = await Promise.all([
+		getEvaluationResultsData(acId),
 		getParticipantReviewerBreakdown(acId, participantId),
+		fetchParticipantGroupId(acId, participantId),
 	]);
+
+	const index = results.participants.findIndex(
+		(entry) => entry.id === participantId,
+	);
+	const participant = results.participants[index];
 
 	if (!participant) {
 		notFound();
 	}
 
-	const groupId = await fetchParticipantGroupId(acId, participantId);
 	const teamObservations = groupId
 		? await fetchTeamObservations(acId, groupId)
 		: [];
+	const breakdownTaskIds = new Set(
+		reviewerBreakdown.tasks.map((task) => task.taskId),
+	);
 
 	return {
 		participant: {
@@ -265,13 +152,27 @@ export async function getEvaluationParticipantDetailData(
 			name: participant.name,
 			groupName: participant.groupName,
 			overallScore: participant.overallScore,
+			rank: participant.overallScore === null ? null : index + 1,
+			rankedCount: results.summary.participantsWithScore,
+			rankingBand: participant.rankingBand,
 			completedAssignmentCount: participant.completedAssignmentCount,
 			totalAssignmentCount: participant.totalAssignmentCount,
-			scoredGroupCount: participant.scoredGroupCount,
-			totalGroupCount: participant.totalGroupCount,
 		},
-		views: buildViews(participant.groups),
-		reviewerBreakdown,
+		taskScores: participant.taskResults.map((task) => ({
+			taskId: task.taskId,
+			taskName: task.taskName,
+			scoreWeight: task.scoreWeight,
+			score: task.score,
+			completedAssignments: task.completedAssignments,
+			totalAssignments: task.totalAssignments,
+		})),
+		// Same task order as the task scores above.
+		reviewerBreakdown: {
+			...reviewerBreakdown,
+			tasks: participant.taskResults
+				.filter((task) => breakdownTaskIds.has(task.taskId))
+				.map(({ taskId, taskName }) => ({ taskId, taskName })),
+		},
 		teamObservations,
 	};
 }

@@ -2,72 +2,35 @@ import "server-only";
 
 import { db } from "@/server/db";
 import {
+	type CriterionRating,
 	computeWeightedCriteriaScore,
-	type WeightedCriterion,
+	getScoredCriteria,
 } from "./scoring";
 
-export type ReviewerGroupScore = {
-	axisId: string;
+export type ReviewerTaskScore = {
+	taskId: string;
 	score: number | null;
 };
 
 export type ReviewerEntry = {
 	reviewerId: string;
 	reviewerName: string;
-	scores: ReviewerGroupScore[];
+	scores: ReviewerTaskScore[];
 };
 
 export type ReviewerBreakdownData = {
-	axisGroups: Array<{
-		axisId: string;
+	tasks: Array<{
+		taskId: string;
 		taskName: string;
-		criteriaGroupTitle: string;
 	}>;
 	reviewers: ReviewerEntry[];
 };
 
-type GroupDefinition = {
-	axisId: string;
-	taskName: string;
-	criteriaGroupTitle: string;
-	taskId: string;
-	criteria: WeightedCriterion[];
-};
-
-function buildGroupDefinitions(
-	tasks: Array<{
-		id: string;
-		name: string;
-		criteriaGroups: Array<{
-			id: string;
-			title: string;
-			criteria: Array<{ id: string; weight: number | null }>;
-		}>;
-	}>,
-): GroupDefinition[] {
-	return tasks.flatMap((task) =>
-		task.criteriaGroups.flatMap((group) => {
-			const criteria = group.criteria.flatMap((c) =>
-				c.weight !== null ? [{ id: c.id, weight: c.weight }] : [],
-			);
-
-			if (criteria.length === 0) {
-				return [];
-			}
-
-			return [
-				{
-					axisId: `${task.id}:${group.id}`,
-					taskName: task.name,
-					criteriaGroupTitle: group.title,
-					taskId: task.id,
-					criteria,
-				},
-			];
-		}),
-	);
-}
-
+/**
+ * Task score per reviewer for one participant: the same weighted criteria
+ * score as the ranking, computed from one reviewer's ratings only. Lists only
+ * tasks the participant was assigned to that have scored criteria.
+ */
 export async function getParticipantReviewerBreakdown(
 	acId: string,
 	participantId: string,
@@ -81,17 +44,9 @@ export async function getParticipantReviewerBreakdown(
 					select: {
 						id: true,
 						name: true,
-						criteriaGroups: {
+						criteria: {
 							where: { deletedAt: null },
-							select: {
-								id: true,
-								title: true,
-								criteria: {
-									where: { deletedAt: null, type: "QUANTITATIVE" },
-									select: { id: true, weight: true },
-									orderBy: { createdAt: "asc" },
-								},
-							},
+							select: { id: true, type: true, weight: true },
 							orderBy: { createdAt: "asc" },
 						},
 					},
@@ -122,25 +77,28 @@ export async function getParticipantReviewerBreakdown(
 	]);
 
 	if (!acData) {
-		return { axisGroups: [], reviewers: [] };
+		return { tasks: [], reviewers: [] };
 	}
 
-	const groupDefinitions = buildGroupDefinitions(acData.tasks);
-	const axisGroups = groupDefinitions.map(
-		({ axisId, taskName, criteriaGroupTitle }) => ({
-			axisId,
-			taskName,
-			criteriaGroupTitle,
-		}),
+	const assignedTaskIds = new Set(
+		assignments.map((assignment) => assignment.taskId),
 	);
+	const tasks = acData.tasks.flatMap((task) => {
+		const criteria = getScoredCriteria(task.criteria);
 
-	type ReviewerAccumulator = {
-		reviewerId: string;
-		reviewerName: string;
-		ratingsByTask: Map<string, Array<{ criteriaId: string; value: number }>>;
-	};
+		return assignedTaskIds.has(task.id) && criteria.length > 0
+			? [{ taskId: task.id, taskName: task.name, criteria }]
+			: [];
+	});
 
-	const reviewerMap = new Map<string, ReviewerAccumulator>();
+	const reviewerMap = new Map<
+		string,
+		{
+			reviewerId: string;
+			reviewerName: string;
+			ratingsByTask: Map<string, CriterionRating[]>;
+		}
+	>();
 
 	for (const assignment of assignments) {
 		const { reviewer, taskId, quantitativeRatings } = assignment;
@@ -158,15 +116,21 @@ export async function getParticipantReviewerBreakdown(
 		(reviewer) => ({
 			reviewerId: reviewer.reviewerId,
 			reviewerName: reviewer.reviewerName,
-			scores: groupDefinitions.map((group) => {
-				const ratings = reviewer.ratingsByTask.get(group.taskId) ?? [];
+			scores: tasks.map((task) => {
+				const ratings = reviewer.ratingsByTask.get(task.taskId);
+
 				return {
-					axisId: group.axisId,
-					score: computeWeightedCriteriaScore(group.criteria, [ratings]),
+					taskId: task.taskId,
+					score: ratings
+						? computeWeightedCriteriaScore(task.criteria, [ratings])
+						: null,
 				};
 			}),
 		}),
 	);
 
-	return { axisGroups, reviewers };
+	return {
+		tasks: tasks.map(({ taskId, taskName }) => ({ taskId, taskName })),
+		reviewers,
+	};
 }

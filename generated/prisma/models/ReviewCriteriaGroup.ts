@@ -28,7 +28,6 @@ export type ReviewCriteriaGroupMinAggregateOutputType = {
   id: string | null
   taskId: string | null
   title: string | null
-  factorType: $Enums.CriteriaGroupFactorType | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -38,7 +37,6 @@ export type ReviewCriteriaGroupMaxAggregateOutputType = {
   id: string | null
   taskId: string | null
   title: string | null
-  factorType: $Enums.CriteriaGroupFactorType | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -48,7 +46,6 @@ export type ReviewCriteriaGroupCountAggregateOutputType = {
   id: number
   taskId: number
   title: number
-  factorType: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -60,7 +57,6 @@ export type ReviewCriteriaGroupMinAggregateInputType = {
   id?: true
   taskId?: true
   title?: true
-  factorType?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -70,7 +66,6 @@ export type ReviewCriteriaGroupMaxAggregateInputType = {
   id?: true
   taskId?: true
   title?: true
-  factorType?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -80,7 +75,6 @@ export type ReviewCriteriaGroupCountAggregateInputType = {
   id?: true
   taskId?: true
   title?: true
-  factorType?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -163,7 +157,6 @@ export type ReviewCriteriaGroupGroupByOutputType = {
   id: string
   taskId: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -194,7 +187,6 @@ export type ReviewCriteriaGroupWhereInput = {
   id?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
   taskId?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
   title?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFilter<"ReviewCriteriaGroup"> | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteriaGroup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteriaGroup"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteriaGroup"> | Date | string | null
@@ -206,7 +198,6 @@ export type ReviewCriteriaGroupOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  factorType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -221,7 +212,6 @@ export type ReviewCriteriaGroupWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.ReviewCriteriaGroupWhereInput | Prisma.ReviewCriteriaGroupWhereInput[]
   taskId?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
   title?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFilter<"ReviewCriteriaGroup"> | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteriaGroup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteriaGroup"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteriaGroup"> | Date | string | null
@@ -233,7 +223,6 @@ export type ReviewCriteriaGroupOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  factorType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -249,7 +238,6 @@ export type ReviewCriteriaGroupScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"ReviewCriteriaGroup"> | string
   taskId?: Prisma.StringWithAggregatesFilter<"ReviewCriteriaGroup"> | string
   title?: Prisma.StringWithAggregatesFilter<"ReviewCriteriaGroup"> | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeWithAggregatesFilter<"ReviewCriteriaGroup"> | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ReviewCriteriaGroup"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ReviewCriteriaGroup"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"ReviewCriteriaGroup"> | Date | string | null
@@ -258,7 +246,6 @@ export type ReviewCriteriaGroupScalarWhereWithAggregatesInput = {
 export type ReviewCriteriaGroupCreateInput = {
   id?: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -270,7 +257,6 @@ export type ReviewCriteriaGroupUncheckedCreateInput = {
   id?: string
   taskId: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -280,7 +266,6 @@ export type ReviewCriteriaGroupUncheckedCreateInput = {
 export type ReviewCriteriaGroupUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -292,7 +277,6 @@ export type ReviewCriteriaGroupUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -303,7 +287,6 @@ export type ReviewCriteriaGroupCreateManyInput = {
   id?: string
   taskId: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -312,7 +295,6 @@ export type ReviewCriteriaGroupCreateManyInput = {
 export type ReviewCriteriaGroupUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -322,7 +304,6 @@ export type ReviewCriteriaGroupUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -342,7 +323,6 @@ export type ReviewCriteriaGroupCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  factorType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -352,7 +332,6 @@ export type ReviewCriteriaGroupMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  factorType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -362,7 +341,6 @@ export type ReviewCriteriaGroupMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   taskId?: Prisma.SortOrder
   title?: Prisma.SortOrder
-  factorType?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -415,10 +393,6 @@ export type ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskNestedInput = {
   deleteMany?: Prisma.ReviewCriteriaGroupScalarWhereInput | Prisma.ReviewCriteriaGroupScalarWhereInput[]
 }
 
-export type EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput = {
-  set?: $Enums.CriteriaGroupFactorType
-}
-
 export type ReviewCriteriaGroupCreateNestedOneWithoutCriteriaInput = {
   create?: Prisma.XOR<Prisma.ReviewCriteriaGroupCreateWithoutCriteriaInput, Prisma.ReviewCriteriaGroupUncheckedCreateWithoutCriteriaInput>
   connectOrCreate?: Prisma.ReviewCriteriaGroupCreateOrConnectWithoutCriteriaInput
@@ -436,7 +410,6 @@ export type ReviewCriteriaGroupUpdateOneRequiredWithoutCriteriaNestedInput = {
 export type ReviewCriteriaGroupCreateWithoutTaskInput = {
   id?: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -446,7 +419,6 @@ export type ReviewCriteriaGroupCreateWithoutTaskInput = {
 export type ReviewCriteriaGroupUncheckedCreateWithoutTaskInput = {
   id?: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -486,7 +458,6 @@ export type ReviewCriteriaGroupScalarWhereInput = {
   id?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
   taskId?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
   title?: Prisma.StringFilter<"ReviewCriteriaGroup"> | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFilter<"ReviewCriteriaGroup"> | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFilter<"ReviewCriteriaGroup"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ReviewCriteriaGroup"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"ReviewCriteriaGroup"> | Date | string | null
@@ -495,7 +466,6 @@ export type ReviewCriteriaGroupScalarWhereInput = {
 export type ReviewCriteriaGroupCreateWithoutCriteriaInput = {
   id?: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -506,7 +476,6 @@ export type ReviewCriteriaGroupUncheckedCreateWithoutCriteriaInput = {
   id?: string
   taskId: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -531,7 +500,6 @@ export type ReviewCriteriaGroupUpdateToOneWithWhereWithoutCriteriaInput = {
 export type ReviewCriteriaGroupUpdateWithoutCriteriaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -542,7 +510,6 @@ export type ReviewCriteriaGroupUncheckedUpdateWithoutCriteriaInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   taskId?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -551,7 +518,6 @@ export type ReviewCriteriaGroupUncheckedUpdateWithoutCriteriaInput = {
 export type ReviewCriteriaGroupCreateManyTaskInput = {
   id?: string
   title: string
-  factorType: $Enums.CriteriaGroupFactorType
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -560,7 +526,6 @@ export type ReviewCriteriaGroupCreateManyTaskInput = {
 export type ReviewCriteriaGroupUpdateWithoutTaskInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -570,7 +535,6 @@ export type ReviewCriteriaGroupUpdateWithoutTaskInput = {
 export type ReviewCriteriaGroupUncheckedUpdateWithoutTaskInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -580,7 +544,6 @@ export type ReviewCriteriaGroupUncheckedUpdateWithoutTaskInput = {
 export type ReviewCriteriaGroupUncheckedUpdateManyWithoutTaskInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
-  factorType?: Prisma.EnumCriteriaGroupFactorTypeFieldUpdateOperationsInput | $Enums.CriteriaGroupFactorType
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -621,7 +584,6 @@ export type ReviewCriteriaGroupSelect<ExtArgs extends runtime.Types.Extensions.I
   id?: boolean
   taskId?: boolean
   title?: boolean
-  factorType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -634,7 +596,6 @@ export type ReviewCriteriaGroupSelectCreateManyAndReturn<ExtArgs extends runtime
   id?: boolean
   taskId?: boolean
   title?: boolean
-  factorType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -645,7 +606,6 @@ export type ReviewCriteriaGroupSelectUpdateManyAndReturn<ExtArgs extends runtime
   id?: boolean
   taskId?: boolean
   title?: boolean
-  factorType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -656,13 +616,12 @@ export type ReviewCriteriaGroupSelectScalar = {
   id?: boolean
   taskId?: boolean
   title?: boolean
-  factorType?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type ReviewCriteriaGroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "factorType" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reviewCriteriaGroup"]>
+export type ReviewCriteriaGroupOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "taskId" | "title" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["reviewCriteriaGroup"]>
 export type ReviewCriteriaGroupInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   task?: boolean | Prisma.TaskDefaultArgs<ExtArgs>
   criteria?: boolean | Prisma.ReviewCriteriaGroup$criteriaArgs<ExtArgs>
@@ -685,7 +644,6 @@ export type $ReviewCriteriaGroupPayload<ExtArgs extends runtime.Types.Extensions
     id: string
     taskId: string
     title: string
-    factorType: $Enums.CriteriaGroupFactorType
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -1117,7 +1075,6 @@ export interface ReviewCriteriaGroupFieldRefs {
   readonly id: Prisma.FieldRef<"ReviewCriteriaGroup", 'String'>
   readonly taskId: Prisma.FieldRef<"ReviewCriteriaGroup", 'String'>
   readonly title: Prisma.FieldRef<"ReviewCriteriaGroup", 'String'>
-  readonly factorType: Prisma.FieldRef<"ReviewCriteriaGroup", 'CriteriaGroupFactorType'>
   readonly createdAt: Prisma.FieldRef<"ReviewCriteriaGroup", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ReviewCriteriaGroup", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"ReviewCriteriaGroup", 'DateTime'>

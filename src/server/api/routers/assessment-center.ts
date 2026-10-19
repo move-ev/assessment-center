@@ -1,8 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { buildParticipantDashboardSnapshot } from "@/modules/evaluation/server/participant-dashboard-snapshot";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-import { Prisma } from "../../../../generated/prisma/client";
 
 const LOCKED_MSG =
 	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
@@ -398,15 +396,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			const participantDashboardSnapshot =
-				await buildParticipantDashboardSnapshot(input.id);
-
 			await ctx.db.assessmentCenter.update({
 				where: { id: input.id },
-				data: {
-					status: "COMPLETED",
-					participantDashboardSnapshot,
-				},
+				data: { status: "COMPLETED" },
 			});
 		}),
 
@@ -440,15 +432,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			// Snapshot wird verworfen, damit die Auswertung nach der Wiederöffnung
-			// live aus den (ggf. angepassten) Ratings berechnet wird. Beim erneuten
-			// Abschließen wird ein frischer Snapshot erzeugt.
 			await ctx.db.assessmentCenter.update({
 				where: { id: input.id },
-				data: {
-					status: "ACTIVE",
-					participantDashboardSnapshot: Prisma.JsonNull,
-				},
+				data: { status: "ACTIVE" },
 			});
 		}),
 });

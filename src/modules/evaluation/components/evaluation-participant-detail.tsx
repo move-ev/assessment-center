@@ -1,4 +1,4 @@
-import { ArrowLeft, Users } from "lucide-react";
+import { ArrowLeft, ListChecks, Users } from "lucide-react";
 import Link from "next/link";
 import {
 	Card,
@@ -8,9 +8,19 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
-import { EvaluationParticipantDetailDashboard } from "./evaluation-participant-detail-dashboard";
+import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
+import { formatScore } from "./format-score";
+import { RankingBandBadge } from "./ranking-band-badge";
 
 type Props = {
 	acId: string;
@@ -27,10 +37,15 @@ function getInitials(name: string): string {
 }
 
 function EvaluationParticipantDetail({ acId, data }: Props) {
-	const hasData = data.views.some((view) => view.groups.length > 0);
 	const initials = getInitials(data.participant.name);
-	const { completedAssignmentCount, totalAssignmentCount, overallScore } =
-		data.participant;
+	const {
+		completedAssignmentCount,
+		totalAssignmentCount,
+		overallScore,
+		rank,
+		rankedCount,
+		rankingBand,
+	} = data.participant;
 
 	return (
 		<div className="space-y-6 p-6">
@@ -61,34 +76,96 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 					</div>
 
 					{overallScore !== null && (
-						<div className="shrink-0 text-right">
+						<div className="shrink-0 space-y-1 text-right">
 							<p className="text-muted-foreground text-xs">Gesamtwert</p>
 							<p className="font-bold text-3xl tabular-nums">
 								{overallScore.toFixed(2)}
 							</p>
+							{rank !== null && (
+								<div className="flex items-center justify-end gap-2">
+									{rankingBand && <RankingBandBadge band={rankingBand} />}
+									<p className="text-muted-foreground text-sm">
+										Rang {rank} von {rankedCount}
+									</p>
+								</div>
+							)}
 						</div>
 					)}
 				</div>
 			</div>
 
-			{!hasData ? (
-				<Card>
-					<CardContent className="flex min-h-40 items-center justify-center">
-						<p className="text-muted-foreground text-sm">
-							Für diese Bewerbende liegen noch keine quantitativen
-							Kriteriengruppen mit Bewertungen vor.
-						</p>
-					</CardContent>
-				</Card>
-			) : (
-				<EvaluationParticipantDetailDashboard data={data} />
-			)}
+			<TaskScoresCard taskScores={data.taskScores} />
+
+			<ReviewerBreakdownCard data={data.reviewerBreakdown} />
 
 			<TeamObservationsSection
 				groupName={data.participant.groupName}
 				teamObservations={data.teamObservations}
 			/>
 		</div>
+	);
+}
+
+function TaskScoresCard({
+	taskScores,
+}: {
+	taskScores: EvaluationParticipantDetailData["taskScores"];
+}) {
+	return (
+		<Card>
+			<CardHeader>
+				<CardTitle className="flex items-center gap-2">
+					<ListChecks className="h-5 w-5" />
+					Teil-Scores je Aufgabe
+				</CardTitle>
+				<CardDescription>
+					Der Gesamtwert ist der nach Teil-Gewicht gewichtete Mittelwert der
+					Teil-Scores.
+				</CardDescription>
+			</CardHeader>
+			<CardContent>
+				{taskScores.length === 0 ? (
+					<p className="text-muted-foreground text-sm">
+						Diese Bewerbende ist noch keiner Aufgabe zugeordnet.
+					</p>
+				) : (
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Aufgabe</TableHead>
+								<TableHead className="text-right">Teil-Gewicht</TableHead>
+								<TableHead className="text-right">Teil-Score</TableHead>
+								<TableHead className="text-right">Bewertungen</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{taskScores.map((task) => (
+								<TableRow key={task.taskId}>
+									<TableCell className="font-medium">{task.taskName}</TableCell>
+									<TableCell className="text-right tabular-nums">
+										{task.scoreWeight.toLocaleString("de-DE")}
+									</TableCell>
+									<TableCell className="text-right font-mono tabular-nums">
+										<span
+											className={
+												task.score === null
+													? "text-muted-foreground"
+													: undefined
+											}
+										>
+											{formatScore(task.score)}
+										</span>
+									</TableCell>
+									<TableCell className="text-right text-muted-foreground tabular-nums">
+										{task.completedAssignments} / {task.totalAssignments}
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				)}
+			</CardContent>
+		</Card>
 	);
 }
 

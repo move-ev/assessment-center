@@ -122,18 +122,7 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 							className="space-y-3 rounded-3xl border p-4"
 							key={group.id}
 						>
-							<div className="flex flex-wrap items-center gap-2">
-								<h2 className="font-medium text-base">{group.title}</h2>
-								<Badge
-									variant={
-										group.factorType === "POTENTIAL" ? "secondary" : "outline"
-									}
-								>
-									{group.factorType === "POTENTIAL"
-										? "Potenzial-Faktoren"
-										: "Kompetenz-Faktoren"}
-								</Badge>
-							</div>
+							<h2 className="font-medium text-base">{group.title}</h2>
 							<div className="space-y-4">
 								{group.criteria.map((criteria) =>
 									criteria.type === "QUANTITATIVE" ? (
