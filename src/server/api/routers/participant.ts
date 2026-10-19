@@ -1,10 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
+import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const participantRouter = createTRPCRouter({
 	listByAc: protectedProcedure
@@ -45,9 +43,7 @@ export const participantRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			return ctx.db.participant.create({
 				data: {
@@ -95,9 +91,7 @@ export const participantRouter = createTRPCRouter({
 				});
 			}
 
-			if (participant.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(participant.assessmentCenter.status);
 
 			return ctx.db.participant.update({
 				where: { id: input.id },
@@ -135,9 +129,7 @@ export const participantRouter = createTRPCRouter({
 				});
 			}
 
-			if (participant.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(participant.assessmentCenter.status);
 
 			// Hard delete for data protection: memberships, assignments and their
 			// ratings go with the participant (cascade).

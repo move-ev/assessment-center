@@ -1,10 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { RATING_ANCHOR_MAX_LENGTH } from "@/lib/rating-anchors";
+import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 /** Anchor text under the rating scale; blank means no anchor. */
 const anchorTextSchema = z.string().trim().max(RATING_ANCHOR_MAX_LENGTH);
@@ -133,9 +132,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			return ctx.db.task.create({
 				data: {
@@ -194,9 +191,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(task.assessmentCenter.status);
 
 			return ctx.db.task.update({
 				where: { id: input.id },
@@ -248,9 +243,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(task.assessmentCenter.status);
 
 			if (task._count.scheduleEntries > 0) {
 				throw new TRPCError({
@@ -314,9 +307,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(task.assessmentCenter.status);
 
 			return ctx.db.reviewCriteriaGroup.create({
 				data: { taskId: input.taskId, title: input.title },
@@ -363,9 +354,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(group.task.assessmentCenter.status);
 
 			return ctx.db.reviewCriteriaGroup.update({
 				where: { id: input.id },
@@ -406,9 +395,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(group.task.assessmentCenter.status);
 
 			const deletedAt = new Date();
 
@@ -471,9 +458,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(group.task.assessmentCenter.status);
 
 			return ctx.db.reviewCriteria.create({
 				data: {
@@ -549,9 +534,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (criteria.task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(criteria.task.assessmentCenter.status);
 
 			const group = await ctx.db.reviewCriteriaGroup.findFirst({
 				where: {
@@ -628,9 +611,7 @@ export const taskRouter = createTRPCRouter({
 				});
 			}
 
-			if (criteria.task.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(criteria.task.assessmentCenter.status);
 
 			await ctx.db.reviewCriteria.update({
 				where: { id: input.id },

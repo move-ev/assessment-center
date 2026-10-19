@@ -1,9 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { assignPseudonyms } from "@/modules/assessment-center/server/anonymization";
+import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const assessmentCenterRouter = createTRPCRouter({
 	listForUser: protectedProcedure.query(async ({ ctx }) => {
@@ -28,6 +27,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 		return ctx.db.assessmentCenter.findMany({
 			where: {
 				deletedAt: null,
+				status: { not: "ANONYMIZED" },
 				reviewers: { some: { userId } },
 			},
 			select: {
@@ -76,6 +76,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 					description: true,
 					status: true,
 					isDemo: true,
+					anonymizedAt: true,
 					days: {
 						select: { id: true, date: true },
 						orderBy: { date: "asc" },
@@ -194,9 +195,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			await ctx.db.assessmentCenter.update({
 				where: { id: input.id },
@@ -235,9 +234,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			const date = new Date(`${input.date}T00:00:00.000Z`);
 
@@ -279,9 +276,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (day.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(day.assessmentCenter.status);
 
 			if (day._count.scheduleEntries > 0) {
 				throw new TRPCError({
@@ -442,6 +437,96 @@ export const assessmentCenterRouter = createTRPCRouter({
 			await ctx.db.assessmentCenter.update({
 				where: { id: input.id },
 				data: { status: "ACTIVE" },
+			});
+		}),
+
+	/**
+	 * Removes personal data after a completed AC: participants and groups get
+	 * pseudonyms, contact fields are cleared, free-text ratings and group
+	 * observations are deleted, soft-deleted participants are purged.
+	 * Quantitative ratings and the AC structure stay for cohort comparisons.
+	 */
+	anonymize: protectedProcedure
+		.input(z.object({ id: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können Assessment Center anonymisieren",
+				});
+			}
+
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id, deletedAt: null },
+				select: { id: true, status: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			if (ac.status !== "COMPLETED") {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message:
+						"Nur abgeschlossene Assessment Center können anonymisiert werden",
+				});
+			}
+
+			const assessmentCenterId = input.id;
+
+			await ctx.db.$transaction(async (tx) => {
+				await tx.participant.deleteMany({
+					where: { assessmentCenterId, deletedAt: { not: null } },
+				});
+				await tx.qualitativeRating.deleteMany({
+					where: {
+						reviewerAssignment: { participant: { assessmentCenterId } },
+					},
+				});
+				await tx.teamTaskObservation.deleteMany({
+					where: { task: { assessmentCenterId } },
+				});
+
+				const [participants, groups] = await Promise.all([
+					tx.participant.findMany({
+						where: { assessmentCenterId },
+						select: { id: true },
+					}),
+					tx.participantGroup.findMany({
+						where: { assessmentCenterId },
+						select: { id: true },
+						orderBy: { createdAt: "asc" },
+					}),
+				]);
+
+				const participantNames = assignPseudonyms(
+					participants.map((participant) => participant.id),
+					"Bewerbende",
+				);
+				for (const [id, name] of participantNames) {
+					await tx.participant.update({
+						where: { id },
+						data: { name, email: null, avatarUrl: null, avatarFileKey: null },
+					});
+				}
+
+				const groupNames = assignPseudonyms(
+					groups.map((group) => group.id),
+					"Gruppe",
+					null,
+				);
+				for (const [id, name] of groupNames) {
+					await tx.participantGroup.update({ where: { id }, data: { name } });
+				}
+
+				await tx.assessmentCenter.update({
+					where: { id: assessmentCenterId },
+					data: { status: "ANONYMIZED", anonymizedAt: new Date() },
+				});
 			});
 		}),
 

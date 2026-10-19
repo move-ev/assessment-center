@@ -1,26 +1,13 @@
 import Link from "next/link";
+import { AcStatusBadge } from "@/components/ac-status-badge";
 import { LogoutButton } from "@/components/logout-button";
-import { Badge } from "@/components/ui/badge";
+import type { AcStatus } from "@/lib/ac-status";
 import { ROUTES } from "@/lib/routes";
-
-type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 
 type Props = {
 	id: string;
 	name: string;
 	status: AcStatus;
-};
-
-const STATUS_LABEL: Record<AcStatus, string> = {
-	DRAFT: "Entwurf",
-	ACTIVE: "Aktiv",
-	COMPLETED: "Abgeschlossen",
-};
-
-const STATUS_VARIANT: Record<AcStatus, "secondary" | "default" | "outline"> = {
-	DRAFT: "secondary",
-	ACTIVE: "default",
-	COMPLETED: "outline",
 };
 
 function AcHeader({ id, name, status }: Props) {
@@ -41,7 +28,7 @@ function AcHeader({ id, name, status }: Props) {
 					>
 						{name}
 					</Link>
-					<Badge variant={STATUS_VARIANT[status]}>{STATUS_LABEL[status]}</Badge>
+					<AcStatusBadge status={status} />
 				</div>
 				<LogoutButton variant="ghost" />
 			</div>

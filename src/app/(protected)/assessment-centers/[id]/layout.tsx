@@ -33,7 +33,8 @@ export default async function AcLayout({ children, params }: Props) {
 			});
 	const isReviewer = reviewer !== null;
 
-	if (!isAdmin && !isReviewer) {
+	// Anonymized ACs are only visible to admins.
+	if (!isAdmin && (!isReviewer || ac.status === "ANONYMIZED")) {
 		redirect(ROUTES.dashboard());
 	}
 

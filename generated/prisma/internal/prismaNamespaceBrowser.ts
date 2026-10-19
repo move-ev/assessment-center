@@ -168,6 +168,7 @@ export const AssessmentCenterScalarFieldEnum = {
   description: 'description',
   status: 'status',
   isDemo: 'isDemo',
+  anonymizedAt: 'anonymizedAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'

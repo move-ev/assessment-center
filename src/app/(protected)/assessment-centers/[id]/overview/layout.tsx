@@ -31,5 +31,9 @@ export default async function AcOverviewLayout({ children, params }: Props) {
 		redirect(ROUTES.acSetupDetails(id));
 	}
 
+	if (assessmentCenter.status === "ANONYMIZED") {
+		redirect(ROUTES.acResults(id));
+	}
+
 	return children;
 }

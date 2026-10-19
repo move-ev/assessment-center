@@ -14,12 +14,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { AC_STATUS_LABEL, type AcStatus, isAcLocked } from "@/lib/ac-status";
 import { ROUTES } from "@/lib/routes";
 import { api } from "@/trpc/react";
 import { AcConfirmByNameDialog } from "./ac-confirm-by-name-dialog";
 import { DemoField } from "./ac-demo-field";
-
-type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 
 type AcData = {
 	id: string;
@@ -27,6 +26,7 @@ type AcData = {
 	description: string | null;
 	status: AcStatus;
 	isDemo: boolean;
+	anonymizedAt: Date | null;
 	days: Array<{ id: string; date: Date }>;
 };
 
@@ -66,7 +66,7 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 	const invalidateDetails = () =>
 		utils.assessmentCenter.getDetails.invalidate({ id: acId });
 
-	const isReadOnly = ac.status === "COMPLETED";
+	const isReadOnly = isAcLocked(ac.status);
 
 	const updateMutation = api.assessmentCenter.updateDetails.useMutation({
 		onSuccess: async () => {
@@ -191,7 +191,19 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 
 			<Separator />
 
-			<StatusSection acId={acId} currentStatus={ac.status} utils={utils} />
+			<StatusSection
+				acId={acId}
+				anonymizedAt={ac.anonymizedAt}
+				currentStatus={ac.status}
+				utils={utils}
+			/>
+
+			{ac.status === "COMPLETED" && (
+				<>
+					<Separator />
+					<AnonymizeSection acId={acId} acName={ac.name} utils={utils} />
+				</>
+			)}
 
 			<Separator />
 
@@ -294,11 +306,17 @@ function DaysSection({
 
 type StatusSectionProps = {
 	acId: string;
+	anonymizedAt: Date | null;
 	currentStatus: AcStatus;
 	utils: ReturnType<typeof api.useUtils>;
 };
 
-function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
+function StatusSection({
+	acId,
+	anonymizedAt,
+	currentStatus,
+	utils,
+}: StatusSectionProps) {
 	const router = useRouter();
 	const { data: progress } = api.assessmentCenter.getSetupProgress.useQuery(
 		{ acId },
@@ -332,11 +350,18 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 		onError: (error) => toast.error(error.message),
 	});
 
-	const STATUS_LABEL: Record<AcStatus, string> = {
-		DRAFT: "Entwurf",
-		ACTIVE: "Aktiv",
-		COMPLETED: "Abgeschlossen",
-	};
+	if (currentStatus === "ANONYMIZED") {
+		return (
+			<div className="space-y-1">
+				<h3 className="font-medium text-sm">Status</h3>
+				<p className="text-muted-foreground text-sm">
+					Das Assessment Center wurde
+					{anonymizedAt ? ` am ${formatDate(anonymizedAt)}` : ""} anonymisiert
+					und ist dauerhaft schreibgeschützt.
+				</p>
+			</div>
+		);
+	}
 
 	if (currentStatus === "COMPLETED") {
 		return (
@@ -346,10 +371,9 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 					<p className="mt-1 text-muted-foreground text-sm">
 						Das Assessment Center ist{" "}
 						<strong className="text-foreground">
-							{STATUS_LABEL[currentStatus]}
+							{AC_STATUS_LABEL[currentStatus]}
 						</strong>
-						. Du kannst es wieder öffnen, um Bewertungen nachzupflegen. Beim
-						erneuten Abschließen werden die Auswertungen neu berechnet.
+						. Du kannst es wieder öffnen, um Bewertungen nachzupflegen.
 					</p>
 				</div>
 				<Button
@@ -415,6 +439,72 @@ function StatusSection({ acId, currentStatus, utils }: StatusSectionProps) {
 					Schließe alle 7 Einrichtungsschritte ab, um das AC zu aktivieren.
 				</p>
 			)}
+		</div>
+	);
+}
+
+function formatDate(date: Date): string {
+	return date.toLocaleDateString("de-DE", {
+		year: "numeric",
+		month: "2-digit",
+		day: "2-digit",
+	});
+}
+
+type AnonymizeSectionProps = {
+	acId: string;
+	acName: string;
+	utils: ReturnType<typeof api.useUtils>;
+};
+
+function AnonymizeSection({ acId, acName, utils }: AnonymizeSectionProps) {
+	const router = useRouter();
+	const anonymizeMutation = api.assessmentCenter.anonymize.useMutation({
+		onSuccess: async () => {
+			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
+			router.refresh();
+			toast.success("Assessment Center wurde anonymisiert");
+		},
+		onError: (error) => toast.error(error.message),
+	});
+
+	return (
+		<div className="space-y-4">
+			<div>
+				<h3 className="font-medium text-sm">Anonymisieren</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
+					Entfernt nach dem AC alle personenbezogenen Daten der Bewerbenden. Die
+					Zahlenbewertungen bleiben für spätere Jahrgangsvergleiche erhalten.
+				</p>
+			</div>
+			<AcConfirmByNameDialog
+				acName={acName}
+				confirmLabel="Endgültig anonymisieren"
+				description={
+					<div className="space-y-2">
+						<p>Das lässt sich nicht rückgängig machen:</p>
+						<ul className="list-disc space-y-1 pl-5">
+							<li>Namen werden zu „Bewerbende 1…n“ (zufällige Reihenfolge)</li>
+							<li>E-Mail-Adressen und Bilder werden entfernt</li>
+							<li>Gruppennamen werden zu „Gruppe 1…n“</li>
+							<li>
+								Alle Freitext-Bewertungen und Gruppenbeobachtungen werden
+								gelöscht
+							</li>
+							<li>Bereits entfernte Bewerbende werden endgültig gelöscht</li>
+						</ul>
+						<p>
+							Danach ist das AC dauerhaft schreibgeschützt und nur noch für
+							Admins sichtbar.
+						</p>
+					</div>
+				}
+				isPending={anonymizeMutation.isPending}
+				onConfirm={() => anonymizeMutation.mutate({ id: acId })}
+				pendingLabel="Anonymisiert..."
+				title="Assessment Center anonymisieren?"
+				triggerLabel="AC anonymisieren"
+			/>
 		</div>
 	);
 }

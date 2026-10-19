@@ -24,7 +24,9 @@ record links their `User` to that AC.
 ## Assessment Center Lifecycle
 
 ```
-DRAFT ──► ACTIVE ──► COMPLETED
+DRAFT ──► ACTIVE ──► COMPLETED ──► ANONYMIZED
+                        │  ▲
+                        └──┘ reopen
 ```
 
 | Status | Meaning | What is available |
@@ -32,6 +34,13 @@ DRAFT ──► ACTIVE ──► COMPLETED
 | `DRAFT` | Being set up | Setup flow (admin only) |
 | `ACTIVE` | AC is running, participants are on-site | Reviewer workspace; live overview (admin) |
 | `COMPLETED` | AC has ended | Results/evaluation (admin); reviewers can still edit ratings |
+| `ANONYMIZED` | Personal data removed after the AC (irreversible) | Read-only results (admin only); hidden from reviewers |
+
+Anonymizing replaces participant and group names with pseudonyms, clears
+contact fields, deletes free-text ratings, group observations and
+soft-deleted participants. Quantitative ratings and the AC structure stay for
+cohort comparisons. Admins can also delete an AC completely in any status
+(e.g. demos); `isDemo` marks ACs to leave out of comparisons.
 
 Status is stored on `AssessmentCenter` and gates access within each section.
 
@@ -308,6 +317,9 @@ testable with `bun run test` without any setup.
   Required criteria are quantitative and not marked optional; free-text
   criteria never block completion. Used by the review lists, the rating form's
   live progress, the live overview and the results.
+- `src/lib/ac-status.ts`: AC status type and labels, and which statuses lock
+  setup changes (`COMPLETED`, `ANONYMIZED`). Used by the routers (via
+  `assertAcEditable`), the setup layout and the details form.
 - `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and
   4-star anchor texts, shared by the criteria editor, the rating view and the
   task router.

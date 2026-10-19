@@ -95,6 +95,14 @@ async function getAssignmentAccess(
 		});
 	}
 
+	if (assignment.task.assessmentCenter.status === "ANONYMIZED") {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message:
+				"Anonymisierte Assessment Center können nicht mehr bewertet werden",
+		});
+	}
+
 	return assignment;
 }
 

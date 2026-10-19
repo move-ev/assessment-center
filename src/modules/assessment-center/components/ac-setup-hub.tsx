@@ -90,10 +90,11 @@ const STEPS: StepConfig[] = [
 type Props = {
 	acId: string;
 	isReadOnly: boolean;
+	isAnonymized: boolean;
 	children: React.ReactNode;
 };
 
-function AcSetupHub({ acId, isReadOnly, children }: Props) {
+function AcSetupHub({ acId, isReadOnly, isAnonymized, children }: Props) {
 	const pathname = usePathname();
 	const { data: progress } = api.assessmentCenter.getSetupProgress.useQuery({
 		acId,
@@ -132,8 +133,9 @@ function AcSetupHub({ acId, isReadOnly, children }: Props) {
 				{isReadOnly && (
 					<div className="mb-6 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 text-sm dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
 						<LockIcon className="h-4 w-4 shrink-0" />
-						Das Assessment Center ist abgeschlossen. Öffne es wieder, um die
-						Einrichtung zu bearbeiten.
+						{isAnonymized
+							? "Das Assessment Center ist anonymisiert und kann nicht mehr bearbeitet werden."
+							: "Das Assessment Center ist abgeschlossen. Öffne es wieder, um die Einrichtung zu bearbeiten."}
 					</div>
 				)}
 				{children}

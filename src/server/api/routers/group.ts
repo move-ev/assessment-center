@@ -1,9 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const groupRouter = createTRPCRouter({
 	listByAc: protectedProcedure
@@ -55,9 +53,7 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			return ctx.db.participantGroup.create({
 				data: { assessmentCenterId: input.acId, name: input.name },
@@ -91,9 +87,7 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(group.assessmentCenter.status);
 
 			if (group._count.scheduleEntries > 0) {
 				throw new TRPCError({
@@ -142,9 +136,7 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(group.assessmentCenter.status);
 
 			// Verify the participant belongs to the same AC and is active
 			const participant = await ctx.db.participant.findFirst({
@@ -217,9 +209,7 @@ export const groupRouter = createTRPCRouter({
 				});
 			}
 
-			if (group.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(group.assessmentCenter.status);
 
 			// Verify the participant belongs to the same AC
 			const participant = await ctx.db.participant.findFirst({

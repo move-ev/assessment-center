@@ -1,3 +1,4 @@
+import { ShieldCheckIcon } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { ROUTES } from "@/lib/routes";
 import { getSession } from "@/server/better-auth/server";
@@ -15,7 +16,7 @@ export default async function AcResultsLayout({ children, params }: Props) {
 		getSession(),
 		db.assessmentCenter.findFirst({
 			where: { id, deletedAt: null },
-			select: { status: true },
+			select: { status: true, anonymizedAt: true },
 		}),
 	]);
 
@@ -33,6 +34,22 @@ export default async function AcResultsLayout({ children, params }: Props) {
 
 	if (assessmentCenter.status === "ACTIVE") {
 		redirect(ROUTES.acOverview(id));
+	}
+
+	if (assessmentCenter.status === "ANONYMIZED") {
+		return (
+			<>
+				<div className="mx-6 mt-6 flex items-center gap-2 rounded-lg border bg-muted/40 px-4 py-3 text-muted-foreground text-sm">
+					<ShieldCheckIcon className="h-4 w-4 shrink-0" />
+					Anonymisiert
+					{assessmentCenter.anonymizedAt
+						? ` am ${assessmentCenter.anonymizedAt.toLocaleDateString("de-DE")}`
+						: ""}
+					: Namen sind ersetzt, Freitexte und Gruppenbeobachtungen gelöscht.
+				</div>
+				{children}
+			</>
+		);
 	}
 
 	return children;
