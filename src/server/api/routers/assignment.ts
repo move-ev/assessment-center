@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
+import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 export const assignmentRouter = createTRPCRouter({
@@ -162,6 +163,10 @@ export const assignmentRouter = createTRPCRouter({
 			}
 
 			assertAcEditable(assignment.reviewer.assessmentCenter.status);
+			await assertNoSubmittedRatings(
+				{ id: input.id },
+				"Für diese Zuweisung liegen bereits Bewertungen vor; sie kann nicht entfernt werden",
+			);
 
 			await ctx.db.reviewerAssignment.delete({ where: { id: input.id } });
 		}),

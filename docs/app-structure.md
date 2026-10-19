@@ -25,8 +25,8 @@ record links their `User` to that AC.
 
 ```
 DRAFT ──► ACTIVE ──► COMPLETED ──► ANONYMIZED
-                        │  ▲
-                        └──┘ reopen
+             ▲           │
+             └───────────┘ reopen
 ```
 
 | Status | Meaning | What is available |
@@ -37,8 +37,8 @@ DRAFT ──► ACTIVE ──► COMPLETED ──► ANONYMIZED
 | `ANONYMIZED` | Personal data removed after the AC (irreversible) | Read-only results (admin only); hidden from reviewers |
 
 Anonymizing replaces participant and group names with pseudonyms, clears
-contact fields, deletes free-text ratings, group observations and
-soft-deleted participants. Quantitative ratings and the AC structure stay for
+contact fields and rating notes, deletes free-text ratings, group
+observations and soft-deleted participants. Quantitative ratings and the AC structure stay for
 cohort comparisons. Admins can also delete an AC completely in any status
 (e.g. demos); `isDemo` marks ACs to leave out of comparisons.
 
@@ -72,7 +72,7 @@ Status is stored on `AssessmentCenter` and gates access within each section.
         │
         ├── /overview                             Admin: live completion matrix (ACTIVE only)
         │
-        ├── /results                              Admin: aggregated evaluation (COMPLETED)
+        ├── /results                              Admin: aggregated evaluation (COMPLETED, ANONYMIZED)
         │
         └── /review                               Reviewer: workspace root
             └── /[taskId]                         Reviewer: participant list for this task
@@ -84,12 +84,15 @@ Status is stored on `AssessmentCenter` and gates access within each section.
 - `/assessment-centers/[id]` redirects based on role and AC status:
   - Admin + DRAFT → `/setup/details`
   - Admin + ACTIVE → `/overview`
-  - Admin + COMPLETED → `/results`
-  - Reviewer → `/review`
+  - Admin + COMPLETED or ANONYMIZED → `/results`
+  - Reviewer → `/review`; for an ANONYMIZED AC → `/dashboard` (hidden from reviewers)
 - `/setup` redirects to `/setup/details`
 - Access to `/setup` is blocked for non-admins and non-DRAFT status (with a
   guard in the layout that allows read-only viewing once ACTIVE/COMPLETED).
-- Access to `/overview` and `/results` is blocked for non-admins.
+- Access to `/overview` and `/results` is blocked for non-admins. `/overview`
+  redirects to `/results` once the AC is ANONYMIZED.
+- Removing a reviewer, a task or an assignment is refused while submitted
+  ratings exist (deleting assignments would cascade to the ratings).
 - Access to `/review` is blocked for users who are not assigned as a
   Reviewer within that AC.
 

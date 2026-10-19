@@ -232,7 +232,9 @@ function AnonymizeSection({ acId, acName, utils }: AnonymizeSectionProps) {
 					</div>
 				}
 				isPending={anonymizeMutation.isPending}
-				onConfirm={() => anonymizeMutation.mutate({ id: acId })}
+				onConfirm={(confirmName) =>
+					anonymizeMutation.mutate({ id: acId, confirmName })
+				}
 				pendingLabel="Anonymisiert..."
 				title="Assessment Center anonymisieren?"
 				triggerLabel="AC anonymisieren"
@@ -278,7 +280,9 @@ function DeleteSection({ acId, acName, utils }: DeleteSectionProps) {
 					</p>
 				}
 				isPending={deleteMutation.isPending}
-				onConfirm={() => deleteMutation.mutate({ id: acId })}
+				onConfirm={(confirmName) =>
+					deleteMutation.mutate({ id: acId, confirmName })
+				}
 				pendingLabel="Löscht..."
 				title="Assessment Center löschen?"
 				triggerLabel="AC löschen"

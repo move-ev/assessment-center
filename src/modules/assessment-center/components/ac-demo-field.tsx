@@ -21,7 +21,7 @@ function AcDemoField({ checked, disabled, onCheckedChange }: Props) {
 			<FieldLabel htmlFor="ac-is-demo">
 				Demo-AC{" "}
 				<span className="font-normal text-muted-foreground">
-					(wird in Jahrgangsvergleichen nicht berücksichtigt)
+					(wird aus künftigen Jahrgangsvergleichen herausgehalten)
 				</span>
 			</FieldLabel>
 		</Field>

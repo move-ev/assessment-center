@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { RATING_ANCHOR_MAX_LENGTH } from "@/lib/rating-anchors";
 import { assertAcEditable } from "@/server/api/ac-lock";
+import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
@@ -252,6 +253,11 @@ export const taskRouter = createTRPCRouter({
 						"Aufgabe ist im Zeitplan eingetragen und kann nicht gelöscht werden",
 				});
 			}
+
+			await assertNoSubmittedRatings(
+				{ taskId: input.id },
+				"Zu dieser Aufgabe liegen bereits Bewertungen vor; sie kann nicht gelöscht werden",
+			);
 
 			await ctx.db.reviewerAssignment.deleteMany({
 				where: { taskId: input.id },

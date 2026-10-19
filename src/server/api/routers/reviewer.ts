@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
+import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
 export const reviewerRouter = createTRPCRouter({
@@ -122,6 +123,10 @@ export const reviewerRouter = createTRPCRouter({
 			}
 
 			assertAcEditable(reviewer.assessmentCenter.status);
+			await assertNoSubmittedRatings(
+				{ reviewerId: input.id },
+				"Der Bewerter hat bereits Bewertungen abgegeben und kann nicht entfernt werden",
+			);
 
 			await ctx.db.reviewerAssignment.deleteMany({
 				where: { reviewerId: input.id },

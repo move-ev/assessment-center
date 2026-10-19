@@ -4,6 +4,16 @@ import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
+/** Irreversible actions require the AC name, checked again on the server. */
+function assertConfirmedName(confirmName: string, acName: string): void {
+	if (confirmName.trim() !== acName.trim()) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Der eingegebene Name stimmt nicht mit dem AC-Namen überein",
+		});
+	}
+}
+
 export const assessmentCenterRouter = createTRPCRouter({
 	listForUser: protectedProcedure.query(async ({ ctx }) => {
 		const { id: userId, role } = ctx.session.user;
@@ -456,10 +466,18 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			await ctx.db.assessmentCenter.update({
-				where: { id: input.id },
+			// Conditional on the status, so a concurrent anonymization wins.
+			const { count } = await ctx.db.assessmentCenter.updateMany({
+				where: { id: input.id, status: "COMPLETED" },
 				data: { status: "ACTIVE" },
 			});
+
+			if (count === 0) {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: "Der Status des Assessment Centers hat sich geändert",
+				});
+			}
 		}),
 
 	/**
@@ -470,7 +488,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 	 * Quantitative ratings and the AC structure stay for cohort comparisons.
 	 */
 	anonymize: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(z.object({ id: z.string(), confirmName: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
@@ -481,7 +499,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id, deletedAt: null },
-				select: { id: true, status: true },
+				select: { id: true, name: true, status: true },
 			});
 
 			if (!ac) {
@@ -499,9 +517,25 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
+			assertConfirmedName(input.confirmName, ac.name);
+
 			const assessmentCenterId = input.id;
 
 			await ctx.db.$transaction(async (tx) => {
+				// Status first and conditional: locks the row, so a concurrent
+				// reopen waits and then finds the AC anonymized.
+				const { count } = await tx.assessmentCenter.updateMany({
+					where: { id: assessmentCenterId, status: "COMPLETED" },
+					data: { status: "ANONYMIZED", anonymizedAt: new Date() },
+				});
+
+				if (count === 0) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message: "Der Status des Assessment Centers hat sich geändert",
+					});
+				}
+
 				await tx.participant.deleteMany({
 					where: { assessmentCenterId, deletedAt: { not: null } },
 				});
@@ -551,17 +585,12 @@ export const assessmentCenterRouter = createTRPCRouter({
 				for (const [id, name] of groupNames) {
 					await tx.participantGroup.update({ where: { id }, data: { name } });
 				}
-
-				await tx.assessmentCenter.update({
-					where: { id: assessmentCenterId },
-					data: { status: "ANONYMIZED", anonymizedAt: new Date() },
-				});
 			});
 		}),
 
 	/** Deletes the AC with everything attached to it (cascade), e.g. demos. */
 	delete: protectedProcedure
-		.input(z.object({ id: z.string() }))
+		.input(z.object({ id: z.string(), confirmName: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			if (ctx.session.user.role !== "admin") {
 				throw new TRPCError({
@@ -572,7 +601,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id },
-				select: { id: true },
+				select: { id: true, name: true },
 			});
 
 			if (!ac) {
@@ -581,6 +610,8 @@ export const assessmentCenterRouter = createTRPCRouter({
 					message: "Assessment Center nicht gefunden",
 				});
 			}
+
+			assertConfirmedName(input.confirmName, ac.name);
 
 			await ctx.db.assessmentCenter.delete({ where: { id: input.id } });
 		}),

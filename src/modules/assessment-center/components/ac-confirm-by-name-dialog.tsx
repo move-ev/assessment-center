@@ -24,7 +24,7 @@ type Props = {
 	confirmLabel: string;
 	pendingLabel: string;
 	isPending: boolean;
-	onConfirm: () => void;
+	onConfirm: (confirmName: string) => void;
 };
 
 /**
@@ -79,7 +79,7 @@ function AcConfirmByNameDialog({
 					<AlertDialogCancel disabled={isPending}>Abbrechen</AlertDialogCancel>
 					<AlertDialogAction
 						disabled={!nameMatches || isPending}
-						onClick={onConfirm}
+						onClick={() => onConfirm(typedName)}
 						variant="destructive"
 					>
 						{isPending ? pendingLabel : confirmLabel}
