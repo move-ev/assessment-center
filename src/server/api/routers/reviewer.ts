@@ -2,11 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
-import {
-	adminProcedure,
-	createTRPCRouter,
-	protectedProcedure,
-} from "@/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 
 export const reviewerRouter = createTRPCRouter({
 	listByAc: adminProcedure
@@ -55,16 +51,9 @@ export const reviewerRouter = createTRPCRouter({
 			});
 		}),
 
-	add: protectedProcedure
+	add: adminProcedure
 		.input(z.object({ acId: z.string(), userId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerter hinzufügen",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.acId, deletedAt: null },
 				select: { id: true, status: true },
@@ -101,16 +90,9 @@ export const reviewerRouter = createTRPCRouter({
 			});
 		}),
 
-	remove: protectedProcedure
+	remove: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerter entfernen",
-				});
-			}
-
 			const reviewer = await ctx.db.reviewer.findFirst({
 				where: { id: input.id, assessmentCenterId: input.acId },
 				select: {

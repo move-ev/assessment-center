@@ -2,11 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
-import {
-	adminProcedure,
-	createTRPCRouter,
-	protectedProcedure,
-} from "@/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 
 export const assignmentRouter = createTRPCRouter({
 	listByAc: adminProcedure
@@ -27,7 +23,7 @@ export const assignmentRouter = createTRPCRouter({
 			});
 		}),
 
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
@@ -37,13 +33,6 @@ export const assignmentRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Zuweisungen erstellen",
-				});
-			}
-
 			const [ac, reviewer, participant, task] = await Promise.all([
 				ctx.db.assessmentCenter.findFirst({
 					where: { id: input.acId, deletedAt: null },
@@ -134,16 +123,9 @@ export const assignmentRouter = createTRPCRouter({
 			});
 		}),
 
-	remove: protectedProcedure
+	remove: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Zuweisungen entfernen",
-				});
-			}
-
 			const assignment = await ctx.db.reviewerAssignment.findFirst({
 				where: {
 					id: input.id,

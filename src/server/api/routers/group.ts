@@ -1,11 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
-import {
-	adminProcedure,
-	createTRPCRouter,
-	protectedProcedure,
-} from "@/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 
 export const groupRouter = createTRPCRouter({
 	listByAc: adminProcedure
@@ -30,7 +26,7 @@ export const groupRouter = createTRPCRouter({
 			});
 		}),
 
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
@@ -38,13 +34,6 @@ export const groupRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Gruppen erstellen",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.acId, deletedAt: null },
 				select: { id: true, status: true },
@@ -65,16 +54,9 @@ export const groupRouter = createTRPCRouter({
 			});
 		}),
 
-	remove: protectedProcedure
+	remove: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Gruppen löschen",
-				});
-			}
-
 			const group = await ctx.db.participantGroup.findFirst({
 				where: { id: input.id, assessmentCenterId: input.acId },
 				select: {
@@ -110,7 +92,7 @@ export const groupRouter = createTRPCRouter({
 			await ctx.db.participantGroup.delete({ where: { id: input.id } });
 		}),
 
-	assignParticipant: protectedProcedure
+	assignParticipant: adminProcedure
 		.input(
 			z.object({
 				groupId: z.string(),
@@ -118,13 +100,6 @@ export const groupRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerbende zuweisen",
-				});
-			}
-
 			const group = await ctx.db.participantGroup.findUnique({
 				where: { id: input.groupId },
 				select: {
@@ -183,7 +158,7 @@ export const groupRouter = createTRPCRouter({
 			});
 		}),
 
-	unassignParticipant: protectedProcedure
+	unassignParticipant: adminProcedure
 		.input(
 			z.object({
 				groupId: z.string(),
@@ -191,13 +166,6 @@ export const groupRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerbende entfernen",
-				});
-			}
-
 			const group = await ctx.db.participantGroup.findUnique({
 				where: { id: input.groupId },
 				select: {
