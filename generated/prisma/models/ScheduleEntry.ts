@@ -542,14 +542,6 @@ export type ScheduleEntryUncheckedUpdateManyWithoutTaskNestedInput = {
   deleteMany?: Prisma.ScheduleEntryScalarWhereInput | Prisma.ScheduleEntryScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type ScheduleEntryCreateWithoutDayInput = {
   id?: string
   orderIndex?: number

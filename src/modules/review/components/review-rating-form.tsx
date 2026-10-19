@@ -132,6 +132,7 @@ function ReviewRatingForm({ acId, taskId, data, instructionsContent }: Props) {
 											key={criteria.id}
 											onPersisted={handlePersisted}
 											participantId={data.participant.id}
+											ratingScaleMax={data.ratingScaleMax}
 											taskId={taskId}
 										/>
 									) : (

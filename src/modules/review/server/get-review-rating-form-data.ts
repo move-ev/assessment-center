@@ -1,10 +1,13 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
+import { isRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { db } from "@/server/db";
 import { getReviewSession } from "./shared";
 
 export type ReviewRatingFormData = {
+	/** Highest star of the AC's rating scale. */
+	ratingScaleMax: RatingScaleMax;
 	task: {
 		id: string;
 		name: string;
@@ -73,6 +76,7 @@ export async function getReviewRatingFormData(
 					description: true,
 					instructions: true,
 					isTeamTask: true,
+					assessmentCenter: { select: { ratingScaleMax: true } },
 					criteriaGroups: {
 						where: { deletedAt: null },
 						select: {
@@ -156,7 +160,14 @@ export async function getReviewRatingFormData(
 				})
 			: null;
 
+	const { ratingScaleMax } = assignment.task.assessmentCenter;
+	// The check constraint only allows known scales.
+	if (!isRatingScaleMax(ratingScaleMax)) {
+		throw new Error(`Unbekannte Bewertungsskala: 1–${ratingScaleMax}`);
+	}
+
 	return {
+		ratingScaleMax,
 		task: {
 			id: assignment.task.id,
 			name: assignment.task.name,

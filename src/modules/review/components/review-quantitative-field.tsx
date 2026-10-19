@@ -12,6 +12,11 @@ import {
 	DialogTitle,
 } from "@/components/ui/dialog";
 import { RATING_ANCHOR_LABELS } from "@/lib/rating-anchors";
+import {
+	getRatingValues,
+	isExtremeRating,
+	type RatingScaleMax,
+} from "@/lib/rating-scale";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
 
@@ -19,6 +24,7 @@ type Props = {
 	acId: string;
 	taskId: string;
 	participantId: string;
+	ratingScaleMax: RatingScaleMax;
 	criterion: {
 		id: string;
 		name: string;
@@ -36,6 +42,7 @@ function ReviewQuantitativeField({
 	acId,
 	taskId,
 	participantId,
+	ratingScaleMax,
 	criterion,
 	onPersisted,
 }: Props) {
@@ -46,7 +53,7 @@ function ReviewQuantitativeField({
 	const mutation = api.rating.upsertQuantitative.useMutation();
 	const lastSavedValue = useRef(criterion.value);
 	const saveTimer = useRef<number | null>(null);
-	const [pendingExtreme, setPendingExtreme] = useState<1 | 5 | null>(null);
+	const [pendingExtreme, setPendingExtreme] = useState<number | null>(null);
 
 	const saveValue = useCallback(
 		async (nextValue: number, { isRetry }: { isRetry: boolean }) => {
@@ -101,13 +108,13 @@ function ReviewQuantitativeField({
 
 	const handleRatingClick = useCallback(
 		(rating: number) => {
-			if (rating === 1 || rating === 5) {
+			if (isExtremeRating(rating, ratingScaleMax)) {
 				setPendingExtreme(rating);
 				return;
 			}
 			commitSelection(rating);
 		},
-		[commitSelection],
+		[commitSelection, ratingScaleMax],
 	);
 
 	return (
@@ -132,7 +139,7 @@ function ReviewQuantitativeField({
 					</div>
 				</div>
 				<div className="flex flex-wrap gap-2">
-					{RATING_VALUES.map((rating) => (
+					{getRatingValues(ratingScaleMax).map((rating) => (
 						<Button
 							className={cn(
 								"w-10",
@@ -156,7 +163,7 @@ function ReviewQuantitativeField({
 				/>
 				<p className="text-muted-foreground text-xs">
 					{value === null
-						? "Wähle einen Wert von 1 bis 5."
+						? `Wähle einen Wert von 1 bis ${ratingScaleMax}.`
 						: getSaveStateLabel(saveState)}
 				</p>
 			</CardContent>
@@ -177,8 +184,8 @@ function ReviewQuantitativeField({
 							Bewertung {pendingExtreme} vergeben?
 						</DialogTitle>
 						<DialogDescription className="text-[13px] text-muted-foreground leading-relaxed">
-							{pendingExtreme === 5
-								? "Eine 5 steht für eine herausragende Leistung und sollte nur in Ausnahmefällen vergeben werden."
+							{pendingExtreme === ratingScaleMax
+								? `Eine ${ratingScaleMax} steht für eine herausragende Leistung und sollte nur in Ausnahmefällen vergeben werden.`
 								: "Eine 1 steht für eine extrem schwache Leistung und sollte nur in Ausnahmefällen vergeben werden."}
 						</DialogDescription>
 					</div>
@@ -209,8 +216,6 @@ function ReviewQuantitativeField({
 		</Card>
 	);
 }
-
-const RATING_VALUES = [1, 2, 3, 4, 5] as const;
 
 function RatingAnchors({
 	anchorStar2,
