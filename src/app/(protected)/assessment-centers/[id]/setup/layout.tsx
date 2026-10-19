@@ -28,11 +28,8 @@ export default async function AcSetupLayout({ children, params }: Props) {
 		redirect(ROUTES.acReview(id));
 	}
 
-	// DRAFT and ACTIVE allow full editing; COMPLETED ACs are read-only until reopened.
-	const isReadOnly = ac.status === "COMPLETED";
-
 	return (
-		<AcSetupHub acId={id} isReadOnly={isReadOnly}>
+		<AcSetupHub acId={id} status={ac.status}>
 			{children}
 		</AcSetupHub>
 	);

@@ -1,9 +1,8 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { assertAcEditable } from "@/server/api/ac-lock";
+import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const assignmentRouter = createTRPCRouter({
 	listByAc: protectedProcedure
@@ -75,9 +74,7 @@ export const assignmentRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			if (!reviewer) {
 				throw new TRPCError({
@@ -165,9 +162,11 @@ export const assignmentRouter = createTRPCRouter({
 				});
 			}
 
-			if (assignment.reviewer.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(assignment.reviewer.assessmentCenter.status);
+			await assertNoSubmittedRatings(
+				{ id: input.id },
+				"Für diese Zuweisung liegen bereits Bewertungen vor; sie kann nicht entfernt werden",
+			);
 
 			await ctx.db.reviewerAssignment.delete({ where: { id: input.id } });
 		}),

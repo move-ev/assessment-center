@@ -1,26 +1,14 @@
 import Link from "next/link";
+import { AcStatusBadge } from "@/components/ac-status-badge";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ROUTES } from "@/lib/routes";
 import type { RouterOutputs } from "@/trpc/react";
 
-type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 type AcSummary = RouterOutputs["assessmentCenter"]["listForUser"][number];
 
 type Props = {
 	ac: AcSummary;
-};
-
-const STATUS_LABEL: Record<AcStatus, string> = {
-	DRAFT: "Entwurf",
-	ACTIVE: "Aktiv",
-	COMPLETED: "Abgeschlossen",
-};
-
-const STATUS_VARIANT: Record<AcStatus, "secondary" | "default" | "outline"> = {
-	DRAFT: "secondary",
-	ACTIVE: "default",
-	COMPLETED: "outline",
 };
 
 function DashboardAcCard({ ac }: Props) {
@@ -30,9 +18,10 @@ function DashboardAcCard({ ac }: Props) {
 				<CardHeader className="pb-2">
 					<div className="flex items-start justify-between gap-2">
 						<CardTitle className="font-medium text-base">{ac.name}</CardTitle>
-						<Badge variant={STATUS_VARIANT[ac.status]}>
-							{STATUS_LABEL[ac.status]}
-						</Badge>
+						<div className="flex shrink-0 gap-1.5">
+							{ac.isDemo && <Badge variant="secondary">Demo</Badge>}
+							<AcStatusBadge status={ac.status} />
+						</div>
 					</div>
 				</CardHeader>
 				{ac.description && (

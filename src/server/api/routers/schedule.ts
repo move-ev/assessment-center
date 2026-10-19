@@ -1,9 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
-
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
 
 export const scheduleRouter = createTRPCRouter({
 	listByAc: protectedProcedure
@@ -70,9 +68,7 @@ export const scheduleRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			if (!day) {
 				throw new TRPCError({
@@ -166,9 +162,7 @@ export const scheduleRouter = createTRPCRouter({
 				});
 			}
 
-			if (entry.day.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(entry.day.assessmentCenter.status);
 
 			await ctx.db.scheduleEntry.delete({ where: { id: input.id } });
 		}),
@@ -209,9 +203,7 @@ export const scheduleRouter = createTRPCRouter({
 				});
 			}
 
-			if (entry.day.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(entry.day.assessmentCenter.status);
 
 			const adjacent = await ctx.db.scheduleEntry.findFirst({
 				where: {

@@ -180,8 +180,8 @@ function ParticipantsTableContent({
 													Bewerbende entfernen?
 												</AlertDialogTitle>
 												<AlertDialogDescription>
-													{p.name} wird dauerhaft aus diesem Assessment Center
-													entfernt.
+													{p.name} wird endgültig gelöscht, samt Zuordnungen und
+													bereits abgegebenen Bewertungen.
 												</AlertDialogDescription>
 											</AlertDialogHeader>
 											<AlertDialogFooter>

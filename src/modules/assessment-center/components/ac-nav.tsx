@@ -2,10 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { AcStatus } from "@/lib/ac-status";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-
-type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 
 type Props = {
 	acId: string;
@@ -36,7 +35,8 @@ function AcNav({ acId, isAdmin, acStatus }: Props) {
 		{
 			label: "Ergebnisse",
 			href: ROUTES.acResults(acId),
-			visible: isAdmin && acStatus === "COMPLETED",
+			visible:
+				isAdmin && (acStatus === "COMPLETED" || acStatus === "ANONYMIZED"),
 		},
 		{
 			label: "Review",

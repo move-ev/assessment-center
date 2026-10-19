@@ -1,6 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
+import type { AcStatus } from "@/lib/ac-status";
 import { getSession } from "@/server/better-auth/server";
 import { db } from "@/server/db";
 
@@ -9,7 +10,7 @@ export type ReviewSession = {
 	reviewerId: string;
 	reviewerName: string;
 	acName: string;
-	status: "DRAFT" | "ACTIVE" | "COMPLETED";
+	status: AcStatus;
 };
 
 export async function getReviewSession(acId: string): Promise<ReviewSession> {

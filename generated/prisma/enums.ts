@@ -12,7 +12,8 @@
 export const AcStatus = {
   DRAFT: 'DRAFT',
   ACTIVE: 'ACTIVE',
-  COMPLETED: 'COMPLETED'
+  COMPLETED: 'COMPLETED',
+  ANONYMIZED: 'ANONYMIZED'
 } as const
 
 export type AcStatus = (typeof AcStatus)[keyof typeof AcStatus]

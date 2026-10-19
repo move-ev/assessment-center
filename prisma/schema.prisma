@@ -111,6 +111,8 @@ enum AcStatus {
   DRAFT
   ACTIVE
   COMPLETED
+  /// Personal data removed after the AC; read-only for good, admins only.
+  ANONYMIZED
 }
 
 /// The top-level event. All domain entities are scoped to an AssessmentCenter.
@@ -119,13 +121,16 @@ enum AcStatus {
 /// Status gates which sections are accessible (DRAFT → setup, ACTIVE → overview, COMPLETED → results).
 
 model AssessmentCenter {
-  id          String    @id @default(cuid())
-  name        String
-  description String?
-  status      AcStatus  @default(DRAFT)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id           String    @id @default(cuid())
+  name         String
+  description  String?
+  status       AcStatus  @default(DRAFT)
+  /// Demo ACs on the production environment; excluded from cohort comparisons.
+  isDemo       Boolean   @default(false)
+  anonymizedAt DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
 
   days         AssessmentDay[]
   groups       ParticipantGroup[]
@@ -140,7 +145,7 @@ model AssessmentCenter {
 model AssessmentDay {
   id                 String           @id @default(cuid())
   assessmentCenterId String
-  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id], onDelete: Cascade)
   date               DateTime         @db.Date
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -157,7 +162,7 @@ model AssessmentDay {
 model ParticipantGroup {
   id                 String           @id @default(cuid())
   assessmentCenterId String
-  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id], onDelete: Cascade)
   name               String
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt
@@ -176,9 +181,9 @@ model ParticipantGroup {
 model ParticipantGroupMembership {
   id            String           @id @default(cuid())
   participantId String
-  participant   Participant      @relation(fields: [participantId], references: [id])
+  participant   Participant      @relation(fields: [participantId], references: [id], onDelete: Cascade)
   groupId       String
-  group         ParticipantGroup @relation(fields: [groupId], references: [id])
+  group         ParticipantGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   createdAt     DateTime         @default(now())
 
   @@unique([participantId, groupId])
@@ -191,7 +196,7 @@ model ParticipantGroupMembership {
 model Participant {
   id                 String           @id @default(cuid())
   assessmentCenterId String
-  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id], onDelete: Cascade)
   name               String
   email              String?
   avatarUrl          String?
@@ -211,7 +216,7 @@ model Participant {
 model Reviewer {
   id                 String           @id @default(cuid())
   assessmentCenterId String
-  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id], onDelete: Cascade)
   userId             String
   user               User             @relation(fields: [userId], references: [id])
   createdAt          DateTime         @default(now())
@@ -230,7 +235,7 @@ model Reviewer {
 model Task {
   id                 String           @id @default(cuid())
   assessmentCenterId String
-  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id])
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id], onDelete: Cascade)
   name               String
   description        String?
   instructions       String?
@@ -257,11 +262,11 @@ model Task {
 model ScheduleEntry {
   id         String           @id @default(cuid())
   dayId      String
-  day        AssessmentDay    @relation(fields: [dayId], references: [id])
+  day        AssessmentDay    @relation(fields: [dayId], references: [id], onDelete: Cascade)
   groupId    String
-  group      ParticipantGroup @relation(fields: [groupId], references: [id])
+  group      ParticipantGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   taskId     String
-  task       Task             @relation(fields: [taskId], references: [id])
+  task       Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
   orderIndex Int              @default(0)
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt
@@ -276,7 +281,7 @@ model ScheduleEntry {
 model ReviewCriteriaGroup {
   id        String    @id @default(cuid())
   taskId    String
-  task      Task      @relation(fields: [taskId], references: [id])
+  task      Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   title     String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -299,9 +304,9 @@ model ReviewCriteriaGroup {
 model ReviewCriteria {
   id              String              @id @default(cuid())
   taskId          String
-  task            Task                @relation(fields: [taskId], references: [id])
+  task            Task                @relation(fields: [taskId], references: [id], onDelete: Cascade)
   criteriaGroupId String
-  criteriaGroup   ReviewCriteriaGroup @relation(fields: [criteriaGroupId], references: [id])
+  criteriaGroup   ReviewCriteriaGroup @relation(fields: [criteriaGroupId], references: [id], onDelete: Cascade)
   name            String
   description     String?
   type            CriteriaType
@@ -340,11 +345,11 @@ enum CriteriaType {
 model ReviewerAssignment {
   id            String      @id @default(cuid())
   reviewerId    String
-  reviewer      Reviewer    @relation(fields: [reviewerId], references: [id])
+  reviewer      Reviewer    @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
   participantId String
-  participant   Participant @relation(fields: [participantId], references: [id])
+  participant   Participant @relation(fields: [participantId], references: [id], onDelete: Cascade)
   taskId        String
-  task          Task        @relation(fields: [taskId], references: [id])
+  task          Task        @relation(fields: [taskId], references: [id], onDelete: Cascade)
   createdAt     DateTime    @default(now())
   updatedAt     DateTime    @updatedAt
 
@@ -367,9 +372,9 @@ model ReviewerAssignment {
 model QuantitativeRating {
   id                   String             @id @default(cuid())
   reviewerAssignmentId String
-  reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id])
+  reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id], onDelete: Cascade)
   criteriaId           String
-  criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id])
+  criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
   /// Integer in range [0, 5]. Enforced via check constraint in migration.
   value                Int
   notes                String?
@@ -388,9 +393,9 @@ model QuantitativeRating {
 model QualitativeRating {
   id                   String             @id @default(cuid())
   reviewerAssignmentId String
-  reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id])
+  reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id], onDelete: Cascade)
   criteriaId           String
-  criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id])
+  criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
   text                 String
   createdAt            DateTime           @default(now())
   updatedAt            DateTime           @updatedAt
@@ -409,11 +414,11 @@ model QualitativeRating {
 model TeamTaskObservation {
   id         String           @id @default(cuid())
   taskId     String
-  task       Task             @relation(fields: [taskId], references: [id])
+  task       Task             @relation(fields: [taskId], references: [id], onDelete: Cascade)
   groupId    String
-  group      ParticipantGroup @relation(fields: [groupId], references: [id])
+  group      ParticipantGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
   reviewerId String
-  reviewer   Reviewer         @relation(fields: [reviewerId], references: [id])
+  reviewer   Reviewer         @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
   notes      String?
   createdAt  DateTime         @default(now())
   updatedAt  DateTime         @updatedAt

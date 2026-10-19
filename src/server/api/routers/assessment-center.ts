@@ -1,9 +1,18 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
+import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
-const LOCKED_MSG =
-	"Abgeschlossene Assessment Center können nicht bearbeitet werden. Öffne das AC zuerst wieder.";
+/** Irreversible actions require the AC name, checked again on the server. */
+function assertConfirmedName(confirmName: string, acName: string): void {
+	if (confirmName.trim() !== acName.trim()) {
+		throw new TRPCError({
+			code: "BAD_REQUEST",
+			message: "Der eingegebene Name stimmt nicht mit dem AC-Namen überein",
+		});
+	}
+}
 
 export const assessmentCenterRouter = createTRPCRouter({
 	listForUser: protectedProcedure.query(async ({ ctx }) => {
@@ -18,6 +27,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 					name: true,
 					description: true,
 					status: true,
+					isDemo: true,
 					createdAt: true,
 				},
 				orderBy: { createdAt: "desc" },
@@ -27,6 +37,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 		return ctx.db.assessmentCenter.findMany({
 			where: {
 				deletedAt: null,
+				status: { not: "ANONYMIZED" },
 				reviewers: { some: { userId } },
 			},
 			select: {
@@ -34,6 +45,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				name: true,
 				description: true,
 				status: true,
+				isDemo: true,
 				createdAt: true,
 			},
 			orderBy: { createdAt: "desc" },
@@ -73,6 +85,8 @@ export const assessmentCenterRouter = createTRPCRouter({
 					name: true,
 					description: true,
 					status: true,
+					isDemo: true,
+					anonymizedAt: true,
 					days: {
 						select: { id: true, date: true },
 						orderBy: { date: "asc" },
@@ -141,6 +155,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			z.object({
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
+				isDemo: z.boolean().default(false),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -155,6 +170,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: {
 					name: input.name,
 					description: input.description,
+					isDemo: input.isDemo,
 				},
 				select: { id: true },
 			});
@@ -188,9 +204,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			await ctx.db.assessmentCenter.update({
 				where: { id: input.id },
@@ -199,6 +213,30 @@ export const assessmentCenterRouter = createTRPCRouter({
 					description: input.description ?? null,
 				},
 			});
+		}),
+
+	/** Allowed in every status: a finished AC may turn out to be a demo. */
+	setDemo: protectedProcedure
+		.input(z.object({ id: z.string(), isDemo: z.boolean() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können die Demo-Markierung ändern",
+				});
+			}
+
+			const { count } = await ctx.db.assessmentCenter.updateMany({
+				where: { id: input.id, deletedAt: null },
+				data: { isDemo: input.isDemo },
+			});
+
+			if (count === 0) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
 		}),
 
 	addDay: protectedProcedure
@@ -228,9 +266,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (ac.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(ac.status);
 
 			const date = new Date(`${input.date}T00:00:00.000Z`);
 
@@ -272,9 +308,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			if (day.assessmentCenter.status === "COMPLETED") {
-				throw new TRPCError({ code: "FORBIDDEN", message: LOCKED_MSG });
-			}
+			assertAcEditable(day.assessmentCenter.status);
 
 			if (day._count.scheduleEntries > 0) {
 				throw new TRPCError({
@@ -432,9 +466,157 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			await ctx.db.assessmentCenter.update({
-				where: { id: input.id },
+			// Conditional on the status, so a concurrent anonymization wins.
+			const { count } = await ctx.db.assessmentCenter.updateMany({
+				where: { id: input.id, status: "COMPLETED" },
 				data: { status: "ACTIVE" },
 			});
+
+			if (count === 0) {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message: "Der Status des Assessment Centers hat sich geändert",
+				});
+			}
+		}),
+
+	/**
+	 * Removes personal data after a completed AC: participants and groups get
+	 * pseudonyms, contact fields and rating notes are cleared, free-text
+	 * ratings and group observations are deleted, soft-deleted participants
+	 * are purged.
+	 * Quantitative ratings and the AC structure stay for cohort comparisons.
+	 */
+	anonymize: protectedProcedure
+		.input(z.object({ id: z.string(), confirmName: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können Assessment Center anonymisieren",
+				});
+			}
+
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id, deletedAt: null },
+				select: { id: true, name: true, status: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			if (ac.status !== "COMPLETED") {
+				throw new TRPCError({
+					code: "CONFLICT",
+					message:
+						"Nur abgeschlossene Assessment Center können anonymisiert werden",
+				});
+			}
+
+			assertConfirmedName(input.confirmName, ac.name);
+
+			const assessmentCenterId = input.id;
+
+			await ctx.db.$transaction(
+				async (tx) => {
+					// Status first and conditional: locks the row, so a concurrent
+					// reopen waits and then finds the AC anonymized.
+					const { count } = await tx.assessmentCenter.updateMany({
+						where: { id: assessmentCenterId, status: "COMPLETED" },
+						data: { status: "ANONYMIZED", anonymizedAt: new Date() },
+					});
+
+					if (count === 0) {
+						throw new TRPCError({
+							code: "CONFLICT",
+							message: "Der Status des Assessment Centers hat sich geändert",
+						});
+					}
+
+					await tx.participant.deleteMany({
+						where: { assessmentCenterId, deletedAt: { not: null } },
+					});
+					await tx.qualitativeRating.deleteMany({
+						where: {
+							reviewerAssignment: { participant: { assessmentCenterId } },
+						},
+					});
+					await tx.quantitativeRating.updateMany({
+						where: {
+							reviewerAssignment: { participant: { assessmentCenterId } },
+							notes: { not: null },
+						},
+						data: { notes: null },
+					});
+					await tx.teamTaskObservation.deleteMany({
+						where: { task: { assessmentCenterId } },
+					});
+
+					const [participants, groups] = await Promise.all([
+						tx.participant.findMany({
+							where: { assessmentCenterId },
+							select: { id: true },
+						}),
+						tx.participantGroup.findMany({
+							where: { assessmentCenterId },
+							select: { id: true },
+							orderBy: { createdAt: "asc" },
+						}),
+					]);
+
+					const participantNames = assignPseudonyms(
+						participants.map((participant) => participant.id),
+						"Bewerbende",
+					);
+					for (const [id, name] of participantNames) {
+						await tx.participant.update({
+							where: { id },
+							data: { name, email: null, avatarUrl: null, avatarFileKey: null },
+						});
+					}
+
+					const groupNames = numberInOrder(
+						groups.map((group) => group.id),
+						"Gruppe",
+					);
+					for (const [id, name] of groupNames) {
+						await tx.participantGroup.update({ where: { id }, data: { name } });
+					}
+				},
+				// One update per participant; generous limit for large ACs.
+				{ timeout: 30_000 },
+			);
+		}),
+
+	/** Deletes the AC with everything attached to it (cascade), e.g. demos. */
+	delete: protectedProcedure
+		.input(z.object({ id: z.string(), confirmName: z.string() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können Assessment Center löschen",
+				});
+			}
+
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id },
+				select: { id: true, name: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			assertConfirmedName(input.confirmName, ac.name);
+
+			await ctx.db.assessmentCenter.delete({ where: { id: input.id } });
 		}),
 });

@@ -3,6 +3,7 @@
 import { CheckIcon, LockIcon } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { type AcStatus, isAcLocked } from "@/lib/ac-status";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import { api } from "@/trpc/react";
@@ -89,11 +90,14 @@ const STEPS: StepConfig[] = [
 
 type Props = {
 	acId: string;
-	isReadOnly: boolean;
+	status: AcStatus;
 	children: React.ReactNode;
 };
 
-function AcSetupHub({ acId, isReadOnly, children }: Props) {
+function AcSetupHub({ acId, status, children }: Props) {
+	// DRAFT and ACTIVE allow full editing; COMPLETED ACs are read-only until
+	// reopened, ANONYMIZED ACs for good.
+	const isReadOnly = isAcLocked(status);
 	const pathname = usePathname();
 	const { data: progress } = api.assessmentCenter.getSetupProgress.useQuery({
 		acId,
@@ -132,8 +136,9 @@ function AcSetupHub({ acId, isReadOnly, children }: Props) {
 				{isReadOnly && (
 					<div className="mb-6 flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-amber-800 text-sm dark:border-amber-900 dark:bg-amber-950/50 dark:text-amber-200">
 						<LockIcon className="h-4 w-4 shrink-0" />
-						Das Assessment Center ist abgeschlossen. Öffne es wieder, um die
-						Einrichtung zu bearbeiten.
+						{status === "ANONYMIZED"
+							? "Das Assessment Center ist anonymisiert und kann nicht mehr bearbeitet werden."
+							: "Das Assessment Center ist abgeschlossen. Öffne es wieder, um die Einrichtung zu bearbeiten."}
 					</div>
 				)}
 				{children}
