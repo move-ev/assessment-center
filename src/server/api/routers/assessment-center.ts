@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import type { AcStatus } from "@/lib/ac-status";
 import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
 import { isRatingScaleMax } from "@/lib/rating-scale";
 import { assertAcEditable } from "@/server/api/ac-lock";
@@ -262,9 +263,20 @@ export const assessmentCenterRouter = createTRPCRouter({
 
 			await ctx.db.$transaction(async (tx) => {
 				// Rating writes hold a share lock on this row; locking it here
-				// makes the count below see every rating that was saved.
-				await tx.$queryRaw`
-					SELECT id FROM "AssessmentCenter" WHERE id = ${ac.id} FOR UPDATE`;
+				// makes the count below see every rating that was saved. The
+				// status is read again under the lock, since the AC may have been
+				// completed or anonymized while this request waited.
+				const [locked] = await tx.$queryRaw<Array<{ status: AcStatus }>>`
+					SELECT status FROM "AssessmentCenter" WHERE id = ${ac.id} FOR UPDATE`;
+
+				if (!locked) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Assessment Center nicht gefunden",
+					});
+				}
+
+				assertAcEditable(locked.status);
 
 				if ((await countQuantitativeRatings(tx, ac.id)) > 0) {
 					throw new TRPCError({

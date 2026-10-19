@@ -379,7 +379,8 @@ model QuantitativeRating {
   reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id], onDelete: Cascade)
   criteriaId           String
   criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
-  /// Integer in range [0, 5]. Enforced via check constraint in migration.
+  /// 1 to the AC's ratingScaleMax (5 or 6), checked in the rating router;
+  /// the DB check allows 0–6.
   value                Int
   notes                String?
   createdAt            DateTime           @default(now())

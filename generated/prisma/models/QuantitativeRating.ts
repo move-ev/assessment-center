@@ -782,7 +782,8 @@ export type $QuantitativeRatingPayload<ExtArgs extends runtime.Types.Extensions.
     reviewerAssignmentId: string
     criteriaId: string
     /**
-     * Integer in range [0, 5]. Enforced via check constraint in migration.
+     * 1 to the AC's ratingScaleMax (5 or 6), checked in the rating router;
+     * the DB check allows 0–6.
      */
     value: number
     notes: string | null

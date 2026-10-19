@@ -26,7 +26,11 @@ function AcRatingScaleSection({
 			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
 			toast.success("Bewertungsskala gespeichert");
 		},
-		onError: (error) => toast.error(error.message),
+		onError: async (error) => {
+			// The lock or rating state may have changed: show the current one.
+			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
+			toast.error(error.message);
+		},
 	});
 
 	return (
@@ -34,9 +38,7 @@ function AcRatingScaleSection({
 			<div>
 				<h3 className="font-medium text-sm">Bewertungsskala</h3>
 				<p className="mt-1 text-muted-foreground text-sm">
-					{hasRatings
-						? "Es liegen bereits Bewertungen vor, deshalb ist die Skala fest."
-						: "Kann geändert werden, solange noch niemand bewertet hat."}
+					{getScaleHint(isReadOnly, hasRatings)}
 				</p>
 			</div>
 			<div className="flex gap-2">
@@ -59,6 +61,16 @@ function AcRatingScaleSection({
 			</div>
 		</div>
 	);
+}
+
+function getScaleHint(isReadOnly: boolean, hasRatings: boolean): string {
+	if (isReadOnly) {
+		return "Abgeschlossene oder anonymisierte ACs können nicht mehr geändert werden.";
+	}
+
+	return hasRatings
+		? "Es liegen bereits Bewertungen vor, deshalb ist die Skala fest."
+		: "Kann geändert werden, solange noch niemand bewertet hat.";
 }
 
 export { AcRatingScaleSection };
