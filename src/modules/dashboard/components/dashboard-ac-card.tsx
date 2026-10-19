@@ -30,9 +30,12 @@ function DashboardAcCard({ ac }: Props) {
 				<CardHeader className="pb-2">
 					<div className="flex items-start justify-between gap-2">
 						<CardTitle className="font-medium text-base">{ac.name}</CardTitle>
-						<Badge variant={STATUS_VARIANT[ac.status]}>
-							{STATUS_LABEL[ac.status]}
-						</Badge>
+						<div className="flex shrink-0 gap-1.5">
+							{ac.isDemo && <Badge variant="secondary">Demo</Badge>}
+							<Badge variant={STATUS_VARIANT[ac.status]}>
+								{STATUS_LABEL[ac.status]}
+							</Badge>
+						</div>
 					</div>
 				</CardHeader>
 				{ac.description && (

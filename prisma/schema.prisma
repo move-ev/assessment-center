@@ -123,6 +123,8 @@ model AssessmentCenter {
   name        String
   description String?
   status      AcStatus  @default(DRAFT)
+  /// Demo ACs on the production environment; excluded from cohort comparisons.
+  isDemo      Boolean   @default(false)
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?

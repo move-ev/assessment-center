@@ -14,11 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/lib/routes";
 import { api } from "@/trpc/react";
+import { DemoField } from "./ac-demo-field";
 
 function AcCreateForm() {
 	const router = useRouter();
 	const [name, setName] = useState("");
 	const [description, setDescription] = useState("");
+	const [isDemo, setIsDemo] = useState(false);
 
 	const createMutation = api.assessmentCenter.create.useMutation({
 		onSuccess: (data) => {
@@ -35,6 +37,7 @@ function AcCreateForm() {
 		createMutation.mutate({
 			name,
 			description: description.trim() !== "" ? description : undefined,
+			isDemo,
 		});
 	}
 
@@ -86,6 +89,12 @@ function AcCreateForm() {
 							value={description}
 						/>
 					</Field>
+
+					<DemoField
+						checked={isDemo}
+						disabled={createMutation.isPending}
+						onCheckedChange={setIsDemo}
+					/>
 				</FieldGroup>
 
 				<div className="mt-6">

@@ -17,6 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/lib/routes";
 import { api } from "@/trpc/react";
 import { AcConfirmByNameDialog } from "./ac-confirm-by-name-dialog";
+import { DemoField } from "./ac-demo-field";
 
 type AcStatus = "DRAFT" | "ACTIVE" | "COMPLETED";
 
@@ -25,6 +26,7 @@ type AcData = {
 	name: string;
 	description: string | null;
 	status: AcStatus;
+	isDemo: boolean;
 	days: Array<{ id: string; date: Date }>;
 };
 
@@ -58,6 +60,7 @@ type ContentProps = {
 function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 	const [name, setName] = useState(ac.name);
 	const [description, setDescription] = useState(ac.description ?? "");
+	const [isDemo, setIsDemo] = useState(ac.isDemo);
 	const [newDate, setNewDate] = useState("");
 
 	const invalidateDetails = () =>
@@ -96,6 +99,7 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 			id: acId,
 			name,
 			description: description.trim() !== "" ? description : undefined,
+			isDemo,
 		});
 	}
 
@@ -151,6 +155,12 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 							value={description}
 						/>
 					</Field>
+
+					<DemoField
+						checked={isDemo}
+						disabled={isReadOnly || updateMutation.isPending}
+						onCheckedChange={setIsDemo}
+					/>
 				</FieldGroup>
 
 				{!isReadOnly && (

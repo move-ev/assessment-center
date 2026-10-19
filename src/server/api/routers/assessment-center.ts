@@ -18,6 +18,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 					name: true,
 					description: true,
 					status: true,
+					isDemo: true,
 					createdAt: true,
 				},
 				orderBy: { createdAt: "desc" },
@@ -34,6 +35,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				name: true,
 				description: true,
 				status: true,
+				isDemo: true,
 				createdAt: true,
 			},
 			orderBy: { createdAt: "desc" },
@@ -73,6 +75,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 					name: true,
 					description: true,
 					status: true,
+					isDemo: true,
 					days: {
 						select: { id: true, date: true },
 						orderBy: { date: "asc" },
@@ -141,6 +144,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			z.object({
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
+				isDemo: z.boolean().default(false),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -155,6 +159,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: {
 					name: input.name,
 					description: input.description,
+					isDemo: input.isDemo,
 				},
 				select: { id: true },
 			});
@@ -166,6 +171,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				id: z.string(),
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
+				isDemo: z.boolean().default(false),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -197,6 +203,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: {
 					name: input.name,
 					description: input.description ?? null,
+					isDemo: input.isDemo,
 				},
 			});
 		}),
