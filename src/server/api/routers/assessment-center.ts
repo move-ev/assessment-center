@@ -1,12 +1,27 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import type { AcStatus } from "@/lib/ac-status";
 import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
+import { isRatingScaleMax } from "@/lib/rating-scale";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import {
 	adminProcedure,
 	createTRPCRouter,
 	protectedProcedure,
 } from "@/server/api/trpc";
+import type { PrismaClient } from "../../../../generated/prisma/client";
+
+function countQuantitativeRatings(
+	db: Pick<PrismaClient, "quantitativeRating">,
+	assessmentCenterId: string,
+): Promise<number> {
+	return db.quantitativeRating.count({
+		where: {
+			deletedAt: null,
+			reviewerAssignment: { reviewer: { assessmentCenterId } },
+		},
+	});
+}
 
 /** Irreversible actions require the AC name, checked again on the server. */
 function assertConfirmedName(confirmName: string, acName: string): void {
@@ -91,6 +106,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 					status: true,
 					isDemo: true,
 					anonymizedAt: true,
+					ratingScaleMax: true,
 					days: {
 						select: { id: true, date: true },
 						orderBy: { date: "asc" },
@@ -105,7 +121,18 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			return ac;
+			// The check constraint only allows known scales.
+			if (!isRatingScaleMax(ac.ratingScaleMax)) {
+				throw new Error(`Unbekannte Bewertungsskala: 1–${ac.ratingScaleMax}`);
+			}
+
+			const ratingCount = await countQuantitativeRatings(ctx.db, ac.id);
+
+			return {
+				...ac,
+				ratingScaleMax: ac.ratingScaleMax,
+				hasRatings: ratingCount > 0,
+			};
 		}),
 
 	getSetupProgress: adminProcedure
@@ -202,6 +229,67 @@ export const assessmentCenterRouter = createTRPCRouter({
 					name: input.name,
 					description: input.description ?? null,
 				},
+			});
+		}),
+
+	/**
+	 * The scale can only change before anyone has rated, so existing ratings
+	 * never end up on a different scale than the one they were given on.
+	 */
+	setRatingScale: adminProcedure
+		.input(
+			z.object({
+				id: z.string(),
+				ratingScaleMax: z
+					.number()
+					.int()
+					.refine(isRatingScaleMax, "Unbekannte Bewertungsskala"),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			const ac = await ctx.db.assessmentCenter.findFirst({
+				where: { id: input.id, deletedAt: null },
+				select: { id: true, status: true },
+			});
+
+			if (!ac) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
+
+			assertAcEditable(ac.status);
+
+			await ctx.db.$transaction(async (tx) => {
+				// Rating writes hold a share lock on this row; locking it here
+				// makes the count below see every rating that was saved. The
+				// status is read again under the lock, since the AC may have been
+				// completed or anonymized while this request waited.
+				const [locked] = await tx.$queryRaw<Array<{ status: AcStatus }>>`
+					SELECT status FROM "AssessmentCenter" WHERE id = ${ac.id} FOR UPDATE`;
+
+				if (!locked) {
+					throw new TRPCError({
+						code: "NOT_FOUND",
+						message: "Assessment Center nicht gefunden",
+					});
+				}
+
+				assertAcEditable(locked.status);
+
+				if ((await countQuantitativeRatings(tx, ac.id)) > 0) {
+					throw new TRPCError({
+						code: "CONFLICT",
+						message:
+							"Die Bewertungsskala kann nicht mehr geändert werden, weil bereits Bewertungen vorliegen",
+					});
+				}
+
+				await tx.assessmentCenter.update({
+					where: { id: ac.id },
+					data: { ratingScaleMax: input.ratingScaleMax },
+				});
 			});
 		}),
 

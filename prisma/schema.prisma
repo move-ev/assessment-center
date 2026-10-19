@@ -121,16 +121,19 @@ enum AcStatus {
 /// Status gates which sections are accessible (DRAFT → setup, ACTIVE → overview, COMPLETED → results).
 
 model AssessmentCenter {
-  id           String    @id @default(cuid())
-  name         String
-  description  String?
-  status       AcStatus  @default(DRAFT)
+  id             String    @id @default(cuid())
+  name           String
+  description    String?
+  status         AcStatus  @default(DRAFT)
   /// Demo ACs on the production environment; excluded from cohort comparisons.
-  isDemo       Boolean   @default(false)
-  anonymizedAt DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  deletedAt    DateTime?
+  isDemo         Boolean   @default(false)
+  anonymizedAt   DateTime?
+  /// Highest star of the rating scale: 5 (older ACs) or 6 (assessment matrix).
+  /// Enforced via check constraint in migration.
+  ratingScaleMax Int       @default(6)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?
 
   days         AssessmentDay[]
   groups       ParticipantGroup[]
@@ -361,10 +364,11 @@ model ReviewerAssignment {
   @@index([reviewerId])
 }
 
-/// A numeric rating (0–5) for a QUANTITATIVE criterion.
+/// A numeric rating for a QUANTITATIVE criterion, 1 up to the AC's
+/// ratingScaleMax (checked in the rating router).
 ///
 /// DB-level constraint (applied via migration SQL):
-///   CHECK (value >= 0 AND value <= 5)
+///   CHECK (value >= 0 AND value <= 6)
 ///
 /// notes is optional — use it to add context to the numeric score.
 /// Soft-deleted to preserve history when a reviewer corrects an entry during a live AC.
@@ -375,7 +379,8 @@ model QuantitativeRating {
   reviewerAssignment   ReviewerAssignment @relation(fields: [reviewerAssignmentId], references: [id], onDelete: Cascade)
   criteriaId           String
   criteria             ReviewCriteria     @relation(fields: [criteriaId], references: [id], onDelete: Cascade)
-  /// Integer in range [0, 5]. Enforced via check constraint in migration.
+  /// 1 to the AC's ratingScaleMax (5 or 6), checked in the rating router;
+  /// the DB check allows 0–6.
   value                Int
   notes                String?
   createdAt            DateTime           @default(now())

@@ -14,9 +14,11 @@ import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { type AcStatus, isAcLocked } from "@/lib/ac-status";
+import type { RatingScaleMax } from "@/lib/rating-scale";
 import { api } from "@/trpc/react";
 import { AcDemoField } from "./ac-demo-field";
 import { AcLifecycleSections } from "./ac-lifecycle-sections";
+import { AcRatingScaleSection } from "./ac-rating-scale-section";
 
 type AcData = {
 	id: string;
@@ -25,6 +27,8 @@ type AcData = {
 	status: AcStatus;
 	isDemo: boolean;
 	anonymizedAt: Date | null;
+	ratingScaleMax: RatingScaleMax;
+	hasRatings: boolean;
 	days: Array<{ id: string; date: Date }>;
 };
 
@@ -141,6 +145,16 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 			<Separator />
 
 			<DemoSection acId={acId} isDemo={ac.isDemo} utils={utils} />
+
+			<Separator />
+
+			<AcRatingScaleSection
+				acId={acId}
+				hasRatings={ac.hasRatings}
+				isReadOnly={isReadOnly}
+				ratingScaleMax={ac.ratingScaleMax}
+				utils={utils}
+			/>
 
 			<Separator />
 

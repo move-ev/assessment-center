@@ -1,5 +1,11 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import {
+	isRatingScaleMax,
+	isValidRating,
+	RATING_SCALE_MAXIMUMS,
+	type RatingScaleMax,
+} from "@/lib/rating-scale";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 import type { Prisma } from "../../../../generated/prisma/client";
 
@@ -8,7 +14,12 @@ const quantitativeInput = z.object({
 	taskId: z.string(),
 	participantId: z.string(),
 	criteriaId: z.string(),
-	value: z.number().int().min(1).max(5),
+	// Upper bound of the largest scale; the AC's own scale is checked on write.
+	value: z
+		.number()
+		.int()
+		.min(1)
+		.max(Math.max(...RATING_SCALE_MAXIMUMS)),
 });
 
 const qualitativeInput = z.object({
@@ -136,20 +147,34 @@ async function getCriteria(
 
 /**
  * Runs a rating write while holding a share lock on the AC row. Anonymizing
- * updates that row first, so it waits for writes in flight, and writes that
- * start later see ANONYMIZED and are refused. Without the lock a write that
- * passed the access check could land after anonymization deleted free texts.
+ * and changing the rating scale lock that row first, so they wait for writes
+ * in flight, and writes that start later see the new state. Without the lock
+ * a write that passed its checks could land after anonymization deleted free
+ * texts, or on a scale that changed in between.
  */
 async function writeUnlessAnonymized<T>(
 	db: ReviewAccessContext["db"],
 	acId: string,
-	write: (tx: Prisma.TransactionClient) => Promise<T>,
+	write: (
+		tx: Prisma.TransactionClient,
+		ac: { ratingScaleMax: RatingScaleMax },
+	) => Promise<T>,
 ): Promise<T> {
 	return db.$transaction(async (tx) => {
-		const [ac] = await tx.$queryRaw<Array<{ status: string }>>`
-			SELECT status FROM "AssessmentCenter" WHERE id = ${acId} FOR SHARE`;
+		const [ac] = await tx.$queryRaw<
+			Array<{ status: string; ratingScaleMax: number }>
+		>`
+			SELECT status, "ratingScaleMax" FROM "AssessmentCenter"
+			WHERE id = ${acId} FOR SHARE`;
 
-		if (ac?.status === "ANONYMIZED") {
+		if (!ac) {
+			throw new TRPCError({
+				code: "NOT_FOUND",
+				message: "Assessment Center nicht gefunden",
+			});
+		}
+
+		if (ac.status === "ANONYMIZED") {
 			throw new TRPCError({
 				code: "FORBIDDEN",
 				message:
@@ -157,7 +182,12 @@ async function writeUnlessAnonymized<T>(
 			});
 		}
 
-		return write(tx);
+		// The check constraint only allows known scales.
+		if (!isRatingScaleMax(ac.ratingScaleMax)) {
+			throw new Error(`Unbekannte Bewertungsskala: 1–${ac.ratingScaleMax}`);
+		}
+
+		return write(tx, { ratingScaleMax: ac.ratingScaleMax });
 	});
 }
 
@@ -182,8 +212,15 @@ export const ratingRouter = createTRPCRouter({
 				});
 			}
 
-			return writeUnlessAnonymized(ctx.db, input.acId, (tx) =>
-				tx.quantitativeRating.upsert({
+			return writeUnlessAnonymized(ctx.db, input.acId, (tx, ac) => {
+				if (!isValidRating(input.value, ac.ratingScaleMax)) {
+					throw new TRPCError({
+						code: "BAD_REQUEST",
+						message: `Bewertungen sind nur von 1 bis ${ac.ratingScaleMax} möglich`,
+					});
+				}
+
+				return tx.quantitativeRating.upsert({
 					where: {
 						reviewerAssignmentId_criteriaId: {
 							reviewerAssignmentId: access.id,
@@ -204,8 +241,8 @@ export const ratingRouter = createTRPCRouter({
 						value: true,
 						updatedAt: true,
 					},
-				}),
-			);
+				});
+			});
 		}),
 
 	upsertQualitative: protectedProcedure

@@ -329,6 +329,10 @@ testable with `bun run test` without any setup.
 - `src/lib/ac-status.ts`: AC status type and labels, and which statuses lock
   setup changes (`COMPLETED`, `ANONYMIZED`). Used by the routers (via
   `assertAcEditable`), the setup layout and the details form.
+- `src/lib/rating-scale.ts`: rating scales per AC (1–5 for older ACs, 1–6
+  from the assessment matrix), valid values and which values need a
+  confirmation. Used by the assessment-center and rating routers, the
+  rating form loader, the rating view and the details page.
 - `src/lib/pseudonyms.ts`: pseudonyms "Bewerbende n" / "Gruppe n" for
   anonymizing an AC, shuffled for participants.
 - `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and

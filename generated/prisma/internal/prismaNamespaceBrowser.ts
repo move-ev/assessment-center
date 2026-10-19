@@ -169,6 +169,7 @@ export const AssessmentCenterScalarFieldEnum = {
   status: 'status',
   isDemo: 'isDemo',
   anonymizedAt: 'anonymizedAt',
+  ratingScaleMax: 'ratingScaleMax',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
