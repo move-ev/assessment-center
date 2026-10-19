@@ -102,8 +102,8 @@ function AcReviewersTable({ acId }: Props) {
 													<AlertDialogDescription>
 														{reviewer.user.name} wird aus diesem Assessment
 														Center entfernt. Alle zugehörigen Zuweisungen werden
-														ebenfalls gelöscht. Das ist nur möglich, solange noch
-														keine Bewertungen abgegeben wurden.
+														ebenfalls gelöscht. Das ist nur möglich, solange
+														noch keine Bewertungen abgegeben wurden.
 													</AlertDialogDescription>
 												</AlertDialogHeader>
 												<AlertDialogFooter>
