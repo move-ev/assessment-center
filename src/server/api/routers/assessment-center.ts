@@ -1,6 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
-import { assignPseudonyms } from "@/modules/assessment-center/server/anonymization";
+import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
 
@@ -172,7 +172,6 @@ export const assessmentCenterRouter = createTRPCRouter({
 				id: z.string(),
 				name: z.string().trim().min(1, "Name ist erforderlich"),
 				description: z.string().trim().optional(),
-				isDemo: z.boolean().default(false),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
@@ -202,9 +201,32 @@ export const assessmentCenterRouter = createTRPCRouter({
 				data: {
 					name: input.name,
 					description: input.description ?? null,
-					isDemo: input.isDemo,
 				},
 			});
+		}),
+
+	/** Allowed in every status: a finished AC may turn out to be a demo. */
+	setDemo: protectedProcedure
+		.input(z.object({ id: z.string(), isDemo: z.boolean() }))
+		.mutation(async ({ ctx, input }) => {
+			if (ctx.session.user.role !== "admin") {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Nur Admins können die Demo-Markierung ändern",
+				});
+			}
+
+			const { count } = await ctx.db.assessmentCenter.updateMany({
+				where: { id: input.id, deletedAt: null },
+				data: { isDemo: input.isDemo },
+			});
+
+			if (count === 0) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Assessment Center nicht gefunden",
+				});
+			}
 		}),
 
 	addDay: protectedProcedure
@@ -442,8 +464,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 
 	/**
 	 * Removes personal data after a completed AC: participants and groups get
-	 * pseudonyms, contact fields are cleared, free-text ratings and group
-	 * observations are deleted, soft-deleted participants are purged.
+	 * pseudonyms, contact fields and rating notes are cleared, free-text
+	 * ratings and group observations are deleted, soft-deleted participants
+	 * are purged.
 	 * Quantitative ratings and the AC structure stay for cohort comparisons.
 	 */
 	anonymize: protectedProcedure
@@ -487,6 +510,13 @@ export const assessmentCenterRouter = createTRPCRouter({
 						reviewerAssignment: { participant: { assessmentCenterId } },
 					},
 				});
+				await tx.quantitativeRating.updateMany({
+					where: {
+						reviewerAssignment: { participant: { assessmentCenterId } },
+						notes: { not: null },
+					},
+					data: { notes: null },
+				});
 				await tx.teamTaskObservation.deleteMany({
 					where: { task: { assessmentCenterId } },
 				});
@@ -514,10 +544,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 					});
 				}
 
-				const groupNames = assignPseudonyms(
+				const groupNames = numberInOrder(
 					groups.map((group) => group.id),
 					"Gruppe",
-					null,
 				);
 				for (const [id, name] of groupNames) {
 					await tx.participantGroup.update({ where: { id }, data: { name } });

@@ -1,5 +1,6 @@
 import { ShieldCheckIcon } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
+import { formatDate } from "@/lib/format-date";
 import { ROUTES } from "@/lib/routes";
 import { getSession } from "@/server/better-auth/server";
 import { db } from "@/server/db";
@@ -43,7 +44,7 @@ export default async function AcResultsLayout({ children, params }: Props) {
 					<ShieldCheckIcon className="h-4 w-4 shrink-0" />
 					Anonymisiert
 					{assessmentCenter.anonymizedAt
-						? ` am ${assessmentCenter.anonymizedAt.toLocaleDateString("de-DE")}`
+						? ` am ${formatDate(assessmentCenter.anonymizedAt)}`
 						: ""}
 					: Namen sind ersetzt, Freitexte und Gruppenbeobachtungen gelöscht.
 				</div>

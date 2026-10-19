@@ -1,7 +1,6 @@
 "use client";
 
 import { Trash2Icon } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,11 +13,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { AC_STATUS_LABEL, type AcStatus, isAcLocked } from "@/lib/ac-status";
-import { ROUTES } from "@/lib/routes";
+import { type AcStatus, isAcLocked } from "@/lib/ac-status";
 import { api } from "@/trpc/react";
-import { AcConfirmByNameDialog } from "./ac-confirm-by-name-dialog";
-import { DemoField } from "./ac-demo-field";
+import { AcDemoField } from "./ac-demo-field";
+import { AcLifecycleSections } from "./ac-lifecycle-sections";
 
 type AcData = {
 	id: string;
@@ -60,35 +58,13 @@ type ContentProps = {
 function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 	const [name, setName] = useState(ac.name);
 	const [description, setDescription] = useState(ac.description ?? "");
-	const [isDemo, setIsDemo] = useState(ac.isDemo);
-	const [newDate, setNewDate] = useState("");
-
-	const invalidateDetails = () =>
-		utils.assessmentCenter.getDetails.invalidate({ id: acId });
 
 	const isReadOnly = isAcLocked(ac.status);
 
 	const updateMutation = api.assessmentCenter.updateDetails.useMutation({
 		onSuccess: async () => {
-			await invalidateDetails();
+			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
 			toast.success("Details gespeichert");
-		},
-		onError: (error) => toast.error(error.message),
-	});
-
-	const addDayMutation = api.assessmentCenter.addDay.useMutation({
-		onSuccess: async () => {
-			await invalidateDetails();
-			setNewDate("");
-			toast.success("Tag hinzugefügt");
-		},
-		onError: (error) => toast.error(error.message),
-	});
-
-	const removeDayMutation = api.assessmentCenter.removeDay.useMutation({
-		onSuccess: async () => {
-			await invalidateDetails();
-			toast.success("Tag entfernt");
 		},
 		onError: (error) => toast.error(error.message),
 	});
@@ -99,14 +75,7 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 			id: acId,
 			name,
 			description: description.trim() !== "" ? description : undefined,
-			isDemo,
 		});
-	}
-
-	function handleAddDay(e: React.FormEvent<HTMLFormElement>) {
-		e.preventDefault();
-		if (!newDate) return;
-		addDayMutation.mutate({ acId, date: newDate });
 	}
 
 	const zodErrors = updateMutation.error?.data?.zodError?.fieldErrors as
@@ -155,12 +124,6 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 							value={description}
 						/>
 					</Field>
-
-					<DemoField
-						checked={isDemo}
-						disabled={isReadOnly || updateMutation.isPending}
-						onCheckedChange={setIsDemo}
-					/>
 				</FieldGroup>
 
 				{!isReadOnly && (
@@ -177,37 +140,26 @@ function AcDetailsFormContent({ acId, ac, utils }: ContentProps) {
 
 			<Separator />
 
+			<DemoSection acId={acId} isDemo={ac.isDemo} utils={utils} />
+
+			<Separator />
+
 			<DaysSection
 				acId={acId}
 				days={ac.days}
-				isAddingDay={addDayMutation.isPending}
 				isReadOnly={isReadOnly}
-				isRemovingDay={removeDayMutation.isPending}
-				newDate={newDate}
-				onAddDay={handleAddDay}
-				onNewDateChange={setNewDate}
-				onRemoveDay={(id) => removeDayMutation.mutate({ id })}
-			/>
-
-			<Separator />
-
-			<StatusSection
-				acId={acId}
-				anonymizedAt={ac.anonymizedAt}
-				currentStatus={ac.status}
 				utils={utils}
 			/>
 
-			{ac.status === "COMPLETED" && (
-				<>
-					<Separator />
-					<AnonymizeSection acId={acId} acName={ac.name} utils={utils} />
-				</>
-			)}
-
 			<Separator />
 
-			<DeleteSection acId={acId} acName={ac.name} utils={utils} />
+			<AcLifecycleSections
+				acId={acId}
+				acName={ac.name}
+				anonymizedAt={ac.anonymizedAt}
+				status={ac.status}
+				utils={utils}
+			/>
 		</div>
 	);
 }
@@ -216,24 +168,37 @@ type DaysSectionProps = {
 	acId: string;
 	days: Array<{ id: string; date: Date }>;
 	isReadOnly: boolean;
-	newDate: string;
-	onNewDateChange: (v: string) => void;
-	onAddDay: (e: React.FormEvent<HTMLFormElement>) => void;
-	onRemoveDay: (id: string) => void;
-	isAddingDay: boolean;
-	isRemovingDay: boolean;
+	utils: ReturnType<typeof api.useUtils>;
 };
 
-function DaysSection({
-	days,
-	isReadOnly,
-	newDate,
-	onNewDateChange,
-	onAddDay,
-	onRemoveDay,
-	isAddingDay,
-	isRemovingDay,
-}: DaysSectionProps) {
+function DaysSection({ acId, days, isReadOnly, utils }: DaysSectionProps) {
+	const [newDate, setNewDate] = useState("");
+	const invalidateDetails = () =>
+		utils.assessmentCenter.getDetails.invalidate({ id: acId });
+
+	const addDayMutation = api.assessmentCenter.addDay.useMutation({
+		onSuccess: async () => {
+			await invalidateDetails();
+			setNewDate("");
+			toast.success("Tag hinzugefügt");
+		},
+		onError: (error) => toast.error(error.message),
+	});
+
+	const removeDayMutation = api.assessmentCenter.removeDay.useMutation({
+		onSuccess: async () => {
+			await invalidateDetails();
+			toast.success("Tag entfernt");
+		},
+		onError: (error) => toast.error(error.message),
+	});
+
+	function handleAddDay(e: React.FormEvent<HTMLFormElement>) {
+		e.preventDefault();
+		if (!newDate) return;
+		addDayMutation.mutate({ acId, date: newDate });
+	}
+
 	return (
 		<div className="space-y-4">
 			<div>
@@ -267,8 +232,8 @@ function DaysSection({
 							{!isReadOnly && (
 								<Button
 									aria-label="Tag entfernen"
-									disabled={isRemovingDay}
-									onClick={() => onRemoveDay(day.id)}
+									disabled={removeDayMutation.isPending}
+									onClick={() => removeDayMutation.mutate({ id: day.id })}
 									size="icon-sm"
 									type="button"
 									variant="ghost"
@@ -282,21 +247,21 @@ function DaysSection({
 			)}
 
 			{!isReadOnly && (
-				<form className="flex gap-2" onSubmit={onAddDay}>
+				<form className="flex gap-2" onSubmit={handleAddDay}>
 					<Input
 						aria-label="Neues Datum"
 						className="w-auto"
-						disabled={isAddingDay}
-						onChange={(e) => onNewDateChange(e.target.value)}
+						disabled={addDayMutation.isPending}
+						onChange={(e) => setNewDate(e.target.value)}
 						type="date"
 						value={newDate}
 					/>
 					<Button
-						disabled={isAddingDay || !newDate}
+						disabled={addDayMutation.isPending || !newDate}
 						type="submit"
 						variant="outline"
 					>
-						{isAddingDay ? "Hinzufügen..." : "Tag hinzufügen"}
+						{addDayMutation.isPending ? "Hinzufügen..." : "Tag hinzufügen"}
 					</Button>
 				</form>
 			)}
@@ -304,254 +269,31 @@ function DaysSection({
 	);
 }
 
-type StatusSectionProps = {
+type DemoSectionProps = {
 	acId: string;
-	anonymizedAt: Date | null;
-	currentStatus: AcStatus;
+	isDemo: boolean;
 	utils: ReturnType<typeof api.useUtils>;
 };
 
-function StatusSection({
-	acId,
-	anonymizedAt,
-	currentStatus,
-	utils,
-}: StatusSectionProps) {
-	const router = useRouter();
-	const { data: progress } = api.assessmentCenter.getSetupProgress.useQuery(
-		{ acId },
-		{ enabled: currentStatus === "DRAFT" },
-	);
-
-	const transitionMutation =
-		api.assessmentCenter.transitionToActive.useMutation({
-			onSuccess: async () => {
-				await utils.assessmentCenter.getDetails.invalidate({ id: acId });
-				router.refresh();
-				toast.success("Assessment Center wurde aktiviert");
-			},
-			onError: (error) => toast.error(error.message),
-		});
-	const completeMutation =
-		api.assessmentCenter.transitionToCompleted.useMutation({
-			onSuccess: async () => {
-				await utils.assessmentCenter.getDetails.invalidate({ id: acId });
-				router.refresh();
-				toast.success("Assessment Center wurde abgeschlossen");
-			},
-			onError: (error) => toast.error(error.message),
-		});
-	const reopenMutation = api.assessmentCenter.reopen.useMutation({
+/** Saves on toggle and works in every status, unlike the details form. */
+function DemoSection({ acId, isDemo, utils }: DemoSectionProps) {
+	const setDemoMutation = api.assessmentCenter.setDemo.useMutation({
 		onSuccess: async () => {
 			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
-			router.refresh();
-			toast.success("Assessment Center wurde wieder geöffnet");
-		},
-		onError: (error) => toast.error(error.message),
-	});
-
-	if (currentStatus === "ANONYMIZED") {
-		return (
-			<div className="space-y-1">
-				<h3 className="font-medium text-sm">Status</h3>
-				<p className="text-muted-foreground text-sm">
-					Das Assessment Center wurde
-					{anonymizedAt ? ` am ${formatDate(anonymizedAt)}` : ""} anonymisiert
-					und ist dauerhaft schreibgeschützt.
-				</p>
-			</div>
-		);
-	}
-
-	if (currentStatus === "COMPLETED") {
-		return (
-			<div className="space-y-4">
-				<div>
-					<h3 className="font-medium text-sm">Status</h3>
-					<p className="mt-1 text-muted-foreground text-sm">
-						Das Assessment Center ist{" "}
-						<strong className="text-foreground">
-							{AC_STATUS_LABEL[currentStatus]}
-						</strong>
-						. Du kannst es wieder öffnen, um Bewertungen nachzupflegen.
-					</p>
-				</div>
-				<Button
-					disabled={reopenMutation.isPending}
-					onClick={() => reopenMutation.mutate({ id: acId })}
-					variant="outline"
-				>
-					{reopenMutation.isPending ? "Öffne..." : "AC wieder öffnen"}
-				</Button>
-			</div>
-		);
-	}
-
-	if (currentStatus === "ACTIVE") {
-		return (
-			<div className="space-y-4">
-				<div>
-					<h3 className="font-medium text-sm">Abschließen</h3>
-					<p className="mt-1 text-muted-foreground text-sm">
-						Sobald das Assessment Center beendet ist, kann es abgeschlossen und
-						in die Ergebnisse überführt werden.
-					</p>
-				</div>
-				<Button
-					disabled={completeMutation.isPending}
-					onClick={() => completeMutation.mutate({ id: acId })}
-				>
-					{completeMutation.isPending
-						? "Wird abgeschlossen..."
-						: "AC abschließen"}
-				</Button>
-			</div>
-		);
-	}
-
-	const allStepsComplete =
-		progress !== undefined &&
-		progress.dayCount > 0 &&
-		progress.participantCount > 0 &&
-		progress.groupCount > 0 &&
-		progress.taskCount > 0 &&
-		progress.scheduleEntryCount > 0 &&
-		progress.reviewerCount > 0 &&
-		progress.assignmentCount > 0;
-
-	return (
-		<div className="space-y-4">
-			<div>
-				<h3 className="font-medium text-sm">Aktivieren</h3>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Sobald alle Einrichtungsschritte abgeschlossen sind, kann das AC
-					aktiviert werden.
-				</p>
-			</div>
-			<Button
-				disabled={!allStepsComplete || transitionMutation.isPending}
-				onClick={() => transitionMutation.mutate({ id: acId })}
-			>
-				{transitionMutation.isPending ? "Aktiviert..." : "AC aktivieren"}
-			</Button>
-			{!allStepsComplete && progress !== undefined && (
-				<p className="text-muted-foreground text-sm">
-					Schließe alle 7 Einrichtungsschritte ab, um das AC zu aktivieren.
-				</p>
-			)}
-		</div>
-	);
-}
-
-function formatDate(date: Date): string {
-	return date.toLocaleDateString("de-DE", {
-		year: "numeric",
-		month: "2-digit",
-		day: "2-digit",
-	});
-}
-
-type AnonymizeSectionProps = {
-	acId: string;
-	acName: string;
-	utils: ReturnType<typeof api.useUtils>;
-};
-
-function AnonymizeSection({ acId, acName, utils }: AnonymizeSectionProps) {
-	const router = useRouter();
-	const anonymizeMutation = api.assessmentCenter.anonymize.useMutation({
-		onSuccess: async () => {
-			await utils.assessmentCenter.getDetails.invalidate({ id: acId });
-			router.refresh();
-			toast.success("Assessment Center wurde anonymisiert");
-		},
-		onError: (error) => toast.error(error.message),
-	});
-
-	return (
-		<div className="space-y-4">
-			<div>
-				<h3 className="font-medium text-sm">Anonymisieren</h3>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Entfernt nach dem AC alle personenbezogenen Daten der Bewerbenden. Die
-					Zahlenbewertungen bleiben für spätere Jahrgangsvergleiche erhalten.
-				</p>
-			</div>
-			<AcConfirmByNameDialog
-				acName={acName}
-				confirmLabel="Endgültig anonymisieren"
-				description={
-					<div className="space-y-2">
-						<p>Das lässt sich nicht rückgängig machen:</p>
-						<ul className="list-disc space-y-1 pl-5">
-							<li>Namen werden zu „Bewerbende 1…n“ (zufällige Reihenfolge)</li>
-							<li>E-Mail-Adressen und Bilder werden entfernt</li>
-							<li>Gruppennamen werden zu „Gruppe 1…n“</li>
-							<li>
-								Alle Freitext-Bewertungen und Gruppenbeobachtungen werden
-								gelöscht
-							</li>
-							<li>Bereits entfernte Bewerbende werden endgültig gelöscht</li>
-						</ul>
-						<p>
-							Danach ist das AC dauerhaft schreibgeschützt und nur noch für
-							Admins sichtbar.
-						</p>
-					</div>
-				}
-				isPending={anonymizeMutation.isPending}
-				onConfirm={() => anonymizeMutation.mutate({ id: acId })}
-				pendingLabel="Anonymisiert..."
-				title="Assessment Center anonymisieren?"
-				triggerLabel="AC anonymisieren"
-			/>
-		</div>
-	);
-}
-
-type DeleteSectionProps = {
-	acId: string;
-	acName: string;
-	utils: ReturnType<typeof api.useUtils>;
-};
-
-function DeleteSection({ acId, acName, utils }: DeleteSectionProps) {
-	const router = useRouter();
-	const deleteMutation = api.assessmentCenter.delete.useMutation({
-		onSuccess: async () => {
 			await utils.assessmentCenter.listForUser.invalidate();
-			toast.success("Assessment Center wurde gelöscht");
-			router.push(ROUTES.dashboard());
+			toast.success("Demo-Markierung gespeichert");
 		},
 		onError: (error) => toast.error(error.message),
 	});
 
 	return (
-		<div className="space-y-4">
-			<div>
-				<h3 className="font-medium text-sm">AC löschen</h3>
-				<p className="mt-1 text-muted-foreground text-sm">
-					Löscht das Assessment Center endgültig mit allen Bewerbenden,
-					Aufgaben, Bewertungen und Beobachtungen, zum Beispiel nach einer Demo.
-				</p>
-			</div>
-			<AcConfirmByNameDialog
-				acName={acName}
-				confirmLabel="Endgültig löschen"
-				description={
-					<p>
-						Alle Daten dieses Assessment Centers werden gelöscht. Das lässt sich
-						nicht rückgängig machen. Die Benutzerkonten der Beobachter bleiben
-						erhalten.
-					</p>
-				}
-				isPending={deleteMutation.isPending}
-				onConfirm={() => deleteMutation.mutate({ id: acId })}
-				pendingLabel="Löscht..."
-				title="Assessment Center löschen?"
-				triggerLabel="AC löschen"
-			/>
-		</div>
+		<AcDemoField
+			checked={isDemo}
+			disabled={setDemoMutation.isPending}
+			onCheckedChange={(checked) =>
+				setDemoMutation.mutate({ id: acId, isDemo: checked })
+			}
+		/>
 	);
 }
 

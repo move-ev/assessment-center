@@ -256,7 +256,7 @@ src/app/
 src/server/api/routers/
 │
 ├── assessment-center.ts    CRUD for AssessmentCenter; status transitions
-├── participant.ts          Add/edit/soft-delete participants within an AC
+├── participant.ts          Add/edit/delete participants within an AC
 ├── group.ts                Create groups; assign/remove participants
 ├── task.ts                 CRUD for tasks; CRUD for criteria within a task
 ├── schedule.ts             Create/delete ScheduleEntry records; reorder
@@ -320,6 +320,8 @@ testable with `bun run test` without any setup.
 - `src/lib/ac-status.ts`: AC status type and labels, and which statuses lock
   setup changes (`COMPLETED`, `ANONYMIZED`). Used by the routers (via
   `assertAcEditable`), the setup layout and the details form.
+- `src/lib/pseudonyms.ts`: pseudonyms "Bewerbende n" / "Gruppe n" for
+  anonymizing an AC, shuffled for participants.
 - `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and
   4-star anchor texts, shared by the criteria editor, the rating view and the
   task router.

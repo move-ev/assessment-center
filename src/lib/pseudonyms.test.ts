@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { assignPseudonyms } from "./anonymization.ts";
+import { assignPseudonyms, numberInOrder } from "./pseudonyms.ts";
 
-describe("assignPseudonyms", () => {
+describe("pseudonyms", () => {
 	it("numbers every id once, 1 to n", () => {
 		const pseudonyms = assignPseudonyms(["a", "b", "c", "d"], "Bewerbende");
 
@@ -24,8 +24,8 @@ describe("assignPseudonyms", () => {
 		assert.equal(pseudonyms.get("a"), "Bewerbende 3");
 	});
 
-	it("keeps the input order when asked to", () => {
-		const pseudonyms = assignPseudonyms(["x", "y"], "Gruppe", null);
+	it("numberInOrder keeps the input order", () => {
+		const pseudonyms = numberInOrder(["x", "y"], "Gruppe");
 
 		assert.equal(pseudonyms.get("x"), "Gruppe 1");
 		assert.equal(pseudonyms.get("y"), "Gruppe 2");

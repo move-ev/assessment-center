@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { ROUTES } from "@/lib/routes";
 import { api } from "@/trpc/react";
-import { DemoField } from "./ac-demo-field";
+import { AcDemoField } from "./ac-demo-field";
 
 function AcCreateForm() {
 	const router = useRouter();
@@ -90,7 +90,7 @@ function AcCreateForm() {
 						/>
 					</Field>
 
-					<DemoField
+					<AcDemoField
 						checked={isDemo}
 						disabled={createMutation.isPending}
 						onCheckedChange={setIsDemo}

@@ -9,7 +9,7 @@ type Props = {
 	onCheckedChange: (checked: boolean) => void;
 };
 
-function DemoField({ checked, disabled, onCheckedChange }: Props) {
+function AcDemoField({ checked, disabled, onCheckedChange }: Props) {
 	return (
 		<Field orientation="horizontal">
 			<Checkbox
@@ -28,4 +28,4 @@ function DemoField({ checked, disabled, onCheckedChange }: Props) {
 	);
 }
 
-export { DemoField };
+export { AcDemoField };
