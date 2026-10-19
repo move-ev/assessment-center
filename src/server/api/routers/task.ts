@@ -3,7 +3,11 @@ import { z } from "zod";
 import { RATING_ANCHOR_MAX_LENGTH } from "@/lib/rating-anchors";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+	adminProcedure,
+	createTRPCRouter,
+	protectedProcedure,
+} from "@/server/api/trpc";
 
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 /** Anchor text under the rating scale; blank means no anchor. */
@@ -32,7 +36,7 @@ function assertCriteriaWeight(
 }
 
 export const taskRouter = createTRPCRouter({
-	listByAc: protectedProcedure
+	listByAc: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			return ctx.db.task.findMany({
@@ -51,7 +55,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	getById: protectedProcedure
+	getById: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const task = await ctx.db.task.findFirst({

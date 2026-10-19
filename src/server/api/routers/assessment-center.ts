@@ -2,7 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
 import { assertAcEditable } from "@/server/api/ac-lock";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+	adminProcedure,
+	createTRPCRouter,
+	protectedProcedure,
+} from "@/server/api/trpc";
 
 /** Irreversible actions require the AC name, checked again on the server. */
 function assertConfirmedName(confirmName: string, acName: string): void {
@@ -52,7 +56,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 		});
 	}),
 
-	getById: protectedProcedure
+	getById: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const ac = await ctx.db.assessmentCenter.findFirst({
@@ -75,7 +79,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			return ac;
 		}),
 
-	getDetails: protectedProcedure
+	getDetails: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const ac = await ctx.db.assessmentCenter.findFirst({
@@ -104,7 +108,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			return ac;
 		}),
 
-	getSetupProgress: protectedProcedure
+	getSetupProgress: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const [

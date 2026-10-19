@@ -2,10 +2,14 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+	adminProcedure,
+	createTRPCRouter,
+	protectedProcedure,
+} from "@/server/api/trpc";
 
 export const reviewerRouter = createTRPCRouter({
-	listByAc: protectedProcedure
+	listByAc: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			return ctx.db.reviewer.findMany({
@@ -19,7 +23,7 @@ export const reviewerRouter = createTRPCRouter({
 			});
 		}),
 
-	searchUsers: protectedProcedure
+	searchUsers: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
