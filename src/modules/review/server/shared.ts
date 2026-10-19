@@ -40,6 +40,11 @@ export async function getReviewSession(acId: string): Promise<ReviewSession> {
 		notFound();
 	}
 
+	// Anonymized ACs are admin-only; reviewers must not reach their data.
+	if (reviewer.assessmentCenter.status === "ANONYMIZED") {
+		notFound();
+	}
+
 	return {
 		acId: reviewer.assessmentCenter.id,
 		reviewerId: reviewer.id,

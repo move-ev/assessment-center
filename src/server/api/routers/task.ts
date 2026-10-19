@@ -3,7 +3,7 @@ import { z } from "zod";
 import { RATING_ANCHOR_MAX_LENGTH } from "@/lib/rating-anchors";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import { assertNoSubmittedRatings } from "@/server/api/rating-guard";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 
 const criteriaTypeSchema = z.enum(["QUANTITATIVE", "QUALITATIVE"]);
 /** Anchor text under the rating scale; blank means no anchor. */
@@ -32,7 +32,7 @@ function assertCriteriaWeight(
 }
 
 export const taskRouter = createTRPCRouter({
-	listByAc: protectedProcedure
+	listByAc: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			return ctx.db.task.findMany({
@@ -51,7 +51,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	getById: protectedProcedure
+	getById: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const task = await ctx.db.task.findFirst({
@@ -103,7 +103,7 @@ export const taskRouter = createTRPCRouter({
 			return task;
 		}),
 
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
@@ -114,13 +114,6 @@ export const taskRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Aufgaben erstellen",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.acId, deletedAt: null },
 				select: { id: true, status: true },
@@ -153,7 +146,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	update: protectedProcedure
+	update: adminProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -166,13 +159,6 @@ export const taskRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Aufgaben bearbeiten",
-				});
-			}
-
 			const task = await ctx.db.task.findFirst({
 				where: {
 					id: input.id,
@@ -214,16 +200,9 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	remove: protectedProcedure
+	remove: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Aufgaben löschen",
-				});
-			}
-
 			const task = await ctx.db.task.findFirst({
 				where: {
 					id: input.id,
@@ -278,7 +257,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	addCriteriaGroup: protectedProcedure
+	addCriteriaGroup: adminProcedure
 		.input(
 			z.object({
 				taskId: z.string(),
@@ -287,13 +266,6 @@ export const taskRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Kriteriengruppen hinzufügen",
-				});
-			}
-
 			const task = await ctx.db.task.findFirst({
 				where: {
 					id: input.taskId,
@@ -321,7 +293,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	updateCriteriaGroup: protectedProcedure
+	updateCriteriaGroup: adminProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -331,13 +303,6 @@ export const taskRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Kriteriengruppen bearbeiten",
-				});
-			}
-
 			const group = await ctx.db.reviewCriteriaGroup.findFirst({
 				where: {
 					id: input.id,
@@ -369,16 +334,9 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	removeCriteriaGroup: protectedProcedure
+	removeCriteriaGroup: adminProcedure
 		.input(z.object({ id: z.string(), taskId: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Kriteriengruppen entfernen",
-				});
-			}
-
 			const group = await ctx.db.reviewCriteriaGroup.findFirst({
 				where: {
 					id: input.id,
@@ -415,7 +373,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	addCriteria: protectedProcedure
+	addCriteria: adminProcedure
 		.input(
 			z.object({
 				taskId: z.string(),
@@ -431,13 +389,6 @@ export const taskRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Kriterien hinzufügen",
-				});
-			}
-
 			assertCriteriaWeight(input.type, input.weight);
 
 			const group = await ctx.db.reviewCriteriaGroup.findFirst({
@@ -492,7 +443,7 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	updateCriteria: protectedProcedure
+	updateCriteria: adminProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -509,13 +460,6 @@ export const taskRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Kriterien bearbeiten",
-				});
-			}
-
 			assertCriteriaWeight(input.type, input.weight);
 
 			const criteria = await ctx.db.reviewCriteria.findFirst({
@@ -585,16 +529,9 @@ export const taskRouter = createTRPCRouter({
 			});
 		}),
 
-	removeCriteria: protectedProcedure
+	removeCriteria: adminProcedure
 		.input(z.object({ id: z.string(), taskId: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Kriterien entfernen",
-				});
-			}
-
 			const criteria = await ctx.db.reviewCriteria.findFirst({
 				where: {
 					id: input.id,

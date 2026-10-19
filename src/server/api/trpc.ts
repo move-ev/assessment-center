@@ -132,3 +132,21 @@ export const protectedProcedure = t.procedure
 			},
 		});
 	});
+
+/**
+ * Admin-only procedure
+ *
+ * For everything that reads or changes an AC's setup and participant data,
+ * and for status changes, anonymizing and deleting.
+ * Reviewers never need these: their pages load data through the review
+ * module, scoped to their own assignments.
+ */
+export const adminProcedure = protectedProcedure.use(({ ctx, next }) => {
+	if (ctx.session.user.role !== "admin") {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Nur Admins haben darauf Zugriff",
+		});
+	}
+	return next();
+});

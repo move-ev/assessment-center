@@ -2,7 +2,11 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
 import { assertAcEditable } from "@/server/api/ac-lock";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import {
+	adminProcedure,
+	createTRPCRouter,
+	protectedProcedure,
+} from "@/server/api/trpc";
 
 /** Irreversible actions require the AC name, checked again on the server. */
 function assertConfirmedName(confirmName: string, acName: string): void {
@@ -52,7 +56,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 		});
 	}),
 
-	getById: protectedProcedure
+	getById: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const ac = await ctx.db.assessmentCenter.findFirst({
@@ -75,7 +79,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			return ac;
 		}),
 
-	getDetails: protectedProcedure
+	getDetails: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const ac = await ctx.db.assessmentCenter.findFirst({
@@ -104,7 +108,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			return ac;
 		}),
 
-	getSetupProgress: protectedProcedure
+	getSetupProgress: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			const [
@@ -150,7 +154,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			};
 		}),
 
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				name: z.string().trim().min(1, "Name ist erforderlich"),
@@ -159,13 +163,6 @@ export const assessmentCenterRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Assessment Centers erstellen",
-				});
-			}
-
 			return ctx.db.assessmentCenter.create({
 				data: {
 					name: input.name,
@@ -176,7 +173,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			});
 		}),
 
-	updateDetails: protectedProcedure
+	updateDetails: adminProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -185,13 +182,6 @@ export const assessmentCenterRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Details bearbeiten",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id, deletedAt: null },
 				select: { id: true, status: true },
@@ -216,16 +206,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 		}),
 
 	/** Allowed in every status: a finished AC may turn out to be a demo. */
-	setDemo: protectedProcedure
+	setDemo: adminProcedure
 		.input(z.object({ id: z.string(), isDemo: z.boolean() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können die Demo-Markierung ändern",
-				});
-			}
-
 			const { count } = await ctx.db.assessmentCenter.updateMany({
 				where: { id: input.id, deletedAt: null },
 				data: { isDemo: input.isDemo },
@@ -239,7 +222,7 @@ export const assessmentCenterRouter = createTRPCRouter({
 			}
 		}),
 
-	addDay: protectedProcedure
+	addDay: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
@@ -247,13 +230,6 @@ export const assessmentCenterRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Tage hinzufügen",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.acId, deletedAt: null },
 				select: { id: true, status: true },
@@ -283,16 +259,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 			});
 		}),
 
-	removeDay: protectedProcedure
+	removeDay: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Tage entfernen",
-				});
-			}
-
 			const day = await ctx.db.assessmentDay.findUnique({
 				where: { id: input.id },
 				select: {
@@ -321,16 +290,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 			await ctx.db.assessmentDay.delete({ where: { id: input.id } });
 		}),
 
-	transitionToActive: protectedProcedure
+	transitionToActive: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können den Status ändern",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id, deletedAt: null },
 				select: { id: true, status: true },
@@ -401,16 +363,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 			});
 		}),
 
-	transitionToCompleted: protectedProcedure
+	transitionToCompleted: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können den Status ändern",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id, deletedAt: null },
 				select: { id: true, status: true },
@@ -436,16 +391,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 			});
 		}),
 
-	reopen: protectedProcedure
+	reopen: adminProcedure
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können den Status ändern",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id, deletedAt: null },
 				select: { id: true, status: true },
@@ -487,16 +435,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 	 * are purged.
 	 * Quantitative ratings and the AC structure stay for cohort comparisons.
 	 */
-	anonymize: protectedProcedure
+	anonymize: adminProcedure
 		.input(z.object({ id: z.string(), confirmName: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Assessment Center anonymisieren",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id, deletedAt: null },
 				select: { id: true, name: true, status: true },
@@ -593,16 +534,9 @@ export const assessmentCenterRouter = createTRPCRouter({
 		}),
 
 	/** Deletes the AC with everything attached to it (cascade), e.g. demos. */
-	delete: protectedProcedure
+	delete: adminProcedure
 		.input(z.object({ id: z.string(), confirmName: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Assessment Center löschen",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.id },
 				select: { id: true, name: true },

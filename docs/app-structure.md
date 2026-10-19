@@ -271,6 +271,12 @@ src/server/api/routers/
 
 All routers are registered in `src/server/api/root.ts`.
 
+Access: everything that reads or changes an AC's setup and participant data
+uses `adminProcedure` (admin role required). Reviewers load their data through
+the review module's server loaders, scoped to their own assignments, and write
+only through `rating.ts`, which checks their assignment. `listForUser` returns
+only the ACs a reviewer is assigned to.
+
 ---
 
 ## Routes Constants

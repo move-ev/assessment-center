@@ -1,10 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { assertAcEditable } from "@/server/api/ac-lock";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 
 export const scheduleRouter = createTRPCRouter({
-	listByAc: protectedProcedure
+	listByAc: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			return ctx.db.scheduleEntry.findMany({
@@ -21,7 +21,7 @@ export const scheduleRouter = createTRPCRouter({
 			});
 		}),
 
-	createEntry: protectedProcedure
+	createEntry: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
@@ -31,13 +31,6 @@ export const scheduleRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können den Zeitplan bearbeiten",
-				});
-			}
-
 			const [ac, day, group, task] = await Promise.all([
 				ctx.db.assessmentCenter.findFirst({
 					where: { id: input.acId, deletedAt: null },
@@ -135,16 +128,9 @@ export const scheduleRouter = createTRPCRouter({
 			});
 		}),
 
-	removeEntry: protectedProcedure
+	removeEntry: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können den Zeitplan bearbeiten",
-				});
-			}
-
 			const entry = await ctx.db.scheduleEntry.findFirst({
 				where: { id: input.id, day: { assessmentCenterId: input.acId } },
 				select: {
@@ -167,7 +153,7 @@ export const scheduleRouter = createTRPCRouter({
 			await ctx.db.scheduleEntry.delete({ where: { id: input.id } });
 		}),
 
-	reorderEntry: protectedProcedure
+	reorderEntry: adminProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -176,13 +162,6 @@ export const scheduleRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können den Zeitplan bearbeiten",
-				});
-			}
-
 			const entry = await ctx.db.scheduleEntry.findFirst({
 				where: { id: input.id, day: { assessmentCenterId: input.acId } },
 				select: {

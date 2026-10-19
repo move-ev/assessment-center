@@ -2,10 +2,10 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 
 import { assertAcEditable } from "@/server/api/ac-lock";
-import { createTRPCRouter, protectedProcedure } from "@/server/api/trpc";
+import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 
 export const participantRouter = createTRPCRouter({
-	listByAc: protectedProcedure
+	listByAc: adminProcedure
 		.input(z.object({ acId: z.string() }))
 		.query(async ({ ctx, input }) => {
 			return ctx.db.participant.findMany({
@@ -15,7 +15,7 @@ export const participantRouter = createTRPCRouter({
 			});
 		}),
 
-	create: protectedProcedure
+	create: adminProcedure
 		.input(
 			z.object({
 				acId: z.string(),
@@ -24,13 +24,6 @@ export const participantRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerbende hinzufügen",
-				});
-			}
-
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: input.acId, deletedAt: null },
 				select: { id: true, status: true },
@@ -55,7 +48,7 @@ export const participantRouter = createTRPCRouter({
 			});
 		}),
 
-	update: protectedProcedure
+	update: adminProcedure
 		.input(
 			z.object({
 				id: z.string(),
@@ -65,13 +58,6 @@ export const participantRouter = createTRPCRouter({
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerbende bearbeiten",
-				});
-			}
-
 			const participant = await ctx.db.participant.findFirst({
 				where: {
 					id: input.id,
@@ -100,16 +86,9 @@ export const participantRouter = createTRPCRouter({
 			});
 		}),
 
-	remove: protectedProcedure
+	remove: adminProcedure
 		.input(z.object({ id: z.string(), acId: z.string() }))
 		.mutation(async ({ ctx, input }) => {
-			if (ctx.session.user.role !== "admin") {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Nur Admins können Bewerbende entfernen",
-				});
-			}
-
 			const participant = await ctx.db.participant.findFirst({
 				where: {
 					id: input.id,
