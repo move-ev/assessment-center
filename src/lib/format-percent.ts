@@ -4,11 +4,12 @@ export function formatPercent(value: number | null): string {
 }
 
 /**
- * Spread between reviewers in percentage points with one decimal, so a marked
- * 7.4 never reads as "7"; a dash with a single reviewer.
+ * Spread between reviewers in percentage points with two decimals (the
+ * precision it is computed with), so a marked 7.01 never reads as "7,0"; a
+ * dash with a single reviewer.
  */
 export function formatSpread(spread: number | null): string {
-	return spread === null ? "–" : `${formatDecimal(spread)} Pkt.`;
+	return spread === null ? "–" : `${spread.toFixed(2).replace(".", ",")} Pkt.`;
 }
 
 /**

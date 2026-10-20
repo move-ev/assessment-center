@@ -18,9 +18,9 @@ describe("reviewer deviation", () => {
 		assert.equal(isStrongDeviation(7.01), true);
 		assert.equal(isStrongDeviation(7), false);
 		assert.equal(isStrongDeviation(null), false);
-		// 94.33 − 87.33 is 7.000…014 in floating point: still exactly 7
+		// 64.01 − 57.01 is 7.000000000000007 in floating point: still exactly 7
 		assert.equal(
-			isStrongDeviation(computeReviewerSpread([94.33, 87.33])),
+			isStrongDeviation(computeReviewerSpread([64.01, 57.01])),
 			false,
 		);
 	});

@@ -1,9 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+	computeMeanPercent,
 	computeReviewerPercent,
 	computeReviewerPercents,
-	computeTaskPercent,
 	computeWeightedMean,
 } from "./scoring.ts";
 
@@ -81,7 +81,14 @@ describe("computeReviewerPercents", () => {
 	});
 });
 
-describe("computeTaskPercent", () => {
+describe("computeMeanPercent", () => {
+	it("averages percentages and has no mean without any", () => {
+		assert.equal(computeMeanPercent([50, 75, 100]), 75);
+		assert.equal(computeMeanPercent([]), null);
+	});
+});
+
+describe("task percent (reviewer percents → mean)", () => {
 	it("averages the reviewers' percentages, skipping reviewers without ratings", () => {
 		const criteria = [
 			{ id: "preparation", weight: 2 },
@@ -99,8 +106,14 @@ describe("computeTaskPercent", () => {
 		];
 
 		// (55.56 + 83.33) / 2 = 69.44 (the reviewer without ratings is left out)
-		assert.equal(computeTaskPercent(criteria, ratingSets, 6), 69.44);
-		assert.equal(computeTaskPercent(criteria, [[], []], 6), null);
+		assert.equal(
+			computeMeanPercent(computeReviewerPercents(criteria, ratingSets, 6)),
+			69.44,
+		);
+		assert.equal(
+			computeMeanPercent(computeReviewerPercents(criteria, [[], []], 6)),
+			null,
+		);
 	});
 });
 

@@ -8,8 +8,8 @@ import { db } from "@/server/db";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
 import { getRankingBand, type RankingBand } from "./ranking";
 import {
+	computeMeanPercent,
 	computeReviewerPercents,
-	computeTaskPercent,
 	computeWeightedMean,
 	getScoredCriteria,
 	roundScore,
@@ -337,16 +337,19 @@ function buildParticipantTaskResult(
 	const ratingSets = assignments.map(
 		(assignment) => assignment.quantitativeRatings,
 	);
-	const reviewerSpread = computeReviewerSpread(
-		computeReviewerPercents(scoredCriteria, ratingSets, ratingScaleMax),
+	const reviewerPercents = computeReviewerPercents(
+		scoredCriteria,
+		ratingSets,
+		ratingScaleMax,
 	);
+	const reviewerSpread = computeReviewerSpread(reviewerPercents);
 
 	return {
 		taskId: taskDefinition.id,
 		taskName: taskDefinition.name,
 		isTeamTask: taskDefinition.isTeamTask,
 		scoreWeight: taskDefinition.scoreWeight,
-		score: computeTaskPercent(scoredCriteria, ratingSets, ratingScaleMax),
+		score: computeMeanPercent(reviewerPercents),
 		reviewerSpread,
 		hasStrongDeviation: isStrongDeviation(reviewerSpread),
 		totalAssignments: assignments.length,
