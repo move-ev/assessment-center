@@ -109,10 +109,6 @@ type ParticipantResult = {
 	hasStrongDeviation: boolean;
 	/** Share of each task in the overall score; adds up to it. */
 	taskContributions: TaskContribution[];
-	/**
-	 * Rank (shared by identical results), 15 % mark of the better position
-	 * and whether the overall score shows a decimal (Sonderfall 2).
-	 */
 } & RankFields;
 
 type UnrankedParticipantResult = Omit<ParticipantResult, keyof RankFields>;
@@ -447,6 +443,9 @@ function buildParticipantResults(
 			.filter((result) => result !== null);
 
 		const sortedTaskResults = sortParticipantTaskResults(taskResults);
+		const deviatingTaskNames = sortedTaskResults
+			.filter((taskResult) => taskResult.hasStrongDeviation)
+			.map((taskResult) => taskResult.taskName);
 		const weightedTaskScores: WeightedScore[] = [];
 		let completedTaskCount = 0;
 		let completedAssignmentCount = 0;
@@ -483,12 +482,8 @@ function buildParticipantResults(
 			qualitativeEntries,
 			teamObservationCount,
 			taskResults: sortedTaskResults,
-			deviatingTaskNames: sortedTaskResults
-				.filter((taskResult) => taskResult.hasStrongDeviation)
-				.map((taskResult) => taskResult.taskName),
-			hasStrongDeviation: sortedTaskResults.some(
-				(taskResult) => taskResult.hasStrongDeviation,
-			),
+			deviatingTaskNames,
+			hasStrongDeviation: deviatingTaskNames.length > 0,
 			taskContributions: computeTaskContributions(
 				sortedTaskResults.map((taskResult) => ({
 					taskId: taskResult.taskId,

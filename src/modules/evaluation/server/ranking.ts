@@ -32,9 +32,11 @@ export type RankInput = {
 	hasStrongDeviation: boolean;
 };
 
+/** Sonderfall 2: what the ranking adds to each participant. */
 export type RankFields = {
 	/** Shared by identical results; null without an overall score. */
 	rank: number | null;
+	/** 15 % mark; on a shared rank, the one of the better position. */
 	rankingBand: RankingBand | null;
 	/** The exact value decided the order, so it is shown with one decimal. */
 	showsDecimal: boolean;
@@ -86,31 +88,28 @@ export function rankParticipants<T extends RankInput>(
 	participants: T[],
 ): Array<T & RankFields> {
 	const sorted = [...participants].sort(compareRanked);
-	// Position of the first person of each run of identical results.
-	const sharedPositions: number[] = [];
-	sorted.forEach((participant, index) => {
-		const previous = sorted[index - 1];
-		sharedPositions[index] =
-			previous && compareRanked(previous, participant) === 0
-				? (sharedPositions[index - 1] ?? index + 1)
-				: index + 1;
-	});
-
 	const rankedCount = sorted.filter(
 		(participant) => participant.overallScore !== null,
 	).length;
+	const ranked: Array<T & RankFields> = [];
 
-	return sorted.map((participant, index) => {
-		const rank =
-			participant.overallScore === null
-				? null
-				: (sharedPositions[index] ?? null);
-		return {
+	sorted.forEach((participant, index) => {
+		const previous = ranked[index - 1];
+		// Identical results keep the rank of the first of them.
+		const position =
+			previous && compareRanked(previous, participant) === 0
+				? previous.rank
+				: index + 1;
+		const rank = participant.overallScore === null ? null : position;
+
+		ranked.push({
 			...participant,
 			rank,
 			// A shared rank is its best position, so everyone gets that mark.
 			rankingBand: rank === null ? null : getRankingBand(rank, rankedCount),
 			showsDecimal: isDecidedByExactValue(participant, sorted),
-		};
+		});
 	});
+
+	return ranked;
 }

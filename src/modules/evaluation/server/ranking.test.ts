@@ -158,4 +158,38 @@ describe("rankParticipants", () => {
 			],
 		);
 	});
+
+	it("keeps the bottom mark for a shared rank inside the bottom band", () => {
+		// 14 ranked × 15 % = 2.1 → 2 per end; the last two share rank 13
+		const scores = [95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 20, 20];
+		const ranked = rankParticipants(
+			scores.map((score, index) => person(`P${index + 1}`, score)),
+		);
+
+		assert.deepEqual(
+			ranked.slice(-3).map((entry) => [entry.rank, entry.rankingBand]),
+			[
+				[12, null],
+				[13, "BOTTOM"],
+				[13, "BOTTOM"],
+			],
+		);
+	});
+
+	it("shows the decimal for people sharing a rank when it sets them apart from a third", () => {
+		const ranked = rankParticipants([
+			person("Dritte", 59.1),
+			person("Gleich A", 59.3),
+			person("Gleich B", 59.3),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
+			[
+				["Gleich A", 1, true],
+				["Gleich B", 1, true],
+				["Dritte", 3, true],
+			],
+		);
+	});
 });
