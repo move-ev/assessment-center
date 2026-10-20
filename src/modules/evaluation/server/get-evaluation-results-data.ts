@@ -5,8 +5,10 @@ import { formatPercentForExport } from "@/lib/format-percent";
 import { assertRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
+import { computeReviewerSpread, isStrongDeviation } from "./deviation";
 import { getRankingBand, type RankingBand } from "./ranking";
 import {
+	computeReviewerPercents,
 	computeTaskPercent,
 	computeWeightedMean,
 	getScoredCriteria,
@@ -64,6 +66,10 @@ type ParticipantTaskResult = {
 	/** Weight of the task in the overall score. */
 	scoreWeight: number;
 	score: number | null;
+	/** Highest minus lowest reviewer percentage; null with one reviewer. */
+	reviewerSpread: number | null;
+	/** Reviewers differ by more than the threshold (Sonderfall 1). */
+	hasStrongDeviation: boolean;
 	totalAssignments: number;
 	completedAssignments: number;
 	qualitativeEntries: number;
@@ -83,6 +89,8 @@ type ParticipantResult = {
 	qualitativeEntries: number;
 	teamObservationCount: number;
 	taskResults: ParticipantTaskResult[];
+	/** Tasks whose reviewers differ strongly; marks the person in the ranking. */
+	deviatingTaskNames: string[];
 	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
 	rankingBand: RankingBand | null;
 };
@@ -325,16 +333,22 @@ function buildParticipantTaskResult(
 			).length
 		: 0;
 
+	const scoredCriteria = getScoredCriteria(taskDefinition.criteria);
+	const ratingSets = assignments.map(
+		(assignment) => assignment.quantitativeRatings,
+	);
+	const reviewerSpread = computeReviewerSpread(
+		computeReviewerPercents(scoredCriteria, ratingSets, ratingScaleMax),
+	);
+
 	return {
 		taskId: taskDefinition.id,
 		taskName: taskDefinition.name,
 		isTeamTask: taskDefinition.isTeamTask,
 		scoreWeight: taskDefinition.scoreWeight,
-		score: computeTaskPercent(
-			getScoredCriteria(taskDefinition.criteria),
-			assignments.map((assignment) => assignment.quantitativeRatings),
-			ratingScaleMax,
-		),
+		score: computeTaskPercent(scoredCriteria, ratingSets, ratingScaleMax),
+		reviewerSpread,
+		hasStrongDeviation: isStrongDeviation(reviewerSpread),
 		totalAssignments: assignments.length,
 		completedAssignments,
 		qualitativeEntries,
@@ -424,6 +438,9 @@ function buildParticipantResults(
 			qualitativeEntries,
 			teamObservationCount,
 			taskResults: sortedTaskResults,
+			deviatingTaskNames: sortedTaskResults
+				.filter((taskResult) => taskResult.hasStrongDeviation)
+				.map((taskResult) => taskResult.taskName),
 		});
 	}
 
@@ -553,6 +570,7 @@ function buildExportRows(
 			Abgeschlossene_Bewertungen: `${participant.completedAssignmentCount}/${participant.totalAssignmentCount}`,
 			Qualitative_Eintraege: participant.qualitativeEntries.toString(),
 			Teambeobachtungen: participant.teamObservationCount.toString(),
+			Starke_Abweichung: participant.deviatingTaskNames.join(", "),
 		};
 
 		for (const task of taskLookup.values()) {

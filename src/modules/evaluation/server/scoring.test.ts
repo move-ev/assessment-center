@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
 	computeReviewerPercent,
+	computeReviewerPercents,
 	computeTaskPercent,
 	computeWeightedMean,
 } from "./scoring.ts";
@@ -61,6 +62,22 @@ describe("computeReviewerPercent", () => {
 
 		assert.equal(computeReviewerPercent(criteria, ratings, 5), 80);
 		assert.equal(computeReviewerPercent(criteria, ratings, 6), 66.67);
+	});
+});
+
+describe("computeReviewerPercents", () => {
+	it("lists one percentage per reviewer who rated a scored criterion", () => {
+		const criteria = [{ id: "a", weight: 1 }];
+		const ratingSets = [
+			[{ criteriaId: "a", value: 6 }],
+			[],
+			[{ criteriaId: "a", value: 3 }],
+		];
+
+		assert.deepEqual(
+			computeReviewerPercents(criteria, ratingSets, 6),
+			[100, 50],
+		);
 	});
 });
 
