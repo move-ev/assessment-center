@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { formatPercent } from "@/lib/format-percent";
+import { formatOverallScore } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { TaskContribution } from "../server/comparison";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
@@ -143,7 +143,10 @@ function ScoreComposition({
 										: undefined
 								}
 							>
-								{formatPercent(participant.overallScore)}
+								{formatOverallScore(
+									participant.overallScore,
+									participant.showsDecimal,
+								)}
 								{participant.taskContributions.length < tasks.length && "*"}
 							</span>
 						</li>

@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { formatPercent } from "@/lib/format-percent";
+import { formatOverallScore, formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import { RANKING_BAND_PERCENT, type RankingBand } from "../server/ranking";
@@ -44,10 +44,16 @@ function ScoreDistribution({
 	participants: EvaluationResultsData["participants"];
 	averageScore: number | null;
 }) {
-	const scored = participants.flatMap((participant, index) =>
-		participant.overallScore === null
+	const scored = participants.flatMap((participant) =>
+		participant.overallScore === null || participant.rank === null
 			? []
-			: [{ participant, rank: index + 1, score: participant.overallScore }],
+			: [
+					{
+						participant,
+						rank: participant.rank,
+						score: participant.overallScore,
+					},
+				],
 	);
 
 	if (scored.length === 0) {
@@ -84,7 +90,7 @@ function ScoreDistribution({
 					)}
 					{scored.map((entry, index) => (
 						<Link
-							aria-label={`${entry.participant.name}: ${formatPercent(entry.score)}, Rang ${entry.rank}`}
+							aria-label={`${entry.participant.name}: ${formatOverallScore(entry.score, entry.participant.showsDecimal)}, Rang ${entry.rank}`}
 							className="absolute flex size-4 -translate-x-1/2 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-ring"
 							href={ROUTES.acResultsParticipant(acId, entry.participant.id)}
 							key={entry.participant.id}
@@ -92,7 +98,7 @@ function ScoreDistribution({
 								left: axisPosition(entry.score),
 								bottom: 4 + (rows[index] ?? 0) * ROW_HEIGHT_PX,
 							}}
-							title={`${entry.participant.name}: ${formatPercent(entry.score)} · Rang ${entry.rank}`}
+							title={`${entry.participant.name}: ${formatOverallScore(entry.score, entry.participant.showsDecimal)} · Rang ${entry.rank}`}
 						>
 							<span
 								className="size-3 rounded-full ring-2 ring-card"

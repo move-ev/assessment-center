@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getRankingBand } from "./ranking.ts";
+import { getRankingBand, rankParticipants } from "./ranking.ts";
 
 describe("getRankingBand", () => {
 	it("marks the top and bottom 15 % of a ranking by position", () => {
@@ -30,5 +30,166 @@ describe("getRankingBand", () => {
 		assert.equal(getRankingBand(5, 33), null);
 		assert.equal(getRankingBand(29, 33), null);
 		assert.equal(getRankingBand(30, 33), "BOTTOM");
+	});
+});
+
+function person(
+	name: string,
+	overallScore: number | null,
+	hasStrongDeviation = false,
+) {
+	return { name, overallScore, hasStrongDeviation };
+}
+
+describe("rankParticipants", () => {
+	it("puts the person without a strong reviewer deviation first when the whole percent ties", () => {
+		const ranked = rankParticipants([
+			person("Abweichung", 59.4, true),
+			person("Ohne", 58.6),
+			person("Vorn", 80),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank]),
+			[
+				["Vorn", 1],
+				["Ohne", 2],
+				["Abweichung", 3],
+			],
+		);
+	});
+
+	it("lets the exact value decide a tie of the same status and shows it with a decimal for those people", () => {
+		const ranked = rankParticipants([
+			person("Knapp", 58.6),
+			person("Genau", 59.26),
+			person("Anders", 70),
+			person("Abweichung", 59.4, true),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
+			[
+				["Anders", 1, false],
+				["Genau", 2, true],
+				["Knapp", 3, true],
+				// alone in its status at 59 %: Sonderfall 1 decided, not the decimal
+				["Abweichung", 4, false],
+			],
+		);
+	});
+
+	it("gives identical results the same rank and skips the places they share", () => {
+		const ranked = rankParticipants([
+			person("Erste", 80),
+			person("Gleich A", 62.5),
+			person("Gleich B", 62.5),
+			person("Danach", 50),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
+			[
+				["Erste", 1, false],
+				["Gleich A", 2, false],
+				["Gleich B", 2, false],
+				["Danach", 4, false],
+			],
+		);
+	});
+
+	it("does not share a rank when only Sonderfall 1 differs", () => {
+		const ranked = rankParticipants([
+			person("Abweichung", 62.5, true),
+			person("Ohne", 62.5),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank]),
+			[
+				["Ohne", 1],
+				["Abweichung", 2],
+			],
+		);
+	});
+
+	it("gives everyone sharing a rank the 15 % mark of the better position", () => {
+		// 8 ranked × 15 % = 1.2 → 1 per end
+		const ranked = rankParticipants([
+			person("Top A", 90),
+			person("Top B", 90),
+			person("C", 70),
+			person("D", 65),
+			person("E", 60),
+			person("F", 55),
+			person("Unten A", 30),
+			person("Unten B", 30),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank, entry.rankingBand]),
+			[
+				["Top A", 1, "TOP"],
+				["Top B", 1, "TOP"],
+				["C", 3, null],
+				["D", 4, null],
+				["E", 5, null],
+				["F", 6, null],
+				// shared rank 7 is not in the bottom band, so neither is marked
+				["Unten A", 7, null],
+				["Unten B", 7, null],
+			],
+		);
+	});
+
+	it("lists people without an overall score last, by name, without rank or mark", () => {
+		const ranked = rankParticipants([
+			person("Zora", null),
+			person("Anna", null),
+			person("Mit Wert", 40),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank, entry.rankingBand]),
+			[
+				["Mit Wert", 1, null],
+				["Anna", null, null],
+				["Zora", null, null],
+			],
+		);
+	});
+
+	it("keeps the bottom mark for a shared rank inside the bottom band", () => {
+		// 14 ranked × 15 % = 2.1 → 2 per end; the last two share rank 13
+		const scores = [95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 20, 20];
+		const ranked = rankParticipants(
+			scores.map((score, index) => person(`P${index + 1}`, score)),
+		);
+
+		assert.deepEqual(
+			ranked.slice(-3).map((entry) => [entry.rank, entry.rankingBand]),
+			[
+				[12, null],
+				[13, "BOTTOM"],
+				[13, "BOTTOM"],
+			],
+		);
+	});
+
+	it("shows the decimal for people sharing a rank when it sets them apart from a third", () => {
+		const ranked = rankParticipants([
+			person("Dritte", 59.1),
+			person("Gleich A", 59.3),
+			person("Gleich B", 59.3),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
+			[
+				["Gleich A", 1, true],
+				["Gleich B", 1, true],
+				["Dritte", 3, true],
+			],
+		);
 	});
 });

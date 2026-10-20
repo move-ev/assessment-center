@@ -58,6 +58,13 @@ percentage points (highest minus lowest), the person
 is marked in the ranking; the detail page shows the spread per task and which
 task triggers the mark.
 
+Sonderfall 2 (`ranking.ts`, `rankParticipants`): the ranking orders by the
+whole percent shown; on equal whole percent the person without Sonderfall 1
+comes first, then the exact value decides and is shown with one decimal for
+those people. Results identical in exact value and Sonderfall-1 status share
+a rank (1, 2, 2, 4) and the 15 % mark of the better position. Ranking, detail page, export, distribution and heat
+map all show this rank.
+
 Result charts are server-rendered HTML/CSS on the tokens `--series-*`
 (categorical) and `--heat-*` (sequential) in `globals.css`; only the task
 scatter is a client-side SVG, since the viewer picks its tasks. The results page

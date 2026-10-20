@@ -19,7 +19,7 @@ import {
 	type TaskContribution,
 } from "./comparison";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
-import { getRankingBand, type RankingBand } from "./ranking";
+import { type RankFields, rankParticipants } from "./ranking";
 import {
 	computeMeanPercent,
 	computeReviewerPercent,
@@ -105,13 +105,13 @@ type ParticipantResult = {
 	taskResults: ParticipantTaskResult[];
 	/** Tasks whose reviewers differ strongly; marks the person in the ranking. */
 	deviatingTaskNames: string[];
-	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
-	rankingBand: RankingBand | null;
+	/** Sonderfall 1 in any task; ranks behind equal whole percents. */
+	hasStrongDeviation: boolean;
 	/** Share of each task in the overall score; adds up to it. */
 	taskContributions: TaskContribution[];
-};
+} & RankFields;
 
-type UnrankedParticipantResult = Omit<ParticipantResult, "rankingBand">;
+type UnrankedParticipantResult = Omit<ParticipantResult, keyof RankFields>;
 
 type TaskResult = {
 	id: string;
@@ -443,6 +443,9 @@ function buildParticipantResults(
 			.filter((result) => result !== null);
 
 		const sortedTaskResults = sortParticipantTaskResults(taskResults);
+		const deviatingTaskNames = sortedTaskResults
+			.filter((taskResult) => taskResult.hasStrongDeviation)
+			.map((taskResult) => taskResult.taskName);
 		const weightedTaskScores: WeightedScore[] = [];
 		let completedTaskCount = 0;
 		let completedAssignmentCount = 0;
@@ -479,9 +482,8 @@ function buildParticipantResults(
 			qualitativeEntries,
 			teamObservationCount,
 			taskResults: sortedTaskResults,
-			deviatingTaskNames: sortedTaskResults
-				.filter((taskResult) => taskResult.hasStrongDeviation)
-				.map((taskResult) => taskResult.taskName),
+			deviatingTaskNames,
+			hasStrongDeviation: deviatingTaskNames.length > 0,
 			taskContributions: computeTaskContributions(
 				sortedTaskResults.map((taskResult) => ({
 					taskId: taskResult.taskId,
@@ -493,48 +495,6 @@ function buildParticipantResults(
 	}
 
 	return rankParticipants(participants);
-}
-
-function sortByOverallScore<
-	T extends { name: string; overallScore: number | null },
->(participants: T[]): T[] {
-	return participants.sort((left, right) => {
-		if (left.overallScore === null && right.overallScore !== null) {
-			return 1;
-		}
-
-		if (left.overallScore !== null && right.overallScore === null) {
-			return -1;
-		}
-
-		if (left.overallScore !== null && right.overallScore !== null) {
-			return right.overallScore - left.overallScore;
-		}
-
-		return left.name.localeCompare(right.name, "de-DE");
-	});
-}
-
-/**
- * Sorts by overall score (those without a score last) and marks the top and
- * bottom of the ranking. Both happen here because the marking depends on the
- * sort order.
- */
-function rankParticipants(
-	participants: UnrankedParticipantResult[],
-): ParticipantResult[] {
-	const sorted = sortByOverallScore(participants);
-	const rankedCount = sorted.filter(
-		(participant) => participant.overallScore !== null,
-	).length;
-
-	return sorted.map((participant, index) => ({
-		...participant,
-		rankingBand:
-			participant.overallScore === null
-				? null
-				: getRankingBand(index + 1, rankedCount),
-	}));
 }
 
 function buildTaskResults(
@@ -693,9 +653,9 @@ function buildExportRows(
 	participants: ParticipantResult[],
 	taskLookup: ReturnType<typeof buildTaskLookup>,
 ) {
-	return participants.map((participant, index) => {
+	return participants.map((participant) => {
 		const row: Record<string, string> = {
-			Rang: (index + 1).toString(),
+			Rang: participant.rank?.toString() ?? "",
 			Teilnehmer: participant.name,
 			Gruppe: participant.groupName ?? "Keine Gruppe",
 			Gesamtwert_Prozent: formatPercentForExport(participant.overallScore),

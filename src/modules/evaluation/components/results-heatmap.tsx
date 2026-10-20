@@ -7,7 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { formatPercent } from "@/lib/format-percent";
+import { formatOverallScore } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
@@ -38,12 +38,16 @@ function heatLegendLabels(): string[] {
 function HeatCell({
 	score,
 	hasStrongDeviation = false,
+	showsDecimal = false,
 	label,
 }: {
 	score: number | null;
 	hasStrongDeviation?: boolean;
 	label: string;
+	/** Overall score whose exact value decided the rank (Sonderfall 2). */
+	showsDecimal?: boolean;
 }) {
+	const shownScore = formatOverallScore(score, showsDecimal);
 	const step = getHeatStep(score);
 
 	return (
@@ -53,11 +57,11 @@ function HeatCell({
 					"flex h-9 min-w-16 items-center justify-center gap-1 rounded-md text-sm tabular-nums",
 					step === null ? "bg-muted/40 text-muted-foreground" : HEAT_CELL[step],
 				)}
-				title={`${label}: ${formatPercent(score)}${
+				title={`${label}: ${shownScore}${
 					hasStrongDeviation ? " · Beobachter weichen stark ab" : ""
 				}`}
 			>
-				{formatPercent(score)}
+				{shownScore}
 				{hasStrongDeviation && (
 					<TriangleAlertIcon
 						aria-label="starke Abweichung"
@@ -113,11 +117,11 @@ function ResultsHeatmap({
 							</tr>
 						</thead>
 						<tbody>
-							{participants.map((participant, index) => (
+							{participants.map((participant) => (
 								<tr key={participant.id}>
 									<td className="whitespace-nowrap px-2 py-0.5">
 										<span className="mr-2 text-muted-foreground tabular-nums">
-											{index + 1}.
+											{participant.rank === null ? "–" : `${participant.rank}.`}
 										</span>
 										<Link
 											className="underline-offset-4 hover:underline"
@@ -142,6 +146,7 @@ function ResultsHeatmap({
 									<HeatCell
 										label={`${participant.name}, Gesamtwert`}
 										score={participant.overallScore}
+										showsDecimal={participant.showsDecimal}
 									/>
 								</tr>
 							))}
