@@ -110,19 +110,3 @@ export function computeWeightedMean(entries: WeightedScore[]): number | null {
 
 	return weightSum === 0 ? null : roundScore(weightedValueSum / weightSum);
 }
-
-/** Mean stars as percent of the AC's scale, comparable with task scores. */
-export function starsToPercent(
-	stars: number,
-	scaleMax: RatingScaleMax,
-): number {
-	return roundScore((stars / scaleMax) * 100);
-}
-
-/** The anchor "Erwartung erfüllt" of the assessment matrix. */
-export const EXPECTATION_STARS = 4;
-
-/** "Erwartung erfüllt" (4 stars) of the AC's scale in percent. */
-export function getExpectationPercent(scaleMax: RatingScaleMax): number {
-	return starsToPercent(EXPECTATION_STARS, scaleMax);
-}

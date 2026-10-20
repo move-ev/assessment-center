@@ -20,10 +20,9 @@ import { formatPercent, formatSpread } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
 import { CriteriaDrilldown } from "./criteria-drilldown";
-import { CriteriaStrengths } from "./criteria-strengths";
 import { DeviationBadge } from "./deviation-badge";
 import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
-import { ParticipantAtAGlance } from "./participant-at-a-glance";
+import { ParticipantProfile } from "./participant-profile";
 import { RankingBandBadge } from "./ranking-band-badge";
 
 type Props = {
@@ -106,20 +105,17 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 				</div>
 			</div>
 
-			<ParticipantAtAGlance
-				expectationPercent={data.expectationPercent}
+			<ParticipantProfile
 				participant={data.participant}
 				taskScores={data.taskScores}
 			/>
 
-			<CriteriaStrengths criteria={data.criterionComparisons} />
+			<TaskScoresCard taskScores={data.taskScores} />
 
 			<ReviewerBreakdownCard
 				data={data.reviewerBreakdown}
 				taskScores={data.taskScores}
 			/>
-
-			<TaskScoresCard taskScores={data.taskScores} />
 
 			<CriteriaDrilldown
 				breakdown={data.reviewerBreakdown}

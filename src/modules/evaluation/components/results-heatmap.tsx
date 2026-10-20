@@ -10,50 +10,58 @@ import {
 import { formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
-import { compareToMean } from "../server/comparison";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
-import { formatDelta, TONE, ToneLegend } from "./mean-tone";
+import { getHeatStep, HEAT_STEP_BOUNDS } from "./chart-scales";
 
 type Participants = EvaluationResultsData["participants"];
 type Tasks = EvaluationResultsData["tasks"];
 
+const HEAT_CELL = [
+	"bg-heat-0 text-heat-0-foreground",
+	"bg-heat-1 text-heat-1-foreground",
+	"bg-heat-2 text-heat-2-foreground",
+	"bg-heat-3 text-heat-3-foreground",
+	"bg-heat-4 text-heat-4-foreground",
+] as const;
+
+function heatLegendLabels(): string[] {
+	const [first, ...rest] = HEAT_STEP_BOUNDS;
+	return [
+		`< ${first} %`,
+		...HEAT_STEP_BOUNDS.map((bound, index) => {
+			const next = rest[index];
+			return next === undefined ? `≥ ${bound} %` : `${bound}–${next - 1} %`;
+		}),
+	];
+}
+
 function HeatCell({
 	score,
-	mean,
 	hasStrongDeviation = false,
 	label,
 }: {
 	score: number | null;
-	mean: number | null;
 	hasStrongDeviation?: boolean;
 	label: string;
 }) {
-	const comparison = compareToMean(score, mean);
-	const tone = comparison ? TONE[comparison.tone] : null;
+	const step = getHeatStep(score);
 
 	return (
 		<td className="p-0.5">
 			<div
 				className={cn(
-					"flex h-9 min-w-20 items-center justify-center gap-1 rounded-md text-sm tabular-nums",
-					tone ? tone.className : "bg-muted/40 text-muted-foreground",
+					"flex h-9 min-w-16 items-center justify-center gap-1 rounded-md text-sm tabular-nums",
+					step === null ? "bg-muted/40 text-muted-foreground" : HEAT_CELL[step],
 				)}
-				title={[
-					`${label}: ${formatPercent(score)}`,
-					comparison
-						? `${formatDelta(comparison.delta)} gegenüber Ø ${formatPercent(mean)} (${tone?.label})`
-						: null,
-					hasStrongDeviation ? "Beobachter weichen stark ab" : null,
-				]
-					.filter(Boolean)
-					.join(" · ")}
+				title={`${label}: ${formatPercent(score)}${
+					hasStrongDeviation ? " · Beobachter weichen stark ab" : ""
+				}`}
 			>
-				{tone && <tone.Icon aria-hidden className="size-3.5" />}
 				{formatPercent(score)}
 				{hasStrongDeviation && (
 					<TriangleAlertIcon
 						aria-label="starke Abweichung"
-						className="size-3.5 opacity-70"
+						className="size-3.5"
 					/>
 				)}
 			</div>
@@ -62,28 +70,25 @@ function HeatCell({
 }
 
 /**
- * Participants × tasks, coloured by how far each score lies above (green)
- * or below (red) the task's mean: strengths and weaknesses across the AC
- * at a glance. Rows in ranking order, columns as in the task tab.
+ * Participants × tasks, coloured by score: strengths and weaknesses across
+ * the AC at a glance. Rows in ranking order, columns as in the task tab.
  */
 function ResultsHeatmap({
 	acId,
 	participants,
 	tasks,
-	averageOverallScore,
 }: {
 	acId: string;
 	participants: Participants;
 	tasks: Tasks;
-	averageOverallScore: number | null;
 }) {
 	return (
 		<Card data-testid="results-heatmap">
 			<CardHeader>
-				<CardTitle>Wer war wo stark?</CardTitle>
+				<CardTitle>Heatmap Bewerbende × Aufgaben</CardTitle>
 				<CardDescription>
-					Jede Zelle vergleicht mit dem Durchschnitt der Aufgabe: grün ▲
-					darüber, rot ▼ darunter, grau im Schnitt.{" "}
+					Teil-Scores je Aufgabe in festen Farbstufen, damit gleiche Farbe in
+					jedem AC denselben Wert bedeutet.{" "}
 					<TriangleAlertIcon className="inline size-3.5" /> markiert eine starke
 					Abweichung zwischen Beobachtern.
 				</CardDescription>
@@ -102,17 +107,9 @@ function ResultsHeatmap({
 										key={task.id}
 									>
 										{task.name}
-										<span className="block font-normal text-xs">
-											Ø {formatPercent(task.averageScore)}
-										</span>
 									</th>
 								))}
-								<th className="px-2 py-1 text-center font-medium">
-									Gesamt
-									<span className="block font-normal text-muted-foreground text-xs">
-										Ø {formatPercent(averageOverallScore)}
-									</span>
-								</th>
+								<th className="px-2 py-1 text-center font-medium">Gesamt</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -138,14 +135,12 @@ function ResultsHeatmap({
 												hasStrongDeviation={result?.hasStrongDeviation}
 												key={task.id}
 												label={`${participant.name}, ${task.name}`}
-												mean={task.averageScore}
 												score={result?.score ?? null}
 											/>
 										);
 									})}
 									<HeatCell
 										label={`${participant.name}, Gesamtwert`}
-										mean={averageOverallScore}
 										score={participant.overallScore}
 									/>
 								</tr>
@@ -153,7 +148,17 @@ function ResultsHeatmap({
 						</tbody>
 					</table>
 				</div>
-				<ToneLegend />
+				<div className="flex flex-wrap items-center gap-3 text-muted-foreground text-xs">
+					{heatLegendLabels().map((label, step) => (
+						<span className="inline-flex items-center gap-1.5" key={label}>
+							<span
+								aria-hidden
+								className={cn("h-3 w-5 rounded-sm", HEAT_CELL[step])}
+							/>
+							{label}
+						</span>
+					))}
+				</div>
 			</CardContent>
 		</Card>
 	);

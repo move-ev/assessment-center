@@ -1,4 +1,4 @@
-import { computeMean, roundScore } from "./scoring.ts";
+import { computeMean, roundScore, type WeightedScore } from "./scoring.ts";
 
 export type ScoreSummary = {
 	count: number;
@@ -36,71 +36,32 @@ export function getPositionAmong(
 	};
 }
 
-/** Within this many points of the mean counts as average, not as above or below. */
-export const AVERAGE_BAND_POINTS = 3;
-/** More than this many points off the mean is a clear strength or weakness. */
-export const STRONG_DEVIATION_POINTS = 10;
-
-export type MeanTone =
-	| "STRONG_ABOVE"
-	| "ABOVE"
-	| "AVERAGE"
-	| "BELOW"
-	| "STRONG_BELOW";
-
-export type MeanComparison = {
-	/** Percentage points above (+) or below (−) the mean. */
-	delta: number;
-	tone: MeanTone;
+export type TaskContribution = {
+	taskId: string;
+	/** Percentage points this task adds to the overall score. */
+	contribution: number;
 };
 
 /**
- * How a score compares with the AC's mean: the question every chart of a
- * participant answers, so "good" and "bad" read the same everywhere.
+ * Splits the overall score into the weighted share of each task, so the
+ * shares add up to the overall score. Leaves out the same tasks as the
+ * overall score: without a score or with a non-positive weight.
  */
-export function compareToMean(
-	score: number | null,
-	mean: number | null,
-): MeanComparison | null {
-	if (score === null || mean === null) {
-		return null;
-	}
+export function computeTaskContributions(
+	tasks: Array<WeightedScore & { taskId: string }>,
+): TaskContribution[] {
+	const counted = tasks.flatMap((task) =>
+		task.score !== null && task.weight > 0
+			? [{ taskId: task.taskId, score: task.score, weight: task.weight }]
+			: [],
+	);
+	const weightSum = counted.reduce((sum, task) => sum + task.weight, 0);
 
-	const delta = roundScore(score - mean);
-	const distance = Math.abs(delta);
-	if (distance <= AVERAGE_BAND_POINTS) {
-		return { delta, tone: "AVERAGE" };
-	}
-	if (delta > 0) {
-		return {
-			delta,
-			tone: distance > STRONG_DEVIATION_POINTS ? "STRONG_ABOVE" : "ABOVE",
-		};
-	}
-	return {
-		delta,
-		tone: distance > STRONG_DEVIATION_POINTS ? "STRONG_BELOW" : "BELOW",
-	};
-}
-
-/**
- * The clearest strengths (furthest above the mean) and weaknesses (furthest
- * below), at most `count` each; anything within the average band is neither.
- */
-export function pickStrengthsAndWeaknesses<T extends { delta: number }>(
-	items: T[],
-	count: number,
-): { strengths: T[]; weaknesses: T[] } {
-	return {
-		strengths: items
-			.filter((item) => item.delta > AVERAGE_BAND_POINTS)
-			.sort((left, right) => right.delta - left.delta)
-			.slice(0, count),
-		weaknesses: items
-			.filter((item) => item.delta < -AVERAGE_BAND_POINTS)
-			.sort((left, right) => left.delta - right.delta)
-			.slice(0, count),
-	};
+	return counted.map((task) => ({
+		taskId: task.taskId,
+		// Unrounded, so the shares add up exactly to the overall score.
+		contribution: (task.score * task.weight) / weightSum,
+	}));
 }
 
 /**

@@ -1,10 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-	compareToMean,
 	computeCorrelation,
+	computeTaskContributions,
 	getPositionAmong,
-	pickStrengthsAndWeaknesses,
 	summarizeScores,
 } from "./comparison.ts";
 
@@ -39,56 +38,29 @@ describe("getPositionAmong", () => {
 	});
 });
 
-describe("compareToMean", () => {
-	it("calls a score more than 3 points off the mean above or below, more than 10 strongly", () => {
+describe("computeTaskContributions", () => {
+	it("splits the overall score into the weighted share of each task", () => {
+		// weights 1 + 3: 80 × 1/4 + 60 × 3/4 = 20 + 45 = overall 65
 		assert.deepEqual(
-			[60, 63, 57, 64, 56, 70.01, 49.99].map(
-				(score) => compareToMean(score, 60)?.tone,
-			),
+			computeTaskContributions([
+				{ taskId: "a", score: 80, weight: 1 },
+				{ taskId: "b", score: 60, weight: 3 },
+			]),
 			[
-				"AVERAGE",
-				"AVERAGE",
-				"AVERAGE",
-				"ABOVE",
-				"BELOW",
-				"STRONG_ABOVE",
-				"STRONG_BELOW",
+				{ taskId: "a", contribution: 20 },
+				{ taskId: "b", contribution: 45 },
 			],
 		);
 	});
 
-	it("gives the distance from the mean in points", () => {
-		assert.deepEqual(compareToMean(72.5, 60.25), {
-			delta: 12.25,
-			tone: "STRONG_ABOVE",
-		});
-	});
-
-	it("has no comparison without a score or a mean", () => {
-		assert.equal(compareToMean(null, 60), null);
-		assert.equal(compareToMean(70, null), null);
-	});
-});
-
-describe("pickStrengthsAndWeaknesses", () => {
-	const items = [
-		{ id: "a", delta: 12 },
-		{ id: "b", delta: -2 },
-		{ id: "c", delta: 5 },
-		{ id: "d", delta: -15 },
-		{ id: "e", delta: 20 },
-		{ id: "f", delta: -4 },
-	];
-
-	it("lists the clearest strengths and weaknesses first, leaving out the average", () => {
-		const { strengths, weaknesses } = pickStrengthsAndWeaknesses(items, 2);
+	it("leaves out tasks without a score or weight, like the overall score", () => {
 		assert.deepEqual(
-			strengths.map((item) => item.id),
-			["e", "a"],
-		);
-		assert.deepEqual(
-			weaknesses.map((item) => item.id),
-			["d", "f"],
+			computeTaskContributions([
+				{ taskId: "a", score: 90, weight: 2 },
+				{ taskId: "b", score: null, weight: 1 },
+				{ taskId: "c", score: 50, weight: 0 },
+			]),
+			[{ taskId: "a", contribution: 90 }],
 		);
 	});
 });

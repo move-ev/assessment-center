@@ -27,6 +27,7 @@ import { EvaluationExport } from "./evaluation-export";
 import { EvaluationTask } from "./evaluation-task";
 import { RankingBandBadge } from "./ranking-band-badge";
 import { ResultsHeatmap } from "./results-heatmap";
+import { ScoreComposition } from "./score-composition";
 import { ScoreDistribution } from "./score-distribution";
 import { TaskScatter } from "./task-scatter";
 
@@ -112,7 +113,11 @@ function ComparisonTab({
 		<>
 			<ResultsHeatmap
 				acId={acId}
-				averageOverallScore={results.summary.averageOverallScore}
+				participants={results.participants}
+				tasks={results.tasks}
+			/>
+			<ScoreComposition
+				acId={acId}
 				participants={results.participants}
 				tasks={results.tasks}
 			/>
