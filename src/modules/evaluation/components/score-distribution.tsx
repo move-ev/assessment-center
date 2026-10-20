@@ -44,10 +44,16 @@ function ScoreDistribution({
 	participants: EvaluationResultsData["participants"];
 	averageScore: number | null;
 }) {
-	const scored = participants.flatMap((participant, index) =>
-		participant.overallScore === null
+	const scored = participants.flatMap((participant) =>
+		participant.overallScore === null || participant.rank === null
 			? []
-			: [{ participant, rank: index + 1, score: participant.overallScore }],
+			: [
+					{
+						participant,
+						rank: participant.rank,
+						score: participant.overallScore,
+					},
+				],
 	);
 
 	if (scored.length === 0) {

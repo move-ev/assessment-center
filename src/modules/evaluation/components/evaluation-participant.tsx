@@ -16,7 +16,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatPercent } from "@/lib/format-percent";
+import { formatOverallScore, formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
@@ -217,7 +217,7 @@ function ParticipantTable({
 				</TableRow>
 			</TableHeader>
 			<TableBody>
-				{participants.map((participant, index) => (
+				{participants.map((participant) => (
 					<TableRow
 						className={
 							participant.rankingBand
@@ -228,7 +228,7 @@ function ParticipantTable({
 					>
 						<TableCell className="font-medium">
 							<div className="flex items-center gap-2">
-								{index + 1}
+								{participant.rank ?? "–"}
 								{participant.rankingBand && (
 									<RankingBandBadge band={participant.rankingBand} />
 								)}
@@ -250,7 +250,12 @@ function ParticipantTable({
 						<TableCell className="text-muted-foreground">
 							{participant.groupName ?? "Keine Gruppe"}
 						</TableCell>
-						<TableCell>{formatPercent(participant.overallScore)}</TableCell>
+						<TableCell className="tabular-nums">
+							{formatOverallScore(
+								participant.overallScore,
+								participant.showsDecimal,
+							)}
+						</TableCell>
 						<TableCell className="text-muted-foreground">
 							{participant.completedTaskCount} / {participant.totalTaskCount}
 						</TableCell>

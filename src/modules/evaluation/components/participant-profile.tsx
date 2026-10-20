@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { formatPercent } from "@/lib/format-percent";
+import { formatOverallScore, formatPercent } from "@/lib/format-percent";
 import type {
 	EvaluationParticipantDetailData,
 	ScoreComparison,
@@ -41,15 +41,19 @@ function ProfileRow({
 	score,
 	comparison,
 	emphasis = false,
+	showsDecimal = false,
 }: {
 	label: string;
 	score: number | null;
 	comparison: ScoreComparison;
 	emphasis?: boolean;
+	/** Overall score whose exact value decided the rank (Sonderfall 2). */
+	showsDecimal?: boolean;
 }) {
 	const { summary } = comparison;
+	const shownScore = formatOverallScore(score, showsDecimal);
 	const description = [
-		`${label}: ${formatPercent(score)}`,
+		`${label}: ${shownScore}`,
 		describePosition(comparison),
 		summary
 			? `AC von ${formatPercent(summary.min)} bis ${formatPercent(summary.max)}, Durchschnitt ${formatPercent(summary.mean)}`
@@ -93,7 +97,7 @@ function ProfileRow({
 						className="size-3.5"
 						color={PERSON_COLOR}
 						score={score}
-						title={`${label}: ${formatPercent(score)}`}
+						title={`${label}: ${shownScore}`}
 					/>
 				)}
 			</StripTrack>
@@ -104,7 +108,7 @@ function ProfileRow({
 						: "text-right tabular-nums"
 				}
 			>
-				{formatPercent(score)}
+				{shownScore}
 			</p>
 		</li>
 	);
@@ -157,6 +161,7 @@ function ParticipantProfile({
 						emphasis
 						label="Gesamtwert"
 						score={participant.overallScore}
+						showsDecimal={participant.showsDecimal}
 					/>
 				</ul>
 				<div className="grid grid-cols-[minmax(7rem,11rem)_1fr_4rem] gap-4">

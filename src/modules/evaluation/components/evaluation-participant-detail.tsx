@@ -16,7 +16,11 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { formatPercent, formatSpread } from "@/lib/format-percent";
+import {
+	formatOverallScore,
+	formatPercent,
+	formatSpread,
+} from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
 import { CriteriaDrilldown } from "./criteria-drilldown";
@@ -90,7 +94,10 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 						<div className="shrink-0 space-y-1 text-right">
 							<p className="text-muted-foreground text-xs">Gesamtwert</p>
 							<p className="font-bold text-3xl tabular-nums">
-								{formatPercent(overallScore)}
+								{formatOverallScore(
+									overallScore,
+									data.participant.showsDecimal,
+								)}
 							</p>
 							{rank !== null && (
 								<div className="flex items-center justify-end gap-2">

@@ -36,8 +36,10 @@ export type EvaluationParticipantDetailData = {
 		name: string;
 		groupName: string | null;
 		overallScore: number | null;
-		/** 1-based position in the ranking, null without an overall score. */
+		/** Rank in the ranking (shared on identical results); null without a score. */
 		rank: number | null;
+		/** The exact value decided the rank, so it shows one decimal. */
+		showsDecimal: boolean;
 		/** Number of participants with an overall score. */
 		rankedCount: number;
 		rankingBand: RankingBand | null;
@@ -160,10 +162,9 @@ export async function getEvaluationParticipantDetailData(
 		fetchParticipantGroupId(acId, participantId),
 	]);
 
-	const index = results.participants.findIndex(
+	const participant = results.participants.find(
 		(entry) => entry.id === participantId,
 	);
-	const participant = results.participants[index];
 
 	if (!participant) {
 		notFound();
@@ -187,7 +188,8 @@ export async function getEvaluationParticipantDetailData(
 			name: participant.name,
 			groupName: participant.groupName,
 			overallScore: participant.overallScore,
-			rank: participant.overallScore === null ? null : index + 1,
+			rank: participant.rank,
+			showsDecimal: participant.showsDecimal,
 			rankedCount: results.summary.participantsWithScore,
 			rankingBand: participant.rankingBand,
 			deviatingTaskNames: participant.deviatingTaskNames,
@@ -196,7 +198,7 @@ export async function getEvaluationParticipantDetailData(
 			// The ranking's position, so the profile matches "Rang X von N".
 			overallComparison: {
 				summary: summarizeScores(overallScores),
-				position: participant.overallScore === null ? null : index + 1,
+				position: participant.rank,
 			},
 			taskContributions: participant.taskContributions,
 		},

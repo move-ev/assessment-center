@@ -113,11 +113,11 @@ function ResultsHeatmap({
 							</tr>
 						</thead>
 						<tbody>
-							{participants.map((participant, index) => (
+							{participants.map((participant) => (
 								<tr key={participant.id}>
 									<td className="whitespace-nowrap px-2 py-0.5">
 										<span className="mr-2 text-muted-foreground tabular-nums">
-											{index + 1}.
+											{participant.rank === null ? "–" : `${participant.rank}.`}
 										</span>
 										<Link
 											className="underline-offset-4 hover:underline"

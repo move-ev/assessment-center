@@ -4,6 +4,22 @@ export function formatPercent(value: number | null): string {
 }
 
 /**
+ * Score with one decimal, e.g. "59,3 %": in the ranking when the exact
+ * value decided a tie of the whole percent (Sonderfall 2).
+ */
+export function formatPercentWithDecimal(value: number | null): string {
+	return value === null ? "–" : `${formatDecimal(value)} %`;
+}
+
+/** Overall score as the ranking shows it: one decimal only where it ranked. */
+export function formatOverallScore(
+	value: number | null,
+	showsDecimal: boolean,
+): string {
+	return showsDecimal ? formatPercentWithDecimal(value) : formatPercent(value);
+}
+
+/**
  * Spread between reviewers in percentage points with two decimals (the
  * precision it is computed with), so a marked 7.01 never reads as "7,0"; a
  * dash with a single reviewer.
