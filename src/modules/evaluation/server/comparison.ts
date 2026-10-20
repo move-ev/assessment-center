@@ -59,7 +59,8 @@ export function computeTaskContributions(
 
 	return counted.map((task) => ({
 		taskId: task.taskId,
-		contribution: roundScore((task.score * task.weight) / weightSum),
+		// Unrounded, so the shares add up exactly to the overall score.
+		contribution: (task.score * task.weight) / weightSum,
 	}));
 }
 

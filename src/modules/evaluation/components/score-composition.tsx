@@ -98,6 +98,10 @@ function ScoreComposition({
 		(participant) => participant.overallScore !== null,
 	);
 
+	if (scored.length === 0) {
+		return null;
+	}
+
 	return (
 		<Card data-testid="score-composition">
 			<CardHeader>

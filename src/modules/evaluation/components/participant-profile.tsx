@@ -138,8 +138,8 @@ function ParticipantProfile({
 					Profil im Vergleich zum AC
 				</CardTitle>
 				<CardDescription>
-					Der Platz zählt höhere Werte im AC; gleiche Werte teilen sich einen
-					Platz.
+					Je Aufgabe zählt der Platz höhere Werte im AC, gleiche Werte teilen
+					sich einen Platz. Beim Gesamtwert gilt der Rang aus der Rangliste.
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-5">

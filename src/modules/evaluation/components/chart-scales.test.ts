@@ -5,9 +5,14 @@ import { getHeatStep, stackDots } from "./chart-scales.ts";
 describe("getHeatStep", () => {
 	it("steps scores in ten-point bands from 50 up", () => {
 		assert.deepEqual(
-			[30, 50, 59.99, 60, 70, 80, 100].map(getHeatStep),
+			[30, 50, 59.4, 60, 70, 80, 100].map(getHeatStep),
 			[0, 1, 1, 2, 3, 4, 4],
 		);
+	});
+
+	it("steps the whole percent shown in the cell, so 59.5 (shown as 60 %) is in the 60s", () => {
+		assert.equal(getHeatStep(59.5), 2);
+		assert.equal(getHeatStep(59.49), 1);
 	});
 
 	it("has no step without a score", () => {

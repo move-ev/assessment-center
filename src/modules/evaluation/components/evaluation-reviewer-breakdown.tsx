@@ -76,7 +76,11 @@ function ReviewerDots({
 								{taskScore?.hasStrongDeviation && <DeviationBadge />}
 							</div>
 							<StripTrack
-								label={`${task.taskName}: ${description || "keine Bewertung"}`}
+								label={`${task.taskName}: ${description || "keine Bewertung"}${
+									taskScore?.score === null || taskScore?.score === undefined
+										? ""
+										: `; Teil-Score ${formatPercent(taskScore.score)}`
+								}`}
 							>
 								{taskScore?.score !== null &&
 									taskScore?.score !== undefined && (
