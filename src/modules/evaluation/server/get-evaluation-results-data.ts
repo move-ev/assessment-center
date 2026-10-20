@@ -5,10 +5,24 @@ import { formatPercentForExport } from "@/lib/format-percent";
 import { assertRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
+import {
+	type CriterionDisagreement,
+	type CriterionStarRating,
+	computeCriterionDisagreement,
+	computeReviewerLeniency,
+	type ReviewerLeniency,
+	type ReviewerTaskPercent,
+} from "./calibration";
+import {
+	computeTaskContributions,
+	summarizeScores,
+	type TaskContribution,
+} from "./comparison";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
 import { getRankingBand, type RankingBand } from "./ranking";
 import {
 	computeMeanPercent,
+	computeReviewerPercent,
 	computeReviewerPercents,
 	computeWeightedMean,
 	getScoredCriteria,
@@ -93,6 +107,8 @@ type ParticipantResult = {
 	deviatingTaskNames: string[];
 	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
 	rankingBand: RankingBand | null;
+	/** Share of each task in the overall score; adds up to it. */
+	taskContributions: TaskContribution[];
 };
 
 type UnrankedParticipantResult = Omit<ParticipantResult, "rankingBand">;
@@ -105,6 +121,9 @@ type TaskResult = {
 	reviewerAssignmentCount: number;
 	completedAssignmentCount: number;
 	averageScore: number | null;
+	/** Lowest and highest participant score in this task. */
+	minScore: number | null;
+	maxScore: number | null;
 	qualitativeEntryCount: number;
 	teamObservationCount: number;
 };
@@ -123,6 +142,8 @@ export type EvaluationCriterionResult = {
 };
 
 export type EvaluationResultsData = {
+	/** Free texts and observations were deleted when the AC was anonymized. */
+	isAnonymized: boolean;
 	/** Highest star of the AC's scale; criterion averages are in stars. */
 	ratingScaleMax: RatingScaleMax;
 	summary: {
@@ -140,7 +161,19 @@ export type EvaluationResultsData = {
 	participants: ParticipantResult[];
 	tasks: TaskResult[];
 	criteria: EvaluationCriterionResult[];
+	calibration: EvaluationCalibration;
 	exportRows: Array<Record<string, string>>;
+};
+
+export type EvaluationCalibration = {
+	reviewers: Array<ReviewerLeniency & { reviewerName: string }>;
+	criteria: Array<
+		CriterionDisagreement & {
+			taskName: string;
+			criteriaGroupTitle: string;
+			name: string;
+		}
+	>;
 };
 
 async function fetchEvaluationResultsSourceData(acId: string) {
@@ -149,8 +182,12 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 		select: {
 			id: true,
 			ratingScaleMax: true,
+			anonymizedAt: true,
 			reviewers: {
-				select: { id: true },
+				select: {
+					id: true,
+					user: { select: { name: true } },
+				},
 			},
 			tasks: {
 				where: { deletedAt: null },
@@ -211,6 +248,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 							},
 						},
 						select: {
+							reviewerId: true,
 							participantId: true,
 							taskId: true,
 							quantitativeRatings: {
@@ -444,6 +482,13 @@ function buildParticipantResults(
 			deviatingTaskNames: sortedTaskResults
 				.filter((taskResult) => taskResult.hasStrongDeviation)
 				.map((taskResult) => taskResult.taskName),
+			taskContributions: computeTaskContributions(
+				sortedTaskResults.map((taskResult) => ({
+					taskId: taskResult.taskId,
+					score: taskResult.score,
+					weight: taskResult.scoreWeight,
+				})),
+			),
 		});
 	}
 
@@ -538,6 +583,8 @@ function buildTaskResults(
 				}
 			}
 
+			const scoreSummary = summarizeScores(participantScores);
+
 			return {
 				id: task.id,
 				name: task.name,
@@ -545,18 +592,101 @@ function buildTaskResults(
 				participantCount,
 				reviewerAssignmentCount,
 				completedAssignmentCount,
-				averageScore:
-					participantScores.length === 0
-						? null
-						: roundScore(
-								participantScores.reduce((sum, value) => sum + value, 0) /
-									participantScores.length,
-							),
+				averageScore: scoreSummary?.mean ?? null,
+				minScore: scoreSummary?.min ?? null,
+				maxScore: scoreSummary?.max ?? null,
 				qualitativeEntryCount,
 				teamObservationCount: task.teamObservations.length,
 			} satisfies TaskResult;
 		})
 		.sort((left, right) => left.name.localeCompare(right.name, "de-DE"));
+}
+
+/** Map lookup that fails loudly: a miss means the query data is inconsistent. */
+function requireEntry<K, V>(map: Map<K, V>, key: K, what: string): V {
+	const value = map.get(key);
+	if (value === undefined) {
+		throw new Error(`Missing ${what} ${String(key)} in evaluation data`);
+	}
+	return value;
+}
+
+type CriterionMeta = Pick<
+	EvaluationCalibration["criteria"][number],
+	"taskName" | "criteriaGroupTitle" | "name"
+>;
+
+/**
+ * Reviewer leniency and criterion disagreement over the whole AC, from each
+ * reviewer's own percentage and stars per participant and task. Only scored
+ * criteria count, as in the scores themselves.
+ */
+function buildCalibration(
+	data: QueryResult,
+	taskLookup: ReturnType<typeof buildTaskLookup>,
+	ratingScaleMax: RatingScaleMax,
+): EvaluationCalibration {
+	const percents: ReviewerTaskPercent[] = [];
+	const starRatings: CriterionStarRating[] = [];
+	const criterionMeta = new Map<string, CriterionMeta>();
+
+	for (const participant of data.participants) {
+		for (const assignment of participant.reviewerAssignments) {
+			const task = requireEntry(taskLookup, assignment.taskId, "task");
+			const scoredCriteria = getScoredCriteria(task.criteria);
+			const percent = computeReviewerPercent(
+				scoredCriteria,
+				assignment.quantitativeRatings,
+				ratingScaleMax,
+			);
+			if (percent !== null) {
+				percents.push({
+					reviewerId: assignment.reviewerId,
+					participantId: participant.id,
+					taskId: task.id,
+					percent,
+				});
+			}
+
+			for (const criterion of task.criteria) {
+				const rating = assignment.quantitativeRatings.find(
+					(entry) => entry.criteriaId === criterion.id,
+				);
+				if (!rating || !scoredCriteria.some((c) => c.id === criterion.id)) {
+					continue;
+				}
+				starRatings.push({
+					criteriaId: criterion.id,
+					participantId: participant.id,
+					value: rating.value,
+				});
+				criterionMeta.set(criterion.id, {
+					taskName: task.name,
+					criteriaGroupTitle: criterion.criteriaGroup.title,
+					name: criterion.name,
+				});
+			}
+		}
+	}
+
+	const reviewerNames = new Map(
+		data.reviewers.map((reviewer) => [reviewer.id, reviewer.user.name]),
+	);
+
+	return {
+		reviewers: computeReviewerLeniency(percents)
+			.map((entry) => ({
+				...entry,
+				reviewerName: requireEntry(reviewerNames, entry.reviewerId, "reviewer"),
+			}))
+			.sort((left, right) =>
+				left.reviewerName.localeCompare(right.reviewerName, "de-DE"),
+			),
+		criteria: computeCriterionDisagreement(starRatings).map((entry) => ({
+			...entry,
+			...requireEntry(criterionMeta, entry.criteriaId, "criterion"),
+		})),
+	};
 }
 
 function buildExportRows(
@@ -683,11 +813,13 @@ export async function getEvaluationResultsData(
 	);
 
 	return {
+		isAnonymized: data.anonymizedAt !== null,
 		ratingScaleMax,
 		summary: buildSummary(data, participants),
 		participants,
 		tasks: buildTaskResults(data, participants),
 		criteria: buildCriterionResults(data),
+		calibration: buildCalibration(data, taskLookup, ratingScaleMax),
 		exportRows: buildExportRows(participants, taskLookup),
 	};
 }

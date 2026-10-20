@@ -74,14 +74,16 @@ export function computeReviewerPercents(
 		.filter((percent) => percent !== null);
 }
 
+/** Rounded mean of any values (percent, stars, points); null without any. */
+export function computeMean(values: number[]): number | null {
+	return values.length === 0
+		? null
+		: roundScore(values.reduce((sum, value) => sum + value, 0) / values.length);
+}
+
 /** Mean of reviewer percentages; null without any. */
 export function computeMeanPercent(percentages: number[]): number | null {
-	return percentages.length === 0
-		? null
-		: roundScore(
-				percentages.reduce((sum, percent) => sum + percent, 0) /
-					percentages.length,
-			);
+	return computeMean(percentages);
 }
 
 export type WeightedScore = {

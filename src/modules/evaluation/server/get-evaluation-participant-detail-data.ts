@@ -1,15 +1,36 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
+import type { RatingScaleMax } from "@/lib/rating-scale";
 import { db } from "@/server/db";
-import { getEvaluationResultsData } from "./get-evaluation-results-data";
+import {
+	getPositionAmong,
+	type ScoreSummary,
+	summarizeScores,
+	type TaskContribution,
+} from "./comparison";
+import {
+	type EvaluationResultsData,
+	getEvaluationResultsData,
+} from "./get-evaluation-results-data";
 import {
 	getParticipantReviewerBreakdown,
 	type ReviewerBreakdownData,
 } from "./get-participant-reviewer-breakdown";
 import type { RankingBand } from "./ranking";
 
+/** Where a score lies among all participants of the AC. */
+export type ScoreComparison = {
+	summary: ScoreSummary | null;
+	/** Position among the participants with a score; null without a score. */
+	position: number | null;
+};
+
 export type EvaluationParticipantDetailData = {
+	/** Highest star of the AC's scale, for the criteria drill-down. */
+	ratingScaleMax: RatingScaleMax;
+	/** Free texts were deleted when the AC was anonymized. */
+	isAnonymized: boolean;
 	participant: {
 		id: string;
 		name: string;
@@ -24,6 +45,8 @@ export type EvaluationParticipantDetailData = {
 		deviatingTaskNames: string[];
 		completedAssignmentCount: number;
 		totalAssignmentCount: number;
+		overallComparison: ScoreComparison;
+		taskContributions: TaskContribution[];
 	};
 	taskScores: Array<{
 		taskId: string;
@@ -34,8 +57,11 @@ export type EvaluationParticipantDetailData = {
 		hasStrongDeviation: boolean;
 		completedAssignments: number;
 		totalAssignments: number;
+		comparison: ScoreComparison;
 	}>;
 	reviewerBreakdown: ReviewerBreakdownData;
+	/** Mean stars per criterion across the AC, for the criteria drill-down. */
+	criterionAverages: Record<string, number | null>;
 	teamObservations: Array<{
 		taskId: string;
 		taskName: string;
@@ -146,11 +172,16 @@ export async function getEvaluationParticipantDetailData(
 	const teamObservations = groupId
 		? await fetchTeamObservations(acId, groupId)
 		: [];
+	const overallScores = results.participants.flatMap((entry) =>
+		entry.overallScore === null ? [] : [entry.overallScore],
+	);
 	const breakdownTaskIds = new Set(
 		reviewerBreakdown.tasks.map((task) => task.taskId),
 	);
 
 	return {
+		ratingScaleMax: results.ratingScaleMax,
+		isAnonymized: results.isAnonymized,
 		participant: {
 			id: participant.id,
 			name: participant.name,
@@ -162,6 +193,12 @@ export async function getEvaluationParticipantDetailData(
 			deviatingTaskNames: participant.deviatingTaskNames,
 			completedAssignmentCount: participant.completedAssignmentCount,
 			totalAssignmentCount: participant.totalAssignmentCount,
+			// The ranking's position, so the profile matches "Rang X von N".
+			overallComparison: {
+				summary: summarizeScores(overallScores),
+				position: participant.overallScore === null ? null : index + 1,
+			},
+			taskContributions: participant.taskContributions,
 		},
 		taskScores: participant.taskResults.map((task) => ({
 			taskId: task.taskId,
@@ -172,6 +209,10 @@ export async function getEvaluationParticipantDetailData(
 			hasStrongDeviation: task.hasStrongDeviation,
 			completedAssignments: task.completedAssignments,
 			totalAssignments: task.totalAssignments,
+			comparison: compareScore(
+				task.score,
+				getTaskScores(results.participants, task.taskId),
+			),
 		})),
 		// Same task order as the task scores above.
 		reviewerBreakdown: {
@@ -180,6 +221,31 @@ export async function getEvaluationParticipantDetailData(
 				.filter((task) => breakdownTaskIds.has(task.taskId))
 				.map(({ taskId, taskName }) => ({ taskId, taskName })),
 		},
+		criterionAverages: Object.fromEntries(
+			results.criteria.map((criterion) => [
+				criterion.id,
+				criterion.averageScore,
+			]),
+		),
 		teamObservations,
+	};
+}
+
+function getTaskScores(
+	participants: EvaluationResultsData["participants"],
+	taskId: string,
+): number[] {
+	return participants.flatMap((participant) => {
+		const score = participant.taskResults.find(
+			(task) => task.taskId === taskId,
+		)?.score;
+		return score === null || score === undefined ? [] : [score];
+	});
+}
+
+function compareScore(score: number | null, scores: number[]): ScoreComparison {
+	return {
+		summary: summarizeScores(scores),
+		position: score === null ? null : getPositionAmong(score, scores).position,
 	};
 }

@@ -58,6 +58,18 @@ percentage points (highest minus lowest), the person
 is marked in the ranking; the detail page shows the spread per task and which
 task triggers the mark.
 
+Result charts are server-rendered HTML/CSS on the tokens `--series-*`
+(categorical) and `--heat-*` (sequential) in `globals.css`; only the task
+scatter is a client-side SVG, since the viewer picks its tasks. The results page
+shows the distribution of overall scores, a heat map (fixed 10-point bands from
+50 %), each overall score split into weighted task shares (`comparison.ts`) and
+a task scatter. The detail page compares the person with the AC (range, mean,
+position; per task, ties share a position; overall, the ranking's rank), shows reviewers as dots per task and every
+reviewer's stars per criterion with the written feedback. The calibration tab
+(`calibration.ts`) compares each reviewer only with others who rated the same
+person in the same task, and ranks criteria by the mean star distance between
+two reviewers; it is a calibration aid, not an assessment of reviewers.
+
 ---
 
 ## Route Hierarchy
@@ -195,7 +207,20 @@ src/modules/
     │   ├── evaluation-task.tsx        Per-task average scores across participants
     │   ├── evaluation-criteria.tsx    Per-criteria breakdown with weights
     │   ├── evaluation-export.tsx      Export trigger (CSV / PDF)
+    │   ├── evaluation-calibration.tsx Reviewer leniency, criterion disagreement
+    │   ├── score-distribution.tsx     Overall scores as dots on 0–100 %
+    │   ├── results-heatmap.tsx        Participants × tasks heat map
+    │   ├── score-composition.tsx      Overall score split into task shares
+    │   ├── task-scatter.tsx           Two tasks against each other (client)
+    │   ├── participant-profile.tsx    Person against the AC per task
+    │   ├── criteria-drilldown.tsx     Stars per reviewer and criterion, texts
+    │   ├── score-strip.tsx            Shared 0–100 % axis, marks and legend
     │   └── index.ts
+    ├── server/                        Data loaders and pure scoring logic
+    │   ├── scoring.ts, ranking.ts, deviation.ts
+    │   ├── comparison.ts              Summaries, positions, task shares, correlation
+    │   ├── calibration.ts             Leniency and disagreement
+    │   └── criteria-breakdown.ts      Rows per criterion for one person
     └── index.ts
 ```
 
