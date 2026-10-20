@@ -46,10 +46,11 @@ Status is stored on `AssessmentCenter` and gates access within each section.
 
 Scores are percentages, as in the assessment matrix
 (`src/modules/evaluation/server/scoring.ts`): per reviewer and task,
-Σ(stars × weight) ÷ Σ(scale maximum × weight) over the criteria that reviewer
-rated; per task, the mean of the reviewers' percentages; overall, the mean of
-the task percentages weighted by `scoreWeight`. The app shows whole percent,
-the export one decimal.
+100 × Σ(stars × weight) ÷ Σ(scale maximum × weight) over the criteria that
+reviewer rated; per task, the mean of the reviewers' percentages; overall, the
+mean of the task percentages weighted by `scoreWeight`. The app shows whole
+percent, except the criteria tab (star averages per criterion); the export
+shows one decimal.
 
 ---
 

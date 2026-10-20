@@ -44,6 +44,17 @@ describe("computeReviewerPercent", () => {
 		assert.equal(computeReviewerPercent(criteria, [], 6), null);
 	});
 
+	it("ignores ratings for criteria that are not scored", () => {
+		const criteria = [{ id: "preparation", weight: 1 }];
+		const ratings = [
+			{ criteriaId: "preparation", value: 3 },
+			{ criteriaId: "unweighted", value: 6 },
+		];
+
+		// only "preparation" counts: 3 of 6 = 50 %
+		assert.equal(computeReviewerPercent(criteria, ratings, 6), 50);
+	});
+
 	it("uses the AC's own scale maximum", () => {
 		const criteria = [{ id: "a", weight: 1 }];
 		const ratings = [{ criteriaId: "a", value: 4 }];
