@@ -1,3 +1,5 @@
+import type { RatingScaleMax } from "../../../lib/rating-scale.ts";
+
 export function roundScore(value: number): number {
 	return Number(value.toFixed(2));
 }
@@ -32,39 +34,51 @@ export type CriterionRating = {
 };
 
 /**
- * Averages each criterion's ratings across all rating sets (one set per
- * reviewer assignment), then weights those averages across criteria.
- * Criteria without any rating are left out of both sums.
+ * One reviewer's score for one task in percent: weighted stars divided by
+ * the weighted maximum of the AC's scale, as in the assessment matrix.
  */
-export function computeWeightedCriteriaScore(
+export function computeReviewerPercent(
 	criteria: WeightedCriterion[],
-	ratingSets: CriterionRating[][],
+	ratings: CriterionRating[],
+	scaleMax: RatingScaleMax,
 ): number | null {
-	let weightedValueSum = 0;
-	let weightSum = 0;
+	let weightedPoints = 0;
+	let reachablePoints = 0;
 
 	for (const criterion of criteria) {
-		const values: number[] = [];
-
-		for (const ratings of ratingSets) {
-			for (const rating of ratings) {
-				if (rating.criteriaId === criterion.id) {
-					values.push(rating.value);
-				}
-			}
-		}
-
-		if (values.length === 0) {
+		const rating = ratings.find((entry) => entry.criteriaId === criterion.id);
+		if (!rating) {
 			continue;
 		}
 
-		const averageValue =
-			values.reduce((sum, value) => sum + value, 0) / values.length;
-		weightedValueSum += averageValue * criterion.weight;
-		weightSum += criterion.weight;
+		weightedPoints += rating.value * criterion.weight;
+		reachablePoints += scaleMax * criterion.weight;
 	}
 
-	return weightSum === 0 ? null : roundScore(weightedValueSum / weightSum);
+	return reachablePoints === 0
+		? null
+		: roundScore((weightedPoints / reachablePoints) * 100);
+}
+
+/**
+ * A task's score in percent: the mean of the reviewers' percentages.
+ * Reviewers who have not rated any scored criterion are left out.
+ */
+export function computeTaskPercent(
+	criteria: WeightedCriterion[],
+	ratingSets: CriterionRating[][],
+	scaleMax: RatingScaleMax,
+): number | null {
+	const percentages = ratingSets
+		.map((ratings) => computeReviewerPercent(criteria, ratings, scaleMax))
+		.filter((percent) => percent !== null);
+
+	return percentages.length === 0
+		? null
+		: roundScore(
+				percentages.reduce((sum, percent) => sum + percent, 0) /
+					percentages.length,
+			);
 }
 
 export type WeightedScore = {

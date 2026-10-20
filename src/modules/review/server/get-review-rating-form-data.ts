@@ -1,7 +1,7 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
-import { isRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
+import { assertRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { db } from "@/server/db";
 import { getReviewSession } from "./shared";
 
@@ -160,14 +160,10 @@ export async function getReviewRatingFormData(
 				})
 			: null;
 
-	const { ratingScaleMax } = assignment.task.assessmentCenter;
-	// The check constraint only allows known scales.
-	if (!isRatingScaleMax(ratingScaleMax)) {
-		throw new Error(`Unbekannte Bewertungsskala: 1–${ratingScaleMax}`);
-	}
-
 	return {
-		ratingScaleMax,
+		ratingScaleMax: assertRatingScaleMax(
+			assignment.task.assessmentCenter.ratingScaleMax,
+		),
 		task: {
 			id: assignment.task.id,
 			name: assignment.task.name,

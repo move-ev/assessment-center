@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+	assertRatingScaleMax,
 	getRatingValues,
 	isExtremeRating,
 	isRatingScaleMax,
@@ -35,5 +36,10 @@ describe("rating scale", () => {
 		assert.equal(isRatingScaleMax(6), true);
 		assert.equal(isRatingScaleMax(4), false);
 		assert.equal(isRatingScaleMax(10), false);
+	});
+
+	it("turns a stored maximum into a known scale or fails loudly", () => {
+		assert.equal(assertRatingScaleMax(6), 6);
+		assert.throws(() => assertRatingScaleMax(7), /Unbekannte Bewertungsskala/);
 	});
 });

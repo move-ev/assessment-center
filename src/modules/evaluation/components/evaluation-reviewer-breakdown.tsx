@@ -14,8 +14,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { formatPercent } from "@/lib/format-percent";
 import type { ReviewerBreakdownData } from "../server/get-participant-reviewer-breakdown";
-import { formatScore } from "./format-score";
 
 function getScoreForTask(
 	scores: ReviewerBreakdownData["reviewers"][number]["scores"],
@@ -72,7 +72,7 @@ function ReviewerBreakdownCard({ data }: { data: ReviewerBreakdownData }) {
 														score === null ? "text-muted-foreground" : undefined
 													}
 												>
-													{formatScore(score)}
+													{formatPercent(score)}
 												</span>
 											</TableCell>
 										);

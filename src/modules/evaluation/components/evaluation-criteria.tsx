@@ -11,9 +11,10 @@ import type { EvaluationResultsData } from "../server/get-evaluation-results-dat
 
 type Props = {
 	criteria: EvaluationResultsData["criteria"];
+	ratingScaleMax: EvaluationResultsData["ratingScaleMax"];
 };
 
-function EvaluationCriteria({ criteria }: Props) {
+function EvaluationCriteria({ criteria, ratingScaleMax }: Props) {
 	if (criteria.length === 0) {
 		return (
 			<p className="text-muted-foreground text-sm">
@@ -31,7 +32,7 @@ function EvaluationCriteria({ criteria }: Props) {
 					<TableHead>Kriterium</TableHead>
 					<TableHead>Typ</TableHead>
 					<TableHead>Gewicht</TableHead>
-					<TableHead>Durchschnitt</TableHead>
+					<TableHead>Ø Sterne (von {ratingScaleMax})</TableHead>
 					<TableHead>Anzahl Ratings</TableHead>
 				</TableRow>
 			</TableHeader>

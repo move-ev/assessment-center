@@ -1,9 +1,10 @@
 import "server-only";
 
+import { assertRatingScaleMax } from "@/lib/rating-scale";
 import { db } from "@/server/db";
 import {
 	type CriterionRating,
-	computeWeightedCriteriaScore,
+	computeReviewerPercent,
 	getScoredCriteria,
 } from "./scoring";
 
@@ -27,8 +28,8 @@ export type ReviewerBreakdownData = {
 };
 
 /**
- * Task score per reviewer for one participant: the same weighted criteria
- * score as the ranking, computed from one reviewer's ratings only. Lists only
+ * Task score per reviewer for one participant in percent: the reviewer
+ * percentage that the ranking averages per task. Lists only
  * tasks the participant was assigned to that have scored criteria.
  */
 export async function getParticipantReviewerBreakdown(
@@ -39,6 +40,7 @@ export async function getParticipantReviewerBreakdown(
 		db.assessmentCenter.findFirst({
 			where: { id: acId, deletedAt: null },
 			select: {
+				ratingScaleMax: true,
 				tasks: {
 					where: { deletedAt: null },
 					select: {
@@ -80,6 +82,7 @@ export async function getParticipantReviewerBreakdown(
 		return { tasks: [], reviewers: [] };
 	}
 
+	const ratingScaleMax = assertRatingScaleMax(acData.ratingScaleMax);
 	const assignedTaskIds = new Set(
 		assignments.map((assignment) => assignment.taskId),
 	);
@@ -122,7 +125,7 @@ export async function getParticipantReviewerBreakdown(
 				return {
 					taskId: task.taskId,
 					score: ratings
-						? computeWeightedCriteriaScore(task.criteria, [ratings])
+						? computeReviewerPercent(task.criteria, ratings, ratingScaleMax)
 						: null,
 				};
 			}),

@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatPercent } from "@/lib/format-percent";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 
 type Props = {
@@ -35,8 +36,8 @@ function EvaluationTask({ tasks }: Props) {
 					</CardHeader>
 					<CardContent className="grid gap-3 md:grid-cols-2">
 						<MetricCard
-							label="Durchschnittsscore"
-							value={formatScore(task.averageScore)}
+							label="Durchschnitt"
+							value={formatPercent(task.averageScore)}
 						/>
 						<MetricCard
 							label="Abgeschlossene Bewertungen"
@@ -66,10 +67,6 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 			<p className="mt-2 font-semibold text-2xl">{value}</p>
 		</div>
 	);
-}
-
-function formatScore(value: number | null) {
-	return value === null ? "n/a" : value.toFixed(2);
 }
 
 export { EvaluationTask };

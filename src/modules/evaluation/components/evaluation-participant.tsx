@@ -16,6 +16,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
@@ -61,7 +62,10 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 					<EvaluationTask tasks={results.tasks} />
 				</TabsContent>
 				<TabsContent value="criteria">
-					<EvaluationCriteria criteria={results.criteria} />
+					<EvaluationCriteria
+						criteria={results.criteria}
+						ratingScaleMax={results.ratingScaleMax}
+					/>
 				</TabsContent>
 				<TabsContent value="export">
 					<EvaluationExport acName={acName} rows={results.exportRows} />
@@ -86,11 +90,7 @@ function SummaryGrid({
 			<SummaryCard
 				description="Gemittelter Gesamtwert über alle bewertbaren Bewerbenden."
 				label="Durchschnitt"
-				value={
-					summary.averageOverallScore === null
-						? "n/a"
-						: summary.averageOverallScore.toFixed(2)
-				}
+				value={formatPercent(summary.averageOverallScore)}
 			/>
 			<SummaryCard
 				description={`${summary.completionPercent}% aller Bewerter-Zuweisungen vollständig erfasst.`}
@@ -183,11 +183,7 @@ function ParticipantTable({
 						<TableCell className="text-muted-foreground">
 							{participant.groupName ?? "Keine Gruppe"}
 						</TableCell>
-						<TableCell>
-							{participant.overallScore === null
-								? "n/a"
-								: participant.overallScore.toFixed(2)}
-						</TableCell>
+						<TableCell>{formatPercent(participant.overallScore)}</TableCell>
 						<TableCell className="text-muted-foreground">
 							{participant.completedTaskCount} / {participant.totalTaskCount}
 						</TableCell>
@@ -216,7 +212,7 @@ function TaskBadge({
 }) {
 	return (
 		<Badge variant={task.score === null ? "outline" : "secondary"}>
-			{task.taskName}: {task.score === null ? "n/a" : task.score.toFixed(2)}
+			{task.taskName}: {formatPercent(task.score)}
 		</Badge>
 	);
 }

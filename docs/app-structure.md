@@ -44,6 +44,13 @@ cohort comparisons. Admins can also delete an AC completely in any status
 
 Status is stored on `AssessmentCenter` and gates access within each section.
 
+Scores are percentages, as in the assessment matrix
+(`src/modules/evaluation/server/scoring.ts`): per reviewer and task,
+Σ(stars × weight) ÷ Σ(scale maximum × weight) over the criteria that reviewer
+rated; per task, the mean of the reviewers' percentages; overall, the mean of
+the task percentages weighted by `scoreWeight`. The app shows whole percent,
+the export one decimal.
+
 ---
 
 ## Route Hierarchy
@@ -333,6 +340,8 @@ testable with `bun run test` without any setup.
   from the assessment matrix), valid values and which values need a
   confirmation. Used by the assessment-center and rating routers, the
   rating form loader, the rating view and the details page.
+- `src/lib/format-percent.ts`: how scores are shown, whole percent in the app
+  and one decimal in the export.
 - `src/lib/pseudonyms.ts`: pseudonyms "Bewerbende n" / "Gruppe n" for
   anonymizing an AC, shuffled for participants.
 - `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and
