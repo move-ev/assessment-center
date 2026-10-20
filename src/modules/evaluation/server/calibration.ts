@@ -1,4 +1,4 @@
-import { roundScore } from "./scoring.ts";
+import { computeMean } from "./scoring.ts";
 
 export type ReviewerTaskPercent = {
 	reviewerId: string;
@@ -19,10 +19,11 @@ export type ReviewerLeniency = LeniencyEntry & {
 	tasks: Array<LeniencyEntry & { taskId: string }>;
 };
 
-function mean(values: number[]): number | null {
+/** Unrounded mean, for values that feed into a further mean. */
+function rawMean(values: number[]): number | null {
 	return values.length === 0
 		? null
-		: roundScore(values.reduce((sum, value) => sum + value, 0) / values.length);
+		: values.reduce((sum, value) => sum + value, 0) / values.length;
 }
 
 function groupBy<T>(items: T[], getKey: (item: T) => string): Map<string, T[]> {
@@ -55,7 +56,7 @@ export function computeReviewerLeniency(
 	for (const group of ratingGroups.values()) {
 		for (const entry of group) {
 			const others = group.filter((other) => other !== entry);
-			const othersMean = mean(others.map((other) => other.percent));
+			const othersMean = rawMean(others.map((other) => other.percent));
 			if (othersMean !== null) {
 				deviations.push({
 					reviewerId: entry.reviewerId,
@@ -74,14 +75,14 @@ export function computeReviewerLeniency(
 		const tasks = [...groupBy(own, (entry) => entry.taskId)].map(
 			([taskId, entries]) => ({
 				taskId,
-				meanDeviation: mean(entries.map((entry) => entry.deviation)),
+				meanDeviation: computeMean(entries.map((entry) => entry.deviation)),
 				comparisonCount: entries.length,
 			}),
 		);
 
 		return {
 			reviewerId,
-			meanDeviation: mean(own.map((entry) => entry.deviation)),
+			meanDeviation: computeMean(own.map((entry) => entry.deviation)),
 			comparisonCount: own.length,
 			tasks,
 		};
@@ -96,16 +97,26 @@ export type CriterionStarRating = {
 
 export type CriterionDisagreement = {
 	criteriaId: string;
-	/** Mean of highest minus lowest stars per participant. */
-	meanSpread: number;
+	/**
+	 * Mean star distance between two reviewers of the same participant; the
+	 * mean over all pairs, so more reviewers do not inflate it like a range.
+	 */
+	meanDistance: number;
 	/** Participants rated on this criterion by at least two reviewers. */
 	comparisonCount: number;
 };
 
+function meanPairDistance(values: number[]): number {
+	const distances = values.flatMap((value, index) =>
+		values.slice(index + 1).map((other) => Math.abs(value - other)),
+	);
+	return rawMean(distances) ?? 0;
+}
+
 /**
  * How far reviewers' stars lie apart per criterion, averaged over the
  * participants rated by several reviewers, most disputed first. A high
- * spread hints at anchors that read differently to different reviewers.
+ * distance hints at anchors that read differently to different reviewers.
  */
 export function computeCriterionDisagreement(
 	ratings: CriterionStarRating[],
@@ -116,20 +127,21 @@ export function computeCriterionDisagreement(
 		ratings,
 		(rating) => rating.criteriaId,
 	)) {
-		const spreads = [
+		const distances = [
 			...groupBy(criterionRatings, (rating) => rating.participantId).values(),
 		]
 			.filter((group) => group.length >= 2)
-			.map((group) => {
-				const values = group.map((rating) => rating.value);
-				return Math.max(...values) - Math.min(...values);
-			});
-		const meanSpread = mean(spreads);
+			.map((group) => meanPairDistance(group.map((rating) => rating.value)));
+		const meanDistance = computeMean(distances);
 
-		if (meanSpread !== null) {
-			results.push({ criteriaId, meanSpread, comparisonCount: spreads.length });
+		if (meanDistance !== null) {
+			results.push({
+				criteriaId,
+				meanDistance,
+				comparisonCount: distances.length,
+			});
 		}
 	}
 
-	return results.sort((left, right) => right.meanSpread - left.meanSpread);
+	return results.sort((left, right) => right.meanDistance - left.meanDistance);
 }

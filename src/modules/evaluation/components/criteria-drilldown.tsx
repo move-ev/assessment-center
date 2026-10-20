@@ -15,6 +15,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { RatingScaleMax } from "@/lib/rating-scale";
 import { cn } from "@/lib/utils";
 import { STAR_SPREAD_HIGHLIGHT } from "../server/criteria-breakdown";
 import type {
@@ -75,7 +76,7 @@ function StarsTable({
 	task: TaskCriteriaBreakdown;
 	colorIndex: Map<string, number>;
 	criterionAverages: Record<string, number | null>;
-	ratingScaleMax: number;
+	ratingScaleMax: RatingScaleMax;
 }) {
 	const rows = task.criteria.filter(
 		(criterion) => criterion.type === "QUANTITATIVE",
@@ -166,7 +167,13 @@ function StarsTable({
 	);
 }
 
-function WrittenFeedback({ task }: { task: TaskCriteriaBreakdown }) {
+function WrittenFeedback({
+	task,
+	isAnonymized,
+}: {
+	task: TaskCriteriaBreakdown;
+	isAnonymized: boolean;
+}) {
 	const criteria = task.criteria.filter(
 		(criterion) => criterion.type === "QUALITATIVE",
 	);
@@ -188,7 +195,9 @@ function WrittenFeedback({ task }: { task: TaskCriteriaBreakdown }) {
 					</p>
 					{criterion.texts.length === 0 ? (
 						<p className="text-muted-foreground text-sm">
-							Keine Rückmeldung erfasst.
+							{isAnonymized
+								? "Freitexte wurden bei der Anonymisierung gelöscht."
+								: "Keine Rückmeldung erfasst."}
 						</p>
 					) : (
 						<ul className="space-y-2">
@@ -228,10 +237,12 @@ function CriteriaDrilldown({
 	breakdown,
 	criterionAverages,
 	ratingScaleMax,
+	isAnonymized,
 }: {
 	breakdown: ReviewerBreakdownData;
 	criterionAverages: Record<string, number | null>;
-	ratingScaleMax: number;
+	ratingScaleMax: RatingScaleMax;
+	isAnonymized: boolean;
 }) {
 	if (breakdown.criteriaByTask.length === 0) {
 		return null;
@@ -274,7 +285,7 @@ function CriteriaDrilldown({
 									ratingScaleMax={ratingScaleMax}
 									task={task}
 								/>
-								<WrittenFeedback task={task} />
+								<WrittenFeedback isAnonymized={isAnonymized} task={task} />
 							</div>
 						</details>
 					);

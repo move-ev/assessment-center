@@ -23,6 +23,7 @@ import {
 	StripDot,
 	StripTick,
 	StripTrack,
+	TICK_COLOR,
 } from "./score-strip";
 
 const RANGE_COLOR = "color-mix(in oklab, var(--series-1) 18%, transparent)";
@@ -166,7 +167,7 @@ function ParticipantProfile({
 					<LegendItem color={PERSON_COLOR} label={participant.name} />
 					<LegendItem color={RANGE_COLOR} label="Spanne im AC" shape="band" />
 					<LegendItem
-						color="color-mix(in oklab, var(--foreground) 70%, transparent)"
+						color={TICK_COLOR}
 						label="Durchschnitt im AC"
 						shape="tick"
 					/>

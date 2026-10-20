@@ -14,6 +14,9 @@ import { axisPosition, LegendItem, seriesColor } from "./score-strip";
 
 type TaskInfo = { id: string; name: string };
 
+const INCOMPLETE_NOTE =
+	"Nicht alle Aufgaben haben einen Wert; der Gesamtwert stützt sich nur auf die übrigen.";
+
 function formatPoints(value: number): string {
 	return `${value.toLocaleString("de-DE", { maximumFractionDigits: 1 })} Pkt.`;
 }
@@ -106,6 +109,11 @@ function ScoreComposition({
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<TaskLegend tasks={tasks} />
+				{scored.some(
+					(participant) => participant.taskContributions.length < tasks.length,
+				) && (
+					<p className="text-muted-foreground text-xs">* {INCOMPLETE_NOTE}</p>
+				)}
 				<ul className="space-y-2">
 					{scored.map((participant) => (
 						<li
@@ -123,8 +131,16 @@ function ScoreComposition({
 								label={`${participant.name}: ${describeComposition(participant.taskContributions, tasks)}`}
 								tasks={tasks}
 							/>
-							<span className="text-right tabular-nums">
+							<span
+								className="text-right tabular-nums"
+								title={
+									participant.taskContributions.length < tasks.length
+										? INCOMPLETE_NOTE
+										: undefined
+								}
+							>
 								{formatPercent(participant.overallScore)}
+								{participant.taskContributions.length < tasks.length && "*"}
 							</span>
 						</li>
 					))}

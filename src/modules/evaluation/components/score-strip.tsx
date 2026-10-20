@@ -4,6 +4,10 @@ import { cn } from "@/lib/utils";
 /** Gridlines and labels of every 0–100 % score axis. */
 export const AXIS_TICKS = [0, 25, 50, 75, 100] as const;
 
+/** Colour of the mean tick, for legends next to a StripTick. */
+export const TICK_COLOR =
+	"color-mix(in oklab, var(--foreground) 70%, transparent)";
+
 /** CSS position of a score on a 0–100 axis, clamped to the axis. */
 export function axisPosition(score: number): string {
 	return `${Math.min(100, Math.max(0, score))}%`;

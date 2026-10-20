@@ -1,4 +1,4 @@
-import { roundScore, type WeightedScore } from "./scoring.ts";
+import { computeMean, roundScore, type WeightedScore } from "./scoring.ts";
 
 export type ScoreSummary = {
 	count: number;
@@ -9,7 +9,8 @@ export type ScoreSummary = {
 
 /** Lowest, highest and mean score of a group, e.g. one task across an AC. */
 export function summarizeScores(scores: number[]): ScoreSummary | null {
-	if (scores.length === 0) {
+	const mean = computeMean(scores);
+	if (mean === null) {
 		return null;
 	}
 
@@ -17,9 +18,7 @@ export function summarizeScores(scores: number[]): ScoreSummary | null {
 		count: scores.length,
 		min: Math.min(...scores),
 		max: Math.max(...scores),
-		mean: roundScore(
-			scores.reduce((sum, score) => sum + score, 0) / scores.length,
-		),
+		mean,
 	};
 }
 

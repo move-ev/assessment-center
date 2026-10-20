@@ -25,6 +25,7 @@ import {
 	StripTick,
 	StripTrack,
 	seriesColor,
+	TICK_COLOR,
 } from "./score-strip";
 
 function getScoreForTask(
@@ -115,7 +116,7 @@ function ReviewerDots({
 					/>
 				))}
 				<LegendItem
-					color="color-mix(in oklab, var(--foreground) 70%, transparent)"
+					color={TICK_COLOR}
 					label="Teil-Score (Mittelwert)"
 					shape="tick"
 				/>

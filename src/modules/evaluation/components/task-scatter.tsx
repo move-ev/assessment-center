@@ -50,7 +50,7 @@ function describeCorrelation(correlation: number | null): string {
 		strength >= 0.7 ? "starker" : strength >= 0.4 ? "mittlerer" : "schwacher";
 	const direction = correlation >= 0 ? "gleichläufiger" : "gegenläufiger";
 
-	return `${word} ${direction} Zusammenhang (r = ${correlation.toLocaleString("de-DE", { maximumFractionDigits: 2 })})`;
+	return `${word} ${direction} Zusammenhang (r ≈ ${correlation.toLocaleString("de-DE", { maximumFractionDigits: 1 })})`;
 }
 
 /**
@@ -85,14 +85,25 @@ function TaskScatter({ tasks, participants }: Props) {
 					<TaskSelect
 						id="scatter-x"
 						label="Waagrecht"
-						onChange={setXTaskId}
+						onChange={(taskId) => {
+							// One task against itself says nothing: swap the axes instead.
+							if (taskId === yTaskId) {
+								setYTaskId(xTaskId);
+							}
+							setXTaskId(taskId);
+						}}
 						tasks={tasks}
 						value={xTaskId}
 					/>
 					<TaskSelect
 						id="scatter-y"
 						label="Senkrecht"
-						onChange={setYTaskId}
+						onChange={(taskId) => {
+							if (taskId === xTaskId) {
+								setXTaskId(yTaskId);
+							}
+							setYTaskId(taskId);
+						}}
 						tasks={tasks}
 						value={yTaskId}
 					/>

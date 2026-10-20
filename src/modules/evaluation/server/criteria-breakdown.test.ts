@@ -30,6 +30,7 @@ describe("buildCriterionRows", () => {
 
 		assert.deepEqual(rows.slice(0, 2), [
 			{
+				criterion: criteria[0],
 				criteriaId: "c1",
 				values: [
 					{ reviewerId: "r1", value: 2 },
@@ -40,6 +41,7 @@ describe("buildCriterionRows", () => {
 				texts: [],
 			},
 			{
+				criterion: criteria[1],
 				criteriaId: "c2",
 				values: [
 					{ reviewerId: "r1", value: 4 },
@@ -69,6 +71,7 @@ describe("buildCriterionRows", () => {
 		]);
 
 		assert.deepEqual(rows[2], {
+			criterion: criteria[2],
 			criteriaId: "q",
 			values: [],
 			mean: null,

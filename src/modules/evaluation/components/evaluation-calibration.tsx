@@ -15,6 +15,8 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import type { RatingScaleMax } from "@/lib/rating-scale";
+import { cn } from "@/lib/utils";
 import type { EvaluationCalibration as CalibrationData } from "../server/get-evaluation-results-data";
 
 /** Fewer shared ratings than this make a reviewer's tendency shaky. */
@@ -37,20 +39,37 @@ function describeTendency(deviation: number): string {
 	return deviation > 0 ? "milder als die anderen" : "strenger als die anderen";
 }
 
+function isUncertain(comparisonCount: number): boolean {
+	return comparisonCount < FEW_COMPARISONS;
+}
+
 /** Diverging bar from the middle: blue to the right (milder), red left. */
-function DeviationBar({ deviation }: { deviation: number }) {
+function DeviationBar({
+	deviation,
+	uncertain,
+}: {
+	deviation: number;
+	uncertain: boolean;
+}) {
 	const share =
 		(Math.min(Math.abs(deviation), BAR_RANGE_POINTS) / BAR_RANGE_POINTS) * 50;
 
 	return (
-		<div aria-hidden className="relative h-3 w-40 rounded-sm bg-muted/40">
+		<div
+			aria-hidden
+			className={cn(
+				"relative h-3 w-40 rounded-sm bg-muted/40",
+				uncertain && "opacity-40",
+			)}
+		>
 			<span className="absolute inset-y-0 left-1/2 w-px bg-foreground/40" />
 			<span
 				className="absolute inset-y-0.5 rounded-sm"
 				style={{
 					width: `${share}%`,
 					left: deviation >= 0 ? "50%" : `${50 - share}%`,
-					backgroundColor: deviation >= 0 ? "var(--series-1)" : "#e34948",
+					backgroundColor:
+						deviation >= 0 ? "var(--series-1)" : "var(--series-8)",
 				}}
 			/>
 		</div>
@@ -97,9 +116,14 @@ function ReviewerLeniencyCard({
 										</span>
 									) : (
 										<div className="flex items-center gap-3">
-											<DeviationBar deviation={reviewer.meanDeviation} />
+											<DeviationBar
+												deviation={reviewer.meanDeviation}
+												uncertain={isUncertain(reviewer.comparisonCount)}
+											/>
 											<span className="text-muted-foreground text-sm">
 												{describeTendency(reviewer.meanDeviation)}
+												{isUncertain(reviewer.comparisonCount) &&
+													" (unsicher, wenige Vergleiche)"}
 											</span>
 										</div>
 									)}
@@ -110,20 +134,7 @@ function ReviewerLeniencyCard({
 										: formatSigned(reviewer.meanDeviation, "Pkt.")}
 								</TableCell>
 								<TableCell className="text-right tabular-nums">
-									<span
-										className={
-											reviewer.comparisonCount < FEW_COMPARISONS
-												? "text-muted-foreground"
-												: undefined
-										}
-										title={
-											reviewer.comparisonCount < FEW_COMPARISONS
-												? "Wenige Vergleiche – Tendenz unsicher"
-												: undefined
-										}
-									>
-										{reviewer.comparisonCount}
-									</span>
+									{reviewer.comparisonCount}
 								</TableCell>
 								<TableCell className="text-muted-foreground text-sm">
 									{reviewer.tasks
@@ -131,7 +142,7 @@ function ReviewerLeniencyCard({
 											task.meanDeviation === null
 												? []
 												: [
-														`${taskNames.get(task.taskId) ?? "Aufgabe"} ${formatSigned(task.meanDeviation, "")}`.trim(),
+														`${taskNames.get(task.taskId) ?? "Aufgabe"} ${formatSigned(task.meanDeviation, "Pkt.")} (${task.comparisonCount}×)`,
 													],
 										)
 										.join(" · ") || "–"}
@@ -147,19 +158,20 @@ function ReviewerLeniencyCard({
 
 function CriterionDisagreementCard({
 	criteria,
-	maxSpread,
+	maxDistance,
 }: {
 	criteria: CalibrationData["criteria"];
-	maxSpread: number;
+	maxDistance: number;
 }) {
 	return (
 		<Card data-testid="criterion-disagreement">
 			<CardHeader>
 				<CardTitle>Uneinigkeit je Kriterium</CardTitle>
 				<CardDescription>
-					Mittlere Spanne in Sternen zwischen den Bewertern derselben
+					Mittlerer Abstand in Sternen zwischen zwei Bewertern derselben
 					Bewerbenden. Hohe Werte deuten auf Ankertexte hin, die unterschiedlich
-					verstanden werden.
+					verstanden werden. Unter {FEW_COMPARISONS} Vergleichen ist der Wert
+					blass dargestellt.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
@@ -173,13 +185,18 @@ function CriterionDisagreementCard({
 							<TableRow>
 								<TableHead>Aufgabe</TableHead>
 								<TableHead>Kriterium</TableHead>
-								<TableHead>Ø Spanne</TableHead>
+								<TableHead>Ø Abstand</TableHead>
 								<TableHead className="text-right">Vergleiche</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{criteria.map((criterion) => (
-								<TableRow key={criterion.criteriaId}>
+								<TableRow
+									className={cn(
+										isUncertain(criterion.comparisonCount) && "opacity-60",
+									)}
+									key={criterion.criteriaId}
+								>
 									<TableCell className="text-muted-foreground">
 										{criterion.taskName}
 									</TableCell>
@@ -198,13 +215,13 @@ function CriterionDisagreementCard({
 												<span
 													className="block h-full rounded-sm"
 													style={{
-														width: `${Math.min(100, (criterion.meanSpread / maxSpread) * 100)}%`,
+														width: `${Math.min(100, (criterion.meanDistance / maxDistance) * 100)}%`,
 														backgroundColor: "var(--series-1)",
 													}}
 												/>
 											</div>
 											<span className="tabular-nums">
-												{criterion.meanSpread.toLocaleString("de-DE", {
+												{criterion.meanDistance.toLocaleString("de-DE", {
 													maximumFractionDigits: 2,
 												})}{" "}
 												Sterne
@@ -235,7 +252,7 @@ function EvaluationCalibration({
 }: {
 	calibration: CalibrationData;
 	tasks: Array<{ id: string; name: string }>;
-	ratingScaleMax: number;
+	ratingScaleMax: RatingScaleMax;
 }) {
 	return (
 		<div className="space-y-4">
@@ -253,7 +270,7 @@ function EvaluationCalibration({
 			/>
 			<CriterionDisagreementCard
 				criteria={calibration.criteria}
-				maxSpread={ratingScaleMax - 1}
+				maxDistance={ratingScaleMax - 1}
 			/>
 		</div>
 	);

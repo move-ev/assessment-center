@@ -6,6 +6,7 @@ import { assertRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
 import {
+	type CriterionDisagreement,
 	type CriterionStarRating,
 	computeCriterionDisagreement,
 	computeReviewerLeniency,
@@ -141,6 +142,8 @@ export type EvaluationCriterionResult = {
 };
 
 export type EvaluationResultsData = {
+	/** Free texts and observations were deleted when the AC was anonymized. */
+	isAnonymized: boolean;
 	/** Highest star of the AC's scale; criterion averages are in stars. */
 	ratingScaleMax: RatingScaleMax;
 	summary: {
@@ -164,14 +167,13 @@ export type EvaluationResultsData = {
 
 export type EvaluationCalibration = {
 	reviewers: Array<ReviewerLeniency & { reviewerName: string }>;
-	criteria: Array<{
-		criteriaId: string;
-		taskName: string;
-		criteriaGroupTitle: string;
-		name: string;
-		meanSpread: number;
-		comparisonCount: number;
-	}>;
+	criteria: Array<
+		CriterionDisagreement & {
+			taskName: string;
+			criteriaGroupTitle: string;
+			name: string;
+		}
+	>;
 };
 
 async function fetchEvaluationResultsSourceData(acId: string) {
@@ -180,6 +182,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 		select: {
 			id: true,
 			ratingScaleMax: true,
+			anonymizedAt: true,
 			reviewers: {
 				select: {
 					id: true,
@@ -599,9 +602,24 @@ function buildTaskResults(
 		.sort((left, right) => left.name.localeCompare(right.name, "de-DE"));
 }
 
+/** Map lookup that fails loudly: a miss means the query data is inconsistent. */
+function requireEntry<K, V>(map: Map<K, V>, key: K, what: string): V {
+	const value = map.get(key);
+	if (value === undefined) {
+		throw new Error(`Missing ${what} ${String(key)} in evaluation data`);
+	}
+	return value;
+}
+
+type CriterionMeta = Pick<
+	EvaluationCalibration["criteria"][number],
+	"taskName" | "criteriaGroupTitle" | "name"
+>;
+
 /**
  * Reviewer leniency and criterion disagreement over the whole AC, from each
- * reviewer's own percentage and stars per participant and task.
+ * reviewer's own percentage and stars per participant and task. Only scored
+ * criteria count, as in the scores themselves.
  */
 function buildCalibration(
 	data: QueryResult,
@@ -610,16 +628,14 @@ function buildCalibration(
 ): EvaluationCalibration {
 	const percents: ReviewerTaskPercent[] = [];
 	const starRatings: CriterionStarRating[] = [];
+	const criterionMeta = new Map<string, CriterionMeta>();
 
 	for (const participant of data.participants) {
 		for (const assignment of participant.reviewerAssignments) {
-			const task = taskLookup.get(assignment.taskId);
-			if (!task) {
-				continue;
-			}
-
+			const task = requireEntry(taskLookup, assignment.taskId, "task");
+			const scoredCriteria = getScoredCriteria(task.criteria);
 			const percent = computeReviewerPercent(
-				getScoredCriteria(task.criteria),
+				scoredCriteria,
 				assignment.quantitativeRatings,
 				ratingScaleMax,
 			);
@@ -632,11 +648,22 @@ function buildCalibration(
 				});
 			}
 
-			for (const rating of assignment.quantitativeRatings) {
+			for (const criterion of task.criteria) {
+				const rating = assignment.quantitativeRatings.find(
+					(entry) => entry.criteriaId === criterion.id,
+				);
+				if (!rating || !scoredCriteria.some((c) => c.id === criterion.id)) {
+					continue;
+				}
 				starRatings.push({
-					criteriaId: rating.criteriaId,
+					criteriaId: criterion.id,
 					participantId: participant.id,
 					value: rating.value,
+				});
+				criterionMeta.set(criterion.id, {
+					taskName: task.name,
+					criteriaGroupTitle: criterion.criteriaGroup.title,
+					name: criterion.name,
 				});
 			}
 		}
@@ -645,34 +672,20 @@ function buildCalibration(
 	const reviewerNames = new Map(
 		data.reviewers.map((reviewer) => [reviewer.id, reviewer.user.name]),
 	);
-	const criteriaById = new Map(
-		data.tasks.flatMap((task) =>
-			task.criteria.map((criterion) => [criterion.id, { task, criterion }]),
-		),
-	);
 
 	return {
 		reviewers: computeReviewerLeniency(percents)
 			.map((entry) => ({
 				...entry,
-				reviewerName: reviewerNames.get(entry.reviewerId) ?? "Unbekannt",
+				reviewerName: requireEntry(reviewerNames, entry.reviewerId, "reviewer"),
 			}))
 			.sort((left, right) =>
 				left.reviewerName.localeCompare(right.reviewerName, "de-DE"),
 			),
-		criteria: computeCriterionDisagreement(starRatings).flatMap((entry) => {
-			const match = criteriaById.get(entry.criteriaId);
-			return match
-				? [
-						{
-							...entry,
-							taskName: match.task.name,
-							criteriaGroupTitle: match.criterion.criteriaGroup.title,
-							name: match.criterion.name,
-						},
-					]
-				: [];
-		}),
+		criteria: computeCriterionDisagreement(starRatings).map((entry) => ({
+			...entry,
+			...requireEntry(criterionMeta, entry.criteriaId, "criterion"),
+		})),
 	};
 }
 
@@ -800,6 +813,7 @@ export async function getEvaluationResultsData(
 	);
 
 	return {
+		isAnonymized: data.anonymizedAt !== null,
 		ratingScaleMax,
 		summary: buildSummary(data, participants),
 		participants,

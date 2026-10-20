@@ -204,10 +204,6 @@ function buildCriteriaByTask(
 			return [];
 		}
 
-		const criteriaById = new Map(
-			task.criteria.map((criterion) => [criterion.id, criterion]),
-		);
-
 		return [
 			{
 				taskId: task.id,
@@ -216,24 +212,17 @@ function buildCriteriaByTask(
 					reviewerId,
 					reviewerName,
 				})),
-				criteria: buildCriterionRows(task.criteria, taskAssignments).flatMap(
-					(row) => {
-						const criterion = criteriaById.get(row.criteriaId);
-						return criterion
-							? [
-									{
-										...row,
-										name: criterion.name,
-										criteriaGroupTitle: criterion.criteriaGroup.title,
-										type: criterion.type,
-										weight: criterion.weight,
-										isOptional: criterion.isOptional,
-										anchorStar2: criterion.anchorStar2,
-										anchorStar4: criterion.anchorStar4,
-									},
-								]
-							: [];
-					},
+				criteria: buildCriterionRows(task.criteria, taskAssignments).map(
+					({ criterion, ...row }) => ({
+						...row,
+						name: criterion.name,
+						criteriaGroupTitle: criterion.criteriaGroup.title,
+						type: criterion.type,
+						weight: criterion.weight,
+						isOptional: criterion.isOptional,
+						anchorStar2: criterion.anchorStar2,
+						anchorStar4: criterion.anchorStar4,
+					}),
 				),
 			},
 		];

@@ -17,6 +17,7 @@ import {
 	StripAxis,
 	StripGrid,
 	StripTick,
+	TICK_COLOR,
 } from "./score-strip";
 
 /** Dots closer than this (in percentage points) stack. */
@@ -77,7 +78,6 @@ function ScoreDistribution({
 					<StripGrid />
 					{averageScore !== null && (
 						<StripTick
-							className="bg-foreground/50"
 							score={averageScore}
 							title={`Durchschnitt ${formatPercent(averageScore)}`}
 						/>
@@ -117,7 +117,7 @@ function ScoreDistribution({
 					/>
 					{averageScore !== null && (
 						<LegendItem
-							color="color-mix(in oklab, var(--foreground) 50%, transparent)"
+							color={TICK_COLOR}
 							label={`Durchschnitt ${formatPercent(averageScore)}`}
 							shape="tick"
 						/>

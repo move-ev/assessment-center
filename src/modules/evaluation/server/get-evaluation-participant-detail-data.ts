@@ -29,6 +29,8 @@ export type ScoreComparison = {
 export type EvaluationParticipantDetailData = {
 	/** Highest star of the AC's scale, for the criteria drill-down. */
 	ratingScaleMax: RatingScaleMax;
+	/** Free texts were deleted when the AC was anonymized. */
+	isAnonymized: boolean;
 	participant: {
 		id: string;
 		name: string;
@@ -179,6 +181,7 @@ export async function getEvaluationParticipantDetailData(
 
 	return {
 		ratingScaleMax: results.ratingScaleMax,
+		isAnonymized: results.isAnonymized,
 		participant: {
 			id: participant.id,
 			name: participant.name,
@@ -190,7 +193,11 @@ export async function getEvaluationParticipantDetailData(
 			deviatingTaskNames: participant.deviatingTaskNames,
 			completedAssignmentCount: participant.completedAssignmentCount,
 			totalAssignmentCount: participant.totalAssignmentCount,
-			overallComparison: compareScore(participant.overallScore, overallScores),
+			// The ranking's position, so the profile matches "Rang X von N".
+			overallComparison: {
+				summary: summarizeScores(overallScores),
+				position: participant.overallScore === null ? null : index + 1,
+			},
 			taskContributions: participant.taskContributions,
 		},
 		taskScores: participant.taskResults.map((task) => ({

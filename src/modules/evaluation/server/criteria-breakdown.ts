@@ -1,4 +1,4 @@
-import { roundScore } from "./scoring.ts";
+import { computeMean } from "./scoring.ts";
 
 /** Reviewers this many stars apart on one criterion are worth a look. */
 export const STAR_SPREAD_HIGHLIGHT = 2;
@@ -22,17 +22,21 @@ export type CriterionRow = {
 	texts: Array<{ reviewerId: string; reviewerName: string; text: string }>;
 };
 
+type CriterionInput = { id: string; type: "QUANTITATIVE" | "QUALITATIVE" };
+
 /**
  * One row per criterion of a task for one participant: what each reviewer
- * gave, so a spread between reviewers can be traced to its criteria.
+ * gave, so a spread between reviewers can be traced to its criteria. Each
+ * row carries the criterion it was built from.
  */
-export function buildCriterionRows(
-	criteria: Array<{ id: string; type: "QUANTITATIVE" | "QUALITATIVE" }>,
+export function buildCriterionRows<C extends CriterionInput>(
+	criteria: C[],
 	assignments: BreakdownAssignment[],
-): CriterionRow[] {
+): Array<CriterionRow & { criterion: C }> {
 	return criteria.map((criterion) => {
 		if (criterion.type === "QUALITATIVE") {
 			return {
+				criterion,
 				criteriaId: criterion.id,
 				values: [],
 				mean: null,
@@ -63,14 +67,10 @@ export function buildCriterionRows(
 		);
 
 		return {
+			criterion,
 			criteriaId: criterion.id,
 			values,
-			mean:
-				rated.length === 0
-					? null
-					: roundScore(
-							rated.reduce((sum, value) => sum + value, 0) / rated.length,
-						),
+			mean: computeMean(rated),
 			spread: rated.length < 2 ? null : Math.max(...rated) - Math.min(...rated),
 			texts: [],
 		};

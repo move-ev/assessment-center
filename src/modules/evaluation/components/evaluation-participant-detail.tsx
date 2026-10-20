@@ -120,6 +120,7 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 			<CriteriaDrilldown
 				breakdown={data.reviewerBreakdown}
 				criterionAverages={data.criterionAverages}
+				isAnonymized={data.isAnonymized}
 				ratingScaleMax={data.ratingScaleMax}
 			/>
 
