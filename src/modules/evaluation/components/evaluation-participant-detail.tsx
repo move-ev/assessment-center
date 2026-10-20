@@ -19,8 +19,10 @@ import {
 import { formatPercent, formatSpread } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
+import { CriteriaDrilldown } from "./criteria-drilldown";
 import { DeviationBadge } from "./deviation-badge";
 import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
+import { ParticipantProfile } from "./participant-profile";
 import { RankingBandBadge } from "./ranking-band-badge";
 
 type Props = {
@@ -103,9 +105,23 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 				</div>
 			</div>
 
+			<ParticipantProfile
+				participant={data.participant}
+				taskScores={data.taskScores}
+			/>
+
 			<TaskScoresCard taskScores={data.taskScores} />
 
-			<ReviewerBreakdownCard data={data.reviewerBreakdown} />
+			<ReviewerBreakdownCard
+				data={data.reviewerBreakdown}
+				taskScores={data.taskScores}
+			/>
+
+			<CriteriaDrilldown
+				breakdown={data.reviewerBreakdown}
+				criterionAverages={data.criterionAverages}
+				ratingScaleMax={data.ratingScaleMax}
+			/>
 
 			<TeamObservationsSection
 				groupName={data.participant.groupName}

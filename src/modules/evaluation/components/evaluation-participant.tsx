@@ -21,10 +21,15 @@ import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
 import { DeviationBadge } from "./deviation-badge";
+import { EvaluationCalibration } from "./evaluation-calibration";
 import { EvaluationCriteria } from "./evaluation-criteria";
 import { EvaluationExport } from "./evaluation-export";
 import { EvaluationTask } from "./evaluation-task";
 import { RankingBandBadge } from "./ranking-band-badge";
+import { ResultsHeatmap } from "./results-heatmap";
+import { ScoreComposition } from "./score-composition";
+import { ScoreDistribution } from "./score-distribution";
+import { TaskScatter } from "./task-scatter";
 
 type Props = {
 	acId: string;
@@ -51,13 +56,30 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 			<Tabs className="gap-4" defaultValue="participants">
 				<TabsList>
 					<TabsTrigger value="participants">Bewerbende</TabsTrigger>
+					<TabsTrigger value="comparison">Vergleich</TabsTrigger>
 					<TabsTrigger value="tasks">Aufgaben</TabsTrigger>
 					<TabsTrigger value="criteria">Kriterien</TabsTrigger>
+					<TabsTrigger value="calibration">Kalibrierung</TabsTrigger>
 					<TabsTrigger value="export">Export</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="participants">
+				<TabsContent className="space-y-4" value="participants">
+					<ScoreDistribution
+						acId={acId}
+						averageScore={results.summary.averageOverallScore}
+						participants={results.participants}
+					/>
 					<ParticipantTable acId={acId} participants={results.participants} />
+				</TabsContent>
+				<TabsContent className="space-y-4" value="comparison">
+					<ComparisonTab acId={acId} results={results} />
+				</TabsContent>
+				<TabsContent value="calibration">
+					<EvaluationCalibration
+						calibration={results.calibration}
+						ratingScaleMax={results.ratingScaleMax}
+						tasks={results.tasks}
+					/>
 				</TabsContent>
 				<TabsContent value="tasks">
 					<EvaluationTask tasks={results.tasks} />
@@ -73,6 +95,45 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 				</TabsContent>
 			</Tabs>
 		</div>
+	);
+}
+
+function ComparisonTab({
+	acId,
+	results,
+}: {
+	acId: string;
+	results: EvaluationResultsData;
+}) {
+	const scoredTasks = results.tasks.filter(
+		(task) => task.averageScore !== null,
+	);
+
+	return (
+		<>
+			<ResultsHeatmap
+				acId={acId}
+				participants={results.participants}
+				tasks={results.tasks}
+			/>
+			<ScoreComposition
+				acId={acId}
+				participants={results.participants}
+				tasks={results.tasks}
+			/>
+			{scoredTasks.length >= 2 && (
+				<TaskScatter
+					participants={results.participants.map((participant) => ({
+						id: participant.id,
+						name: participant.name,
+						scores: Object.fromEntries(
+							participant.taskResults.map((task) => [task.taskId, task.score]),
+						),
+					}))}
+					tasks={scoredTasks.map(({ id, name }) => ({ id, name }))}
+				/>
+			)}
+		</>
 	);
 }
 

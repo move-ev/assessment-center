@@ -5,10 +5,23 @@ import { formatPercentForExport } from "@/lib/format-percent";
 import { assertRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
+import {
+	type CriterionStarRating,
+	computeCriterionDisagreement,
+	computeReviewerLeniency,
+	type ReviewerLeniency,
+	type ReviewerTaskPercent,
+} from "./calibration";
+import {
+	computeTaskContributions,
+	summarizeScores,
+	type TaskContribution,
+} from "./comparison";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
 import { getRankingBand, type RankingBand } from "./ranking";
 import {
 	computeMeanPercent,
+	computeReviewerPercent,
 	computeReviewerPercents,
 	computeWeightedMean,
 	getScoredCriteria,
@@ -93,6 +106,8 @@ type ParticipantResult = {
 	deviatingTaskNames: string[];
 	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
 	rankingBand: RankingBand | null;
+	/** Share of each task in the overall score; adds up to it. */
+	taskContributions: TaskContribution[];
 };
 
 type UnrankedParticipantResult = Omit<ParticipantResult, "rankingBand">;
@@ -105,6 +120,9 @@ type TaskResult = {
 	reviewerAssignmentCount: number;
 	completedAssignmentCount: number;
 	averageScore: number | null;
+	/** Lowest and highest participant score in this task. */
+	minScore: number | null;
+	maxScore: number | null;
 	qualitativeEntryCount: number;
 	teamObservationCount: number;
 };
@@ -140,7 +158,20 @@ export type EvaluationResultsData = {
 	participants: ParticipantResult[];
 	tasks: TaskResult[];
 	criteria: EvaluationCriterionResult[];
+	calibration: EvaluationCalibration;
 	exportRows: Array<Record<string, string>>;
+};
+
+export type EvaluationCalibration = {
+	reviewers: Array<ReviewerLeniency & { reviewerName: string }>;
+	criteria: Array<{
+		criteriaId: string;
+		taskName: string;
+		criteriaGroupTitle: string;
+		name: string;
+		meanSpread: number;
+		comparisonCount: number;
+	}>;
 };
 
 async function fetchEvaluationResultsSourceData(acId: string) {
@@ -150,7 +181,10 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 			id: true,
 			ratingScaleMax: true,
 			reviewers: {
-				select: { id: true },
+				select: {
+					id: true,
+					user: { select: { name: true } },
+				},
 			},
 			tasks: {
 				where: { deletedAt: null },
@@ -211,6 +245,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 							},
 						},
 						select: {
+							reviewerId: true,
 							participantId: true,
 							taskId: true,
 							quantitativeRatings: {
@@ -444,6 +479,13 @@ function buildParticipantResults(
 			deviatingTaskNames: sortedTaskResults
 				.filter((taskResult) => taskResult.hasStrongDeviation)
 				.map((taskResult) => taskResult.taskName),
+			taskContributions: computeTaskContributions(
+				sortedTaskResults.map((taskResult) => ({
+					taskId: taskResult.taskId,
+					score: taskResult.score,
+					weight: taskResult.scoreWeight,
+				})),
+			),
 		});
 	}
 
@@ -538,6 +580,8 @@ function buildTaskResults(
 				}
 			}
 
+			const scoreSummary = summarizeScores(participantScores);
+
 			return {
 				id: task.id,
 				name: task.name,
@@ -545,18 +589,91 @@ function buildTaskResults(
 				participantCount,
 				reviewerAssignmentCount,
 				completedAssignmentCount,
-				averageScore:
-					participantScores.length === 0
-						? null
-						: roundScore(
-								participantScores.reduce((sum, value) => sum + value, 0) /
-									participantScores.length,
-							),
+				averageScore: scoreSummary?.mean ?? null,
+				minScore: scoreSummary?.min ?? null,
+				maxScore: scoreSummary?.max ?? null,
 				qualitativeEntryCount,
 				teamObservationCount: task.teamObservations.length,
 			} satisfies TaskResult;
 		})
 		.sort((left, right) => left.name.localeCompare(right.name, "de-DE"));
+}
+
+/**
+ * Reviewer leniency and criterion disagreement over the whole AC, from each
+ * reviewer's own percentage and stars per participant and task.
+ */
+function buildCalibration(
+	data: QueryResult,
+	taskLookup: ReturnType<typeof buildTaskLookup>,
+	ratingScaleMax: RatingScaleMax,
+): EvaluationCalibration {
+	const percents: ReviewerTaskPercent[] = [];
+	const starRatings: CriterionStarRating[] = [];
+
+	for (const participant of data.participants) {
+		for (const assignment of participant.reviewerAssignments) {
+			const task = taskLookup.get(assignment.taskId);
+			if (!task) {
+				continue;
+			}
+
+			const percent = computeReviewerPercent(
+				getScoredCriteria(task.criteria),
+				assignment.quantitativeRatings,
+				ratingScaleMax,
+			);
+			if (percent !== null) {
+				percents.push({
+					reviewerId: assignment.reviewerId,
+					participantId: participant.id,
+					taskId: task.id,
+					percent,
+				});
+			}
+
+			for (const rating of assignment.quantitativeRatings) {
+				starRatings.push({
+					criteriaId: rating.criteriaId,
+					participantId: participant.id,
+					value: rating.value,
+				});
+			}
+		}
+	}
+
+	const reviewerNames = new Map(
+		data.reviewers.map((reviewer) => [reviewer.id, reviewer.user.name]),
+	);
+	const criteriaById = new Map(
+		data.tasks.flatMap((task) =>
+			task.criteria.map((criterion) => [criterion.id, { task, criterion }]),
+		),
+	);
+
+	return {
+		reviewers: computeReviewerLeniency(percents)
+			.map((entry) => ({
+				...entry,
+				reviewerName: reviewerNames.get(entry.reviewerId) ?? "Unbekannt",
+			}))
+			.sort((left, right) =>
+				left.reviewerName.localeCompare(right.reviewerName, "de-DE"),
+			),
+		criteria: computeCriterionDisagreement(starRatings).flatMap((entry) => {
+			const match = criteriaById.get(entry.criteriaId);
+			return match
+				? [
+						{
+							...entry,
+							taskName: match.task.name,
+							criteriaGroupTitle: match.criterion.criteriaGroup.title,
+							name: match.criterion.name,
+						},
+					]
+				: [];
+		}),
+	};
 }
 
 function buildExportRows(
@@ -688,6 +805,7 @@ export async function getEvaluationResultsData(
 		participants,
 		tasks: buildTaskResults(data, participants),
 		criteria: buildCriterionResults(data),
+		calibration: buildCalibration(data, taskLookup, ratingScaleMax),
 		exportRows: buildExportRows(participants, taskLookup),
 	};
 }
