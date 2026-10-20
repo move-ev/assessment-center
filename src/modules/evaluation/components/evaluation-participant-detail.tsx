@@ -16,9 +16,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import { formatPercent } from "@/lib/format-percent";
+import { formatPercent, formatSpread } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
+import { DeviationBadge } from "./deviation-badge";
 import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
 import { RankingBandBadge } from "./ranking-band-badge";
 
@@ -64,9 +65,17 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 							{initials}
 						</div>
 						<div>
-							<h1 className="font-semibold text-2xl tracking-tight">
-								{data.participant.name}
-							</h1>
+							<div className="flex flex-wrap items-center gap-2">
+								<h1 className="font-semibold text-2xl tracking-tight">
+									{data.participant.name}
+								</h1>
+								{data.participant.deviatingTaskNames.length > 0 && (
+									<DeviationBadge
+										label="Starke Abweichung"
+										taskNames={data.participant.deviatingTaskNames}
+									/>
+								)}
+							</div>
 							<p className="mt-0.5 text-muted-foreground text-sm">
 								{data.participant.groupName ?? "Keine Gruppe"} ·{" "}
 								{completedAssignmentCount} / {totalAssignmentCount} Bewertungen
@@ -135,13 +144,19 @@ function TaskScoresCard({
 								<TableHead>Aufgabe</TableHead>
 								<TableHead className="text-right">Teil-Gewicht</TableHead>
 								<TableHead className="text-right">Teil-Score</TableHead>
+								<TableHead className="text-right">Spanne</TableHead>
 								<TableHead className="text-right">Bewertungen</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>
 							{taskScores.map((task) => (
 								<TableRow key={task.taskId}>
-									<TableCell className="font-medium">{task.taskName}</TableCell>
+									<TableCell className="font-medium">
+										<div className="flex flex-wrap items-center gap-2">
+											{task.taskName}
+											{task.hasStrongDeviation && <DeviationBadge />}
+										</div>
+									</TableCell>
 									<TableCell className="text-right tabular-nums">
 										{task.scoreWeight.toLocaleString("de-DE")}
 									</TableCell>
@@ -155,6 +170,9 @@ function TaskScoresCard({
 										>
 											{formatPercent(task.score)}
 										</span>
+									</TableCell>
+									<TableCell className="text-right text-muted-foreground tabular-nums">
+										{formatSpread(task.reviewerSpread)}
 									</TableCell>
 									<TableCell className="text-right text-muted-foreground tabular-nums">
 										{task.completedAssignments} / {task.totalAssignments}

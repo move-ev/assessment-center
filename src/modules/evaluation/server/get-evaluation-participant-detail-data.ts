@@ -20,6 +20,8 @@ export type EvaluationParticipantDetailData = {
 		/** Number of participants with an overall score. */
 		rankedCount: number;
 		rankingBand: RankingBand | null;
+		/** Tasks whose reviewers differ strongly (Sonderfall 1). */
+		deviatingTaskNames: string[];
 		completedAssignmentCount: number;
 		totalAssignmentCount: number;
 	};
@@ -28,6 +30,8 @@ export type EvaluationParticipantDetailData = {
 		taskName: string;
 		scoreWeight: number;
 		score: number | null;
+		reviewerSpread: number | null;
+		hasStrongDeviation: boolean;
 		completedAssignments: number;
 		totalAssignments: number;
 	}>;
@@ -155,6 +159,7 @@ export async function getEvaluationParticipantDetailData(
 			rank: participant.overallScore === null ? null : index + 1,
 			rankedCount: results.summary.participantsWithScore,
 			rankingBand: participant.rankingBand,
+			deviatingTaskNames: participant.deviatingTaskNames,
 			completedAssignmentCount: participant.completedAssignmentCount,
 			totalAssignmentCount: participant.totalAssignmentCount,
 		},
@@ -163,6 +168,8 @@ export async function getEvaluationParticipantDetailData(
 			taskName: task.taskName,
 			scoreWeight: task.scoreWeight,
 			score: task.score,
+			reviewerSpread: task.reviewerSpread,
+			hasStrongDeviation: task.hasStrongDeviation,
 			completedAssignments: task.completedAssignments,
 			totalAssignments: task.totalAssignments,
 		})),

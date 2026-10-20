@@ -52,6 +52,12 @@ mean of the task percentages weighted by `scoreWeight`. The app shows whole
 percent, except the criteria tab (star averages per criterion); the export
 shows one decimal.
 
+Sonderfall 1 (`deviation.ts`): if at least two reviewers have each rated a
+scored criterion of a task and their percentages differ by more than 7
+percentage points (highest minus lowest), the person
+is marked in the ranking; the detail page shows the spread per task and which
+task triggers the mark.
+
 ---
 
 ## Route Hierarchy

@@ -61,18 +61,21 @@ export function computeReviewerPercent(
 }
 
 /**
- * A task's score in percent: the mean of the reviewers' percentages.
- * Reviewers who have not rated any scored criterion are left out.
+ * One percentage per reviewer (rating set) for a task; reviewers who have not
+ * rated any scored criterion are left out.
  */
-export function computeTaskPercent(
+export function computeReviewerPercents(
 	criteria: WeightedCriterion[],
 	ratingSets: CriterionRating[][],
 	scaleMax: RatingScaleMax,
-): number | null {
-	const percentages = ratingSets
+): number[] {
+	return ratingSets
 		.map((ratings) => computeReviewerPercent(criteria, ratings, scaleMax))
 		.filter((percent) => percent !== null);
+}
 
+/** Mean of reviewer percentages; null without any. */
+export function computeMeanPercent(percentages: number[]): number | null {
 	return percentages.length === 0
 		? null
 		: roundScore(

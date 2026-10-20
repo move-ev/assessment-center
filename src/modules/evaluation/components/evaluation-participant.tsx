@@ -20,6 +20,7 @@ import { formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
+import { DeviationBadge } from "./deviation-badge";
 import { EvaluationCriteria } from "./evaluation-criteria";
 import { EvaluationExport } from "./evaluation-export";
 import { EvaluationTask } from "./evaluation-task";
@@ -173,12 +174,17 @@ function ParticipantTable({
 							</div>
 						</TableCell>
 						<TableCell className="font-medium">
-							<Link
-								className="text-primary underline-offset-4 hover:underline"
-								href={ROUTES.acResultsParticipant(acId, participant.id)}
-							>
-								{participant.name}
-							</Link>
+							<div className="flex flex-wrap items-center gap-2">
+								<Link
+									className="text-primary underline-offset-4 hover:underline"
+									href={ROUTES.acResultsParticipant(acId, participant.id)}
+								>
+									{participant.name}
+								</Link>
+								{participant.deviatingTaskNames.length > 0 && (
+									<DeviationBadge taskNames={participant.deviatingTaskNames} />
+								)}
+							</div>
 						</TableCell>
 						<TableCell className="text-muted-foreground">
 							{participant.groupName ?? "Keine Gruppe"}
