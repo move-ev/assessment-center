@@ -1,46 +1,89 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-	computeWeightedCriteriaScore,
+	computeReviewerPercent,
+	computeTaskPercent,
 	computeWeightedMean,
 } from "./scoring.ts";
 
-describe("computeWeightedCriteriaScore", () => {
-	it("averages each criterion across reviewers, then weights across criteria", () => {
+describe("computeReviewerPercent", () => {
+	it("scores one reviewer as weighted points of the reachable maximum, as in the matrix", () => {
+		// weights 3 + 3 + 2 + 2 = 10 → 60 reachable points on 1–6
+		const criteria = [
+			{ id: "a", weight: 3 },
+			{ id: "b", weight: 3 },
+			{ id: "c", weight: 2 },
+			{ id: "d", weight: 2 },
+		];
+		const ratings = [
+			{ criteriaId: "a", value: 6 },
+			{ criteriaId: "b", value: 6 },
+			{ criteriaId: "c", value: 5 },
+			{ criteriaId: "d", value: 5 },
+		];
+
+		// 18 + 18 + 10 + 10 = 56 of 60 = 93.33 %
+		assert.equal(computeReviewerPercent(criteria, ratings, 6), 93.33);
+	});
+
+	it("leaves unrated criteria out of points and maximum", () => {
+		const criteria = [
+			{ id: "required", weight: 2 },
+			{ id: "optional", weight: 1 },
+		];
+
+		// only "required" rated: 4 * 2 of 6 * 2 = 66.67 %
+		assert.equal(
+			computeReviewerPercent(
+				criteria,
+				[{ criteriaId: "required", value: 4 }],
+				6,
+			),
+			66.67,
+		);
+		assert.equal(computeReviewerPercent(criteria, [], 6), null);
+	});
+
+	it("ignores ratings for criteria that are not scored", () => {
+		const criteria = [{ id: "preparation", weight: 1 }];
+		const ratings = [
+			{ criteriaId: "preparation", value: 3 },
+			{ criteriaId: "unweighted", value: 6 },
+		];
+
+		// only "preparation" counts: 3 of 6 = 50 %
+		assert.equal(computeReviewerPercent(criteria, ratings, 6), 50);
+	});
+
+	it("uses the AC's own scale maximum", () => {
+		const criteria = [{ id: "a", weight: 1 }];
+		const ratings = [{ criteriaId: "a", value: 4 }];
+
+		assert.equal(computeReviewerPercent(criteria, ratings, 5), 80);
+		assert.equal(computeReviewerPercent(criteria, ratings, 6), 66.67);
+	});
+});
+
+describe("computeTaskPercent", () => {
+	it("averages the reviewers' percentages, skipping reviewers without ratings", () => {
 		const criteria = [
 			{ id: "preparation", weight: 2 },
 			{ id: "structure", weight: 1 },
 		];
 		const ratingSets = [
+			// (4 * 2 + 2 * 1) of 18 = 55.56 %
 			[
 				{ criteriaId: "preparation", value: 4 },
 				{ criteriaId: "structure", value: 2 },
 			],
+			// only preparation rated: 5 * 2 of 12 = 83.33 %
 			[{ criteriaId: "preparation", value: 5 }],
+			[],
 		];
 
-		// preparation: (4 + 5) / 2 = 4.5, structure: 2
-		// (4.5 * 2 + 2 * 1) / 3 = 3.666… → 3.67
-		assert.equal(computeWeightedCriteriaScore(criteria, ratingSets), 3.67);
-	});
-
-	it("returns null when no criterion has been rated", () => {
-		const criteria = [{ id: "preparation", weight: 2 }];
-
-		assert.equal(computeWeightedCriteriaScore(criteria, []), null);
-		assert.equal(computeWeightedCriteriaScore(criteria, [[]]), null);
-	});
-
-	it("ignores ratings for criteria that are not scored", () => {
-		const criteria = [{ id: "preparation", weight: 1 }];
-		const ratingSets = [
-			[
-				{ criteriaId: "preparation", value: 3 },
-				{ criteriaId: "unweighted", value: 1 },
-			],
-		];
-
-		assert.equal(computeWeightedCriteriaScore(criteria, ratingSets), 3);
+		// (55.56 + 83.33) / 2 = 69.44 (the reviewer without ratings is left out)
+		assert.equal(computeTaskPercent(criteria, ratingSets, 6), 69.44);
+		assert.equal(computeTaskPercent(criteria, [[], []], 6), null);
 	});
 });
 

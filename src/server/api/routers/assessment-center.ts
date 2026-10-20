@@ -2,7 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import type { AcStatus } from "@/lib/ac-status";
 import { assignPseudonyms, numberInOrder } from "@/lib/pseudonyms";
-import { isRatingScaleMax } from "@/lib/rating-scale";
+import { assertRatingScaleMax, isRatingScaleMax } from "@/lib/rating-scale";
 import { assertAcEditable } from "@/server/api/ac-lock";
 import {
 	adminProcedure,
@@ -121,16 +121,11 @@ export const assessmentCenterRouter = createTRPCRouter({
 				});
 			}
 
-			// The check constraint only allows known scales.
-			if (!isRatingScaleMax(ac.ratingScaleMax)) {
-				throw new Error(`Unbekannte Bewertungsskala: 1–${ac.ratingScaleMax}`);
-			}
-
 			const ratingCount = await countQuantitativeRatings(ctx.db, ac.id);
 
 			return {
 				...ac,
-				ratingScaleMax: ac.ratingScaleMax,
+				ratingScaleMax: assertRatingScaleMax(ac.ratingScaleMax),
 				hasRatings: ratingCount > 0,
 			};
 		}),

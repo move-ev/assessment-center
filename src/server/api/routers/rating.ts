@@ -1,7 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
-	isRatingScaleMax,
+	assertRatingScaleMax,
 	isValidRating,
 	RATING_SCALE_MAXIMUMS,
 	type RatingScaleMax,
@@ -182,12 +182,9 @@ async function writeUnlessAnonymized<T>(
 			});
 		}
 
-		// The check constraint only allows known scales.
-		if (!isRatingScaleMax(ac.ratingScaleMax)) {
-			throw new Error(`Unbekannte Bewertungsskala: 1–${ac.ratingScaleMax}`);
-		}
-
-		return write(tx, { ratingScaleMax: ac.ratingScaleMax });
+		return write(tx, {
+			ratingScaleMax: assertRatingScaleMax(ac.ratingScaleMax),
+		});
 	});
 }
 

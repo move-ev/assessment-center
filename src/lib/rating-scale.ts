@@ -22,3 +22,15 @@ export function isValidRating(value: number, max: RatingScaleMax): boolean {
 export function isExtremeRating(value: number, max: RatingScaleMax): boolean {
 	return value === 1 || value === max;
 }
+
+/**
+ * Narrows a stored maximum to a known scale. The check constraint only
+ * allows known scales, so anything else is corrupt data and fails loudly.
+ */
+export function assertRatingScaleMax(value: number): RatingScaleMax {
+	if (!isRatingScaleMax(value)) {
+		throw new Error(`Unbekannte Bewertungsskala: 1–${value}`);
+	}
+
+	return value;
+}

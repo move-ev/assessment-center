@@ -16,10 +16,10 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
 import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
-import { formatScore } from "./format-score";
 import { RankingBandBadge } from "./ranking-band-badge";
 
 type Props = {
@@ -79,7 +79,7 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 						<div className="shrink-0 space-y-1 text-right">
 							<p className="text-muted-foreground text-xs">Gesamtwert</p>
 							<p className="font-bold text-3xl tabular-nums">
-								{overallScore.toFixed(2)}
+								{formatPercent(overallScore)}
 							</p>
 							{rank !== null && (
 								<div className="flex items-center justify-end gap-2">
@@ -153,7 +153,7 @@ function TaskScoresCard({
 													: undefined
 											}
 										>
-											{formatScore(task.score)}
+											{formatPercent(task.score)}
 										</span>
 									</TableCell>
 									<TableCell className="text-right text-muted-foreground tabular-nums">

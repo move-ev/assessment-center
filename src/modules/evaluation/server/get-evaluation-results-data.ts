@@ -1,11 +1,13 @@
 import "server-only";
 
 import { notFound } from "next/navigation";
+import { formatPercentForExport } from "@/lib/format-percent";
+import { assertRatingScaleMax, type RatingScaleMax } from "@/lib/rating-scale";
 import { getAssignmentCompletion } from "@/lib/review-completion";
 import { db } from "@/server/db";
 import { getRankingBand, type RankingBand } from "./ranking";
 import {
-	computeWeightedCriteriaScore,
+	computeTaskPercent,
 	computeWeightedMean,
 	getScoredCriteria,
 	roundScore,
@@ -113,6 +115,8 @@ export type EvaluationCriterionResult = {
 };
 
 export type EvaluationResultsData = {
+	/** Highest star of the AC's scale; criterion averages are in stars. */
+	ratingScaleMax: RatingScaleMax;
 	summary: {
 		participantCount: number;
 		taskCount: number;
@@ -136,6 +140,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 		where: { id: acId, deletedAt: null },
 		select: {
 			id: true,
+			ratingScaleMax: true,
 			reviewers: {
 				select: { id: true },
 			},
@@ -287,10 +292,15 @@ function buildCriterionResults(data: QueryResult) {
 	});
 }
 
+type ParticipantTaskContext = {
+	groupId: string | null;
+	ratingScaleMax: RatingScaleMax;
+};
+
 function buildParticipantTaskResult(
 	assignments: AssignmentRecord[],
 	taskDefinition: TaskDefinition,
-	groupId: string | null,
+	{ groupId, ratingScaleMax }: ParticipantTaskContext,
 ) {
 	if (assignments.length === 0) {
 		return null;
@@ -320,9 +330,10 @@ function buildParticipantTaskResult(
 		taskName: taskDefinition.name,
 		isTeamTask: taskDefinition.isTeamTask,
 		scoreWeight: taskDefinition.scoreWeight,
-		score: computeWeightedCriteriaScore(
+		score: computeTaskPercent(
 			getScoredCriteria(taskDefinition.criteria),
 			assignments.map((assignment) => assignment.quantitativeRatings),
+			ratingScaleMax,
 		),
 		totalAssignments: assignments.length,
 		completedAssignments,
@@ -348,6 +359,7 @@ function sortParticipantTaskResults(results: ParticipantTaskResult[]) {
 function buildParticipantResults(
 	data: QueryResult,
 	taskLookup: ReturnType<typeof buildTaskLookup>,
+	ratingScaleMax: RatingScaleMax,
 ) {
 	const participants: UnrankedParticipantResult[] = [];
 
@@ -368,11 +380,10 @@ function buildParticipantResults(
 					return null;
 				}
 
-				return buildParticipantTaskResult(
-					assignments,
-					taskDefinition,
-					group?.id ?? null,
-				);
+				return buildParticipantTaskResult(assignments, taskDefinition, {
+					groupId: group?.id ?? null,
+					ratingScaleMax,
+				});
 			})
 			.filter((result) => result !== null);
 
@@ -528,10 +539,6 @@ function buildTaskResults(
 		.sort((left, right) => left.name.localeCompare(right.name, "de-DE"));
 }
 
-function formatScore(value: number | null) {
-	return value === null ? "n/a" : value.toFixed(2).replace(".", ",");
-}
-
 function buildExportRows(
 	participants: ParticipantResult[],
 	taskLookup: ReturnType<typeof buildTaskLookup>,
@@ -541,7 +548,7 @@ function buildExportRows(
 			Rang: (index + 1).toString(),
 			Teilnehmer: participant.name,
 			Gruppe: participant.groupName ?? "Keine Gruppe",
-			Gesamtwert: formatScore(participant.overallScore),
+			Gesamtwert_Prozent: formatPercentForExport(participant.overallScore),
 			Abgeschlossene_Aufgaben: `${participant.completedTaskCount}/${participant.totalTaskCount}`,
 			Abgeschlossene_Bewertungen: `${participant.completedAssignmentCount}/${participant.totalAssignmentCount}`,
 			Qualitative_Eintraege: participant.qualitativeEntries.toString(),
@@ -552,7 +559,9 @@ function buildExportRows(
 			const taskResult = participant.taskResults.find(
 				(entry) => entry.taskId === task.id,
 			);
-			row[`Aufgabe_${task.name}`] = formatScore(taskResult?.score ?? null);
+			row[`Aufgabe_${task.name}_Prozent`] = formatPercentForExport(
+				taskResult?.score ?? null,
+			);
 		}
 
 		for (const task of taskLookup.values()) {
@@ -644,10 +653,16 @@ export async function getEvaluationResultsData(
 		notFound();
 	}
 
+	const ratingScaleMax = assertRatingScaleMax(data.ratingScaleMax);
 	const taskLookup = buildTaskLookup(data);
-	const participants = buildParticipantResults(data, taskLookup);
+	const participants = buildParticipantResults(
+		data,
+		taskLookup,
+		ratingScaleMax,
+	);
 
 	return {
+		ratingScaleMax,
 		summary: buildSummary(data, participants),
 		participants,
 		tasks: buildTaskResults(data, participants),
