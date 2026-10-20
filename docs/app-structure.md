@@ -61,8 +61,8 @@ task triggers the mark.
 Sonderfall 2 (`ranking.ts`, `rankParticipants`): the ranking orders by the
 whole percent shown; on equal whole percent the person without Sonderfall 1
 comes first, then the exact value decides and is shown with one decimal for
-those people. Identical results share a rank (1, 2, 2, 4) and the 15 % mark
-of the better position. Ranking, detail page, export, distribution and heat
+those people. Results identical in exact value and Sonderfall-1 status share
+a rank (1, 2, 2, 4) and the 15 % mark of the better position. Ranking, detail page, export, distribution and heat
 map all show this rank.
 
 Result charts are server-rendered HTML/CSS on the tokens `--series-*`
