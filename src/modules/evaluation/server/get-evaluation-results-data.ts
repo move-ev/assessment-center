@@ -13,11 +13,7 @@ import {
 	type ReviewerLeniency,
 	type ReviewerTaskPercent,
 } from "./calibration";
-import {
-	computeTaskContributions,
-	summarizeScores,
-	type TaskContribution,
-} from "./comparison";
+import { summarizeScores } from "./comparison";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
 import { getRankingBand, type RankingBand } from "./ranking";
 import {
@@ -107,8 +103,6 @@ type ParticipantResult = {
 	deviatingTaskNames: string[];
 	/** Top or bottom 15 % of the ranking, null otherwise or without a score. */
 	rankingBand: RankingBand | null;
-	/** Share of each task in the overall score; adds up to it. */
-	taskContributions: TaskContribution[];
 };
 
 type UnrankedParticipantResult = Omit<ParticipantResult, "rankingBand">;
@@ -482,13 +476,6 @@ function buildParticipantResults(
 			deviatingTaskNames: sortedTaskResults
 				.filter((taskResult) => taskResult.hasStrongDeviation)
 				.map((taskResult) => taskResult.taskName),
-			taskContributions: computeTaskContributions(
-				sortedTaskResults.map((taskResult) => ({
-					taskId: taskResult.taskId,
-					score: taskResult.score,
-					weight: taskResult.scoreWeight,
-				})),
-			),
 		});
 	}
 

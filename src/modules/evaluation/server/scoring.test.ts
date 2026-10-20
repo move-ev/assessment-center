@@ -5,6 +5,8 @@ import {
 	computeReviewerPercent,
 	computeReviewerPercents,
 	computeWeightedMean,
+	getExpectationPercent,
+	starsToPercent,
 } from "./scoring.ts";
 
 describe("computeReviewerPercent", () => {
@@ -155,5 +157,19 @@ describe("computeWeightedMean", () => {
 
 		// (1 + 4) / 3 = 1.666… → 1.67
 		assert.equal(computeWeightedMean(entries), 1.67);
+	});
+});
+
+describe("starsToPercent", () => {
+	it("puts mean stars on the same percent scale as the scores", () => {
+		assert.equal(starsToPercent(4.5, 6), 75);
+		assert.equal(starsToPercent(4, 6), 66.67);
+	});
+});
+
+describe("getExpectationPercent", () => {
+	it("is 4 stars (Erwartung erfüllt) of the AC's scale in percent", () => {
+		assert.equal(getExpectationPercent(6), 66.67);
+		assert.equal(getExpectationPercent(5), 80);
 	});
 });

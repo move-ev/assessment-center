@@ -1,23 +1,3 @@
-/** Lower bounds of the heat steps 1–4; step 0 lies below the first. */
-export const HEAT_STEP_BOUNDS = [50, 60, 70, 80] as const;
-
-export type HeatStep = 0 | 1 | 2 | 3 | 4;
-
-/**
- * Colour step of a score in the heat map. Fixed bands rather than the AC's
- * own range, so the same colour means the same score in every AC. Steps the
- * whole percent the cell shows (formatPercent), so the legend's integer
- * bands match what one reads.
- */
-export function getHeatStep(score: number | null): HeatStep | null {
-	if (score === null) {
-		return null;
-	}
-
-	const shown = Math.round(score);
-	return HEAT_STEP_BOUNDS.filter((bound) => shown >= bound).length as HeatStep;
-}
-
 /**
  * Row per dot on a strip so dots closer than `minGap` (in axis units) stack
  * instead of hiding each other. Rows come back in input order.

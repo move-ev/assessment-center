@@ -4,10 +4,11 @@ import { notFound } from "next/navigation";
 import type { RatingScaleMax } from "@/lib/rating-scale";
 import { db } from "@/server/db";
 import {
+	compareToMean,
 	getPositionAmong,
+	type MeanComparison,
 	type ScoreSummary,
 	summarizeScores,
-	type TaskContribution,
 } from "./comparison";
 import {
 	type EvaluationResultsData,
@@ -18,12 +19,28 @@ import {
 	type ReviewerBreakdownData,
 } from "./get-participant-reviewer-breakdown";
 import type { RankingBand } from "./ranking";
+import { getExpectationPercent, roundScore, starsToPercent } from "./scoring";
 
 /** Where a score lies among all participants of the AC. */
 export type ScoreComparison = {
 	summary: ScoreSummary | null;
 	/** Position among the participants with a score; null without a score. */
 	position: number | null;
+	/** Above, around or below the AC's mean; null without a score. */
+	vsMean: MeanComparison | null;
+};
+
+/** One criterion of the person against the same criterion across the AC. */
+export type CriterionComparison = {
+	criteriaId: string;
+	taskName: string;
+	criteriaGroupTitle: string;
+	name: string;
+	/** Mean stars of the person's reviewers, in percent of the scale. */
+	personPercent: number;
+	/** Mean stars of everyone in the AC, in percent of the scale. */
+	acPercent: number;
+	delta: number;
 };
 
 export type EvaluationParticipantDetailData = {
@@ -31,6 +48,8 @@ export type EvaluationParticipantDetailData = {
 	ratingScaleMax: RatingScaleMax;
 	/** Free texts were deleted when the AC was anonymized. */
 	isAnonymized: boolean;
+	/** "Erwartung erfüllt" (4 stars) in percent of the AC's scale. */
+	expectationPercent: number;
 	participant: {
 		id: string;
 		name: string;
@@ -46,7 +65,6 @@ export type EvaluationParticipantDetailData = {
 		completedAssignmentCount: number;
 		totalAssignmentCount: number;
 		overallComparison: ScoreComparison;
-		taskContributions: TaskContribution[];
 	};
 	taskScores: Array<{
 		taskId: string;
@@ -62,6 +80,8 @@ export type EvaluationParticipantDetailData = {
 	reviewerBreakdown: ReviewerBreakdownData;
 	/** Mean stars per criterion across the AC, for the criteria drill-down. */
 	criterionAverages: Record<string, number | null>;
+	/** Every rated criterion against the AC, for strengths and weaknesses. */
+	criterionComparisons: CriterionComparison[];
 	teamObservations: Array<{
 		taskId: string;
 		taskName: string;
@@ -175,6 +195,9 @@ export async function getEvaluationParticipantDetailData(
 	const overallScores = results.participants.flatMap((entry) =>
 		entry.overallScore === null ? [] : [entry.overallScore],
 	);
+	const criterionAverages = Object.fromEntries(
+		results.criteria.map((criterion) => [criterion.id, criterion.averageScore]),
+	);
 	const breakdownTaskIds = new Set(
 		reviewerBreakdown.tasks.map((task) => task.taskId),
 	);
@@ -182,6 +205,7 @@ export async function getEvaluationParticipantDetailData(
 	return {
 		ratingScaleMax: results.ratingScaleMax,
 		isAnonymized: results.isAnonymized,
+		expectationPercent: getExpectationPercent(results.ratingScaleMax),
 		participant: {
 			id: participant.id,
 			name: participant.name,
@@ -195,10 +219,9 @@ export async function getEvaluationParticipantDetailData(
 			totalAssignmentCount: participant.totalAssignmentCount,
 			// The ranking's position, so the profile matches "Rang X von N".
 			overallComparison: {
-				summary: summarizeScores(overallScores),
+				...compareScore(participant.overallScore, overallScores),
 				position: participant.overallScore === null ? null : index + 1,
 			},
-			taskContributions: participant.taskContributions,
 		},
 		taskScores: participant.taskResults.map((task) => ({
 			taskId: task.taskId,
@@ -221,14 +244,43 @@ export async function getEvaluationParticipantDetailData(
 				.filter((task) => breakdownTaskIds.has(task.taskId))
 				.map(({ taskId, taskName }) => ({ taskId, taskName })),
 		},
-		criterionAverages: Object.fromEntries(
-			results.criteria.map((criterion) => [
-				criterion.id,
-				criterion.averageScore,
-			]),
+		criterionAverages,
+		criterionComparisons: compareCriteria(
+			reviewerBreakdown,
+			criterionAverages,
+			results.ratingScaleMax,
 		),
 		teamObservations,
 	};
+}
+
+function compareCriteria(
+	breakdown: ReviewerBreakdownData,
+	criterionAverages: Record<string, number | null>,
+	scaleMax: RatingScaleMax,
+): CriterionComparison[] {
+	return breakdown.criteriaByTask.flatMap((task) =>
+		task.criteria.flatMap((criterion) => {
+			const acMean = criterionAverages[criterion.criteriaId];
+			if (criterion.mean === null || acMean === null || acMean === undefined) {
+				return [];
+			}
+
+			const personPercent = starsToPercent(criterion.mean, scaleMax);
+			const acPercent = starsToPercent(acMean, scaleMax);
+			return [
+				{
+					criteriaId: criterion.criteriaId,
+					taskName: task.taskName,
+					criteriaGroupTitle: criterion.criteriaGroupTitle,
+					name: criterion.name,
+					personPercent,
+					acPercent,
+					delta: roundScore(personPercent - acPercent),
+				},
+			];
+		}),
+	);
 }
 
 function getTaskScores(
@@ -244,8 +296,10 @@ function getTaskScores(
 }
 
 function compareScore(score: number | null, scores: number[]): ScoreComparison {
+	const summary = summarizeScores(scores);
 	return {
-		summary: summarizeScores(scores),
+		summary,
 		position: score === null ? null : getPositionAmong(score, scores).position,
+		vsMean: compareToMean(score, summary?.mean ?? null),
 	};
 }
