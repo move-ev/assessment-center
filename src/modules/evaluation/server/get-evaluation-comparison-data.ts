@@ -1,15 +1,17 @@
 import "server-only";
 
 import {
-	type ComparisonIds,
-	compareParticipants,
-	type ParticipantComparison,
-	parseComparisonIds,
-} from "./compare";
-import {
 	type EvaluationResultsData,
 	getEvaluationResultsData,
 } from "./get-evaluation-results-data";
+import {
+	type ComparedPerson,
+	type ComparisonIdsError,
+	compareParticipants,
+	type PersonSummary,
+	parseComparisonIds,
+	type TaskLead,
+} from "./participant-comparison";
 
 type ResultsParticipant = EvaluationResultsData["participants"][number];
 
@@ -23,9 +25,15 @@ export type ComparedParticipant = Pick<
 	| "rankingBand"
 	| "showsDecimal"
 	| "deviatingTaskNames"
-> & {
-	/** Task score per task id; null without a score. */
-	taskScores: Record<string, number | null>;
+> &
+	Pick<ComparedPerson, "taskScores">;
+
+type ComparisonTask = {
+	id: string;
+	name: string;
+	averageScore: number | null;
+	minScore: number | null;
+	maxScore: number | null;
 };
 
 export type EvaluationComparisonData = {
@@ -33,20 +41,13 @@ export type EvaluationComparisonData = {
 	candidates: Array<{ id: string; name: string; rank: number | null }>;
 	/** Participants with an overall score, for "Rang X von N". */
 	rankedCount: number;
-	tasks: Array<{
-		id: string;
-		name: string;
-		averageScore: number | null;
-		minScore: number | null;
-		maxScore: number | null;
-	}>;
 	selection:
 		| {
 				ok: true;
-				people: ComparedParticipant[];
-				comparison: ParticipantComparison;
+				people: Array<ComparedParticipant & PersonSummary>;
+				tasks: Array<ComparisonTask & TaskLead>;
 		  }
-		| Extract<ComparisonIds, { ok: false }>;
+		| { ok: false; reason: ComparisonIdsError };
 };
 
 function toComparedParticipant(
@@ -73,14 +74,14 @@ function toComparedParticipant(
  */
 export async function getEvaluationComparisonData(
 	acId: string,
-	rawIds: string | undefined,
+	rawIds: string | string[] | undefined,
 ): Promise<EvaluationComparisonData> {
 	const results = await getEvaluationResultsData(acId);
 	const byId = new Map(
 		results.participants.map((participant) => [participant.id, participant]),
 	);
 	const parsed = parseComparisonIds(rawIds, [...byId.keys()]);
-	const tasks = results.tasks.map((task) => ({
+	const tasks: ComparisonTask[] = results.tasks.map((task) => ({
 		id: task.id,
 		name: task.name,
 		averageScore: task.averageScore,
@@ -95,7 +96,6 @@ export async function getEvaluationComparisonData(
 			rank,
 		})),
 		rankedCount: results.summary.participantsWithScore,
-		tasks,
 	};
 
 	if (!parsed.ok) {
@@ -113,13 +113,6 @@ export async function getEvaluationComparisonData(
 
 	return {
 		...base,
-		selection: {
-			ok: true,
-			people,
-			comparison: compareParticipants(
-				people,
-				tasks.map((task) => task.id),
-			),
-		},
+		selection: { ok: true, ...compareParticipants(people, tasks) },
 	};
 }

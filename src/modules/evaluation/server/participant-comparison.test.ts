@@ -1,8 +1,11 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { compareParticipants, parseComparisonIds } from "./compare.ts";
+import {
+	compareParticipants,
+	parseComparisonIds,
+} from "./participant-comparison.ts";
 
-const tasks = ["sp", "gc", "ei"];
+const tasks = [{ id: "sp" }, { id: "gc" }, { id: "ei" }];
 
 describe("compareParticipants", () => {
 	it("names the best person per task", () => {
@@ -15,9 +18,9 @@ describe("compareParticipants", () => {
 		);
 
 		assert.deepEqual(result, [
-			{ taskId: "sp", leaderIds: ["a"] },
-			{ taskId: "gc", leaderIds: ["b"] },
-			{ taskId: "ei", leaderIds: ["a"] },
+			{ id: "sp", leaderIds: ["a"] },
+			{ id: "gc", leaderIds: ["b"] },
+			{ id: "ei", leaderIds: ["a"] },
 		]);
 	});
 
@@ -32,9 +35,9 @@ describe("compareParticipants", () => {
 		);
 
 		assert.deepEqual(result, [
-			{ taskId: "sp", leaderIds: ["a", "b"] },
-			{ taskId: "gc", leaderIds: [] },
-			{ taskId: "ei", leaderIds: [] },
+			{ id: "sp", leaderIds: ["a", "b"] },
+			{ id: "gc", leaderIds: [] },
+			{ id: "ei", leaderIds: [] },
 		]);
 	});
 
@@ -53,11 +56,18 @@ describe("compareParticipants", () => {
 		);
 
 		// sp is a tie: it counts for both
-		assert.deepEqual(people, [
-			{ id: "a", leadCount: 2, gapToBest: 0 },
-			{ id: "b", leadCount: 2, gapToBest: 8.25 },
-			{ id: "c", leadCount: 0, gapToBest: null },
-		]);
+		assert.deepEqual(
+			people.map(({ id, leadCount, gapToBest }) => ({
+				id,
+				leadCount,
+				gapToBest,
+			})),
+			[
+				{ id: "a", leadCount: 2, gapToBest: 0 },
+				{ id: "b", leadCount: 2, gapToBest: 8.25 },
+				{ id: "c", leadCount: 0, gapToBest: null },
+			],
+		);
 	});
 });
 
@@ -91,6 +101,13 @@ describe("parseComparisonIds", () => {
 		assert.deepEqual(parseComparisonIds("p1,x9", known), {
 			ok: false,
 			reason: "UNKNOWN",
+		});
+	});
+
+	it("accepts the ids repeated in the URL, as Next.js passes them as a list", () => {
+		assert.deepEqual(parseComparisonIds(["p1", "p2,p3"], known), {
+			ok: true,
+			ids: ["p1", "p2", "p3"],
 		});
 	});
 });

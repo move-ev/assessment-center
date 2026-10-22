@@ -8,22 +8,15 @@ export type ComparedPerson = {
 };
 
 export type TaskLead = {
-	taskId: string;
 	/** Everyone with the best score in this task; several on a tie. */
 	leaderIds: string[];
 };
 
 export type PersonSummary = {
-	id: string;
 	/** Tasks this person is ahead in, ties included. */
 	leadCount: number;
 	/** Points behind the best overall score; null without an overall score. */
 	gapToBest: number | null;
-};
-
-export type ParticipantComparison = {
-	tasks: TaskLead[];
-	people: PersonSummary[];
 };
 
 function findLeaders(people: ComparedPerson[], taskId: string): string[] {
@@ -47,15 +40,19 @@ function findLeaders(people: ComparedPerson[], taskId: string): string[] {
 
 /**
  * Compares 2–3 participants side by side: who is ahead in each task and
- * overall, for the comparison page.
+ * overall, for the comparison page. Returns the given people and tasks,
+ * each with what the comparison says about them.
  */
-export function compareParticipants(
-	people: ComparedPerson[],
-	taskIds: string[],
-): ParticipantComparison {
-	const tasks = taskIds.map((taskId) => ({
-		taskId,
-		leaderIds: findLeaders(people, taskId),
+export function compareParticipants<
+	P extends ComparedPerson,
+	T extends { id: string },
+>(
+	people: P[],
+	tasks: T[],
+): { people: Array<P & PersonSummary>; tasks: Array<T & TaskLead> } {
+	const ledTasks = tasks.map((task) => ({
+		...task,
+		leaderIds: findLeaders(people, task.id),
 	}));
 	const overallScores = people.flatMap((person) =>
 		person.overallScore === null ? [] : [person.overallScore],
@@ -64,10 +61,10 @@ export function compareParticipants(
 		overallScores.length === 0 ? null : Math.max(...overallScores);
 
 	return {
-		tasks,
+		tasks: ledTasks,
 		people: people.map((person) => ({
-			id: person.id,
-			leadCount: tasks.filter((task) => task.leaderIds.includes(person.id))
+			...person,
+			leadCount: ledTasks.filter((task) => task.leaderIds.includes(person.id))
 				.length,
 			gapToBest:
 				person.overallScore === null || bestOverall === null
@@ -81,22 +78,25 @@ export function compareParticipants(
 export const MIN_COMPARED = 2;
 export const MAX_COMPARED = 3;
 
+export type ComparisonIdsError = "TOO_FEW" | "TOO_MANY" | "UNKNOWN";
+
 export type ComparisonIds =
 	| { ok: true; ids: string[] }
-	| { ok: false; reason: "TOO_FEW" | "TOO_MANY" | "UNKNOWN" };
+	| { ok: false; reason: ComparisonIdsError };
 
 /**
- * The participants to compare from the URL (`?ids=a,b,c`): 2–3 distinct
- * participants of the AC, in the order given.
+ * The participants to compare from the URL (`?ids=a,b,c`, also repeated):
+ * 2–3 distinct participants of the AC, in the order given.
  */
 export function parseComparisonIds(
-	raw: string | undefined,
+	raw: string | string[] | undefined,
 	knownIds: string[],
 ): ComparisonIds {
 	const ids = [
 		...new Set(
-			(raw ?? "")
-				.split(",")
+			[raw ?? []]
+				.flat()
+				.flatMap((value) => value.split(","))
 				.map((id) => id.trim())
 				.filter((id) => id !== ""),
 		),

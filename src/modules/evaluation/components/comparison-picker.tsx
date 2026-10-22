@@ -8,8 +8,8 @@ import {
 	NativeSelectOption,
 } from "@/components/ui/native-select";
 import { ROUTES } from "@/lib/routes";
-import { MAX_COMPARED, MIN_COMPARED } from "../server/compare";
 import type { EvaluationComparisonData } from "../server/get-evaluation-comparison-data";
+import { MAX_COMPARED, MIN_COMPARED } from "../server/participant-comparison";
 import { seriesColor } from "./score-strip";
 
 type Candidate = EvaluationComparisonData["candidates"][number];

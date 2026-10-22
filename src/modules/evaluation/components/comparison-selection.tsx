@@ -3,11 +3,10 @@
 import { ScaleIcon } from "lucide-react";
 import Link from "next/link";
 import { createContext, type ReactNode, useContext, useState } from "react";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ROUTES } from "@/lib/routes";
-import { cn } from "@/lib/utils";
-import { MAX_COMPARED, MIN_COMPARED } from "../server/compare";
+import { MAX_COMPARED, MIN_COMPARED } from "../server/participant-comparison";
 
 type Selection = {
 	selectedIds: string[];
@@ -62,16 +61,10 @@ function ComparisonSelection({
 							Gegenüberstellen
 						</Link>
 					) : (
-						<span
-							aria-disabled
-							className={cn(
-								buttonVariants({ size: "sm" }),
-								"pointer-events-none opacity-50",
-							)}
-						>
+						<Button disabled size="sm">
 							<ScaleIcon />
 							Gegenüberstellen
-						</span>
+						</Button>
 					)}
 				</div>
 				{children}

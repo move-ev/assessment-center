@@ -15,15 +15,12 @@ import {
 } from "@/components/ui/empty";
 import { formatOverallScore, formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
+import type { EvaluationComparisonData } from "../server/get-evaluation-comparison-data";
 import {
+	type ComparisonIdsError,
 	MAX_COMPARED,
 	MIN_COMPARED,
-	type PersonSummary,
-} from "../server/compare";
-import type {
-	ComparedParticipant,
-	EvaluationComparisonData,
-} from "../server/get-evaluation-comparison-data";
+} from "../server/participant-comparison";
 import { stackDots } from "./chart-scales";
 import { ComparisonPicker } from "./comparison-picker";
 import { DeviationBadge } from "./deviation-badge";
@@ -39,13 +36,13 @@ import {
 	TICK_COLOR,
 } from "./score-strip";
 
-type Task = EvaluationComparisonData["tasks"][number];
 type Selected = Extract<EvaluationComparisonData["selection"], { ok: true }>;
+type Person = Selected["people"][number];
 
 const RANGE_COLOR =
 	"color-mix(in oklab, var(--muted-foreground) 22%, transparent)";
 
-const INVALID_TEXT: Record<"TOO_FEW" | "TOO_MANY" | "UNKNOWN", string> = {
+const INVALID_TEXT: Record<ComparisonIdsError, string> = {
 	TOO_FEW: `Für eine Gegenüberstellung braucht es mindestens ${MIN_COMPARED} Bewerbende.`,
 	TOO_MANY: `Es lassen sich höchstens ${MAX_COMPARED} Bewerbende gegenüberstellen.`,
 	UNKNOWN: "Mindestens eine der gewählten Personen gehört nicht zu diesem AC.",
@@ -62,7 +59,7 @@ function PersonCard({
 	rankedCount,
 }: {
 	acId: string;
-	person: ComparedParticipant;
+	person: Person;
 	index: number;
 	rankedCount: number;
 }) {
@@ -91,7 +88,7 @@ function PersonCard({
 				<div className="flex flex-wrap items-center gap-2">
 					<span className="text-muted-foreground text-sm">
 						{person.rank === null
-							? "Kein Rang"
+							? "Rang –"
 							: `Rang ${person.rank} von ${rankedCount}`}
 					</span>
 					{person.rankingBand && <RankingBandBadge band={person.rankingBand} />}
@@ -104,53 +101,39 @@ function PersonCard({
 	);
 }
 
-function describeSummary(
-	person: ComparedParticipant,
-	summary: PersonSummary,
-	taskCount: number,
-): string {
-	const lead = `vorn in ${summary.leadCount} von ${taskCount} ${taskCount === 1 ? "Aufgabe" : "Aufgaben"}`;
-	if (summary.gapToBest === null) {
-		return `${person.name}: ${lead}, kein Gesamtwert`;
+function describeSummary(person: Person, taskCount: number): string {
+	const lead = `vorn in ${person.leadCount} von ${taskCount} ${taskCount === 1 ? "Aufgabe" : "Aufgaben"}`;
+	if (person.gapToBest === null) {
+		return `${person.name}: ${lead}, Gesamtwert –`;
 	}
-	return summary.gapToBest === 0
+	return person.gapToBest === 0
 		? `${person.name}: ${lead}, bester Gesamtwert`
-		: `${person.name}: ${lead}, ${formatGap(summary.gapToBest)} hinter dem besten Gesamtwert`;
+		: `${person.name}: ${lead}, ${formatGap(person.gapToBest)} hinter dem besten Gesamtwert`;
 }
 
-function SummaryCard({
-	selection,
-	taskCount,
-}: {
-	selection: Selected;
-	taskCount: number;
-}) {
+function SummaryCard({ selection }: { selection: Selected }) {
 	return (
 		<Card data-testid="comparison-summary">
 			<CardHeader>
 				<CardTitle>Kurzfazit</CardTitle>
 				<CardDescription>
 					Vorn liegt, wer in einer Aufgabe den höchsten Teil-Score hat;
-					Gleichstand zählt für alle.
+					Gleichstand zählt für alle. Der Abstand ist aus den genauen
+					Gesamtwerten berechnet.
 				</CardDescription>
 			</CardHeader>
 			<CardContent>
 				<ul className="space-y-1.5 text-sm">
-					{selection.people.map((person, index) => {
-						const summary = selection.comparison.people.find(
-							(entry) => entry.id === person.id,
-						);
-						return (
-							<li className="flex items-center gap-2" key={person.id}>
-								<span
-									aria-hidden
-									className="size-2.5 shrink-0 rounded-full"
-									style={{ backgroundColor: seriesColor(index) }}
-								/>
-								{summary && describeSummary(person, summary, taskCount)}
-							</li>
-						);
-					})}
+					{selection.people.map((person, index) => (
+						<li className="flex items-center gap-2" key={person.id}>
+							<span
+								aria-hidden
+								className="size-2.5 shrink-0 rounded-full"
+								style={{ backgroundColor: seriesColor(index) }}
+							/>
+							{describeSummary(person, selection.tasks.length)}
+						</li>
+					))}
 				</ul>
 			</CardContent>
 		</Card>
@@ -164,7 +147,7 @@ const DOT_OFFSET_PX = 8;
  * The people's dots on one task strip; equal or near-equal scores sit just
  * above and below each other instead of on top of each other.
  */
-function placeDots(people: ComparedParticipant[], taskId: string) {
+function placeDots(people: Person[], taskId: string) {
 	const dots = people.flatMap((person, index) => {
 		const score = person.taskScores[taskId];
 		return score === null || score === undefined
@@ -183,13 +166,7 @@ function placeDots(people: ComparedParticipant[], taskId: string) {
 	}));
 }
 
-function TaskStrips({
-	selection,
-	tasks,
-}: {
-	selection: Selected;
-	tasks: Task[];
-}) {
+function TaskStrips({ selection }: { selection: Selected }) {
 	return (
 		<Card data-testid="comparison-strips">
 			<CardHeader>
@@ -201,7 +178,7 @@ function TaskStrips({
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<ul className="space-y-3">
-					{tasks.map((task) => {
+					{selection.tasks.map((task) => {
 						const description = selection.people
 							.map(
 								(person) =>
@@ -270,13 +247,7 @@ function TaskStrips({
 	);
 }
 
-function TaskBars({
-	selection,
-	tasks,
-}: {
-	selection: Selected;
-	tasks: Task[];
-}) {
+function TaskBars({ selection }: { selection: Selected }) {
 	return (
 		<Card data-testid="comparison-bars">
 			<CardHeader>
@@ -286,10 +257,7 @@ function TaskBars({
 				</CardDescription>
 			</CardHeader>
 			<CardContent className="space-y-5">
-				{tasks.map((task) => {
-					const leaderIds =
-						selection.comparison.tasks.find((entry) => entry.taskId === task.id)
-							?.leaderIds ?? [];
+				{selection.tasks.map((task) => {
 					return (
 						<div
 							className="space-y-1.5"
@@ -300,7 +268,7 @@ function TaskBars({
 							<ul className="space-y-1">
 								{selection.people.map((person, index) => {
 									const score = person.taskScores[task.id] ?? null;
-									const leads = leaderIds.includes(person.id);
+									const leads = task.leaderIds.includes(person.id);
 									return (
 										<li
 											className="grid grid-cols-[minmax(7rem,11rem)_1fr_5.5rem] items-center gap-3 text-sm"
@@ -323,10 +291,13 @@ function TaskBars({
 											</div>
 											<span className="flex items-center justify-end gap-1 tabular-nums">
 												{leads && (
-													<TrophyIcon
-														aria-label="Bestwert"
-														className="size-3.5 text-amber-600 dark:text-amber-400"
-													/>
+													<>
+														<TrophyIcon
+															aria-hidden
+															className="size-3.5 text-amber-600 dark:text-amber-400"
+														/>
+														<span className="sr-only">Bestwert:</span>
+													</>
 												)}
 												{formatPercent(score)}
 											</span>
@@ -388,9 +359,9 @@ function EvaluationComparison({
 							/>
 						))}
 					</div>
-					<SummaryCard selection={selection} taskCount={data.tasks.length} />
-					<TaskStrips selection={selection} tasks={data.tasks} />
-					<TaskBars selection={selection} tasks={data.tasks} />
+					<SummaryCard selection={selection} />
+					<TaskStrips selection={selection} />
+					<TaskBars selection={selection} />
 				</>
 			) : (
 				<Empty className="max-w-xl border">

@@ -106,6 +106,8 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
         ├── /overview                             Admin: live completion matrix (ACTIVE only)
         │
         ├── /results                              Admin: aggregated evaluation (COMPLETED, ANONYMIZED)
+        │   ├── /[participantId]                  Admin: one participant in detail
+        │   └── /compare?ids=a,b,c                Admin: 2–3 participants side by side
         │
         └── /review                               Reviewer: workspace root
             └── /[taskId]                         Reviewer: participant list for this task
@@ -222,12 +224,16 @@ src/modules/
     │   ├── participant-profile.tsx    Person against the AC per task
     │   ├── criteria-drilldown.tsx     Stars per reviewer and criterion, texts
     │   ├── score-strip.tsx            Shared 0–100 % axis, marks and legend
+    │   ├── evaluation-comparison.tsx  2–3 participants side by side
+    │   ├── comparison-selection.tsx   Pick 2–3 people in the ranking (client)
+    │   ├── comparison-picker.tsx      Swap, add, remove people on the page (client)
     │   └── index.ts
     ├── server/                        Data loaders and pure scoring logic
     │   ├── scoring.ts, ranking.ts, deviation.ts
     │   ├── comparison.ts              Summaries, positions, task shares, correlation
     │   ├── calibration.ts             Leniency and disagreement
-    │   └── criteria-breakdown.ts      Rows per criterion for one person
+    │   ├── criteria-breakdown.ts      Rows per criterion for one person
+    │   └── participant-comparison.ts  Who leads per task, gap to the best, URL ids
     └── index.ts
 ```
 
@@ -286,7 +292,9 @@ src/app/
             │
             ├── results/
             │   ├── layout.tsx         Admin guard + COMPLETED guard
-            │   └── page.tsx           → <EvaluationParticipant /> + <EvaluationExport />
+            │   ├── page.tsx           → <EvaluationParticipant /> + <EvaluationExport />
+            │   ├── [participantId]/page.tsx → <EvaluationParticipantDetail />
+            │   └── compare/page.tsx   → <EvaluationComparison /> (?ids=a,b,c)
             │
             └── review/
                 ├── layout.tsx         Reviewer guard + <ReviewLayout />
@@ -349,6 +357,10 @@ export const ROUTES = {
   acSetupAssignments: (id: string) => `/assessment-centers/${id}/setup/assignments`,
   acOverview: (id: string) => `/assessment-centers/${id}/overview`,
   acResults: (id: string) => `/assessment-centers/${id}/results`,
+  acResultsParticipant: (id: string, participantId: string) =>
+    `/assessment-centers/${id}/results/${participantId}`,
+  acResultsCompare: (id: string, participantIds: string[]) =>
+    `/assessment-centers/${id}/results/compare?ids=${participantIds.join(",")}`,
   acReview: (id: string) => `/assessment-centers/${id}/review`,
   acReviewTask: (id: string, taskId: string) => `/assessment-centers/${id}/review/${taskId}`,
   acReviewRating: (id: string, taskId: string, participantId: string) =>
