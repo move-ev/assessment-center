@@ -35,10 +35,12 @@ import { TaskScatter } from "./task-scatter";
 type Props = {
 	acId: string;
 	acName: string;
+	/** Admins only: the export (and later changes) are not for reviewers. */
+	canManage: boolean;
 	results: EvaluationResultsData;
 };
 
-function EvaluationParticipant({ acId, acName, results }: Props) {
+function EvaluationParticipant({ acId, acName, canManage, results }: Props) {
 	if (results.participants.length === 0) {
 		return <ResultsEmptyState acId={acId} />;
 	}
@@ -61,7 +63,7 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 					<TabsTrigger value="tasks">Aufgaben</TabsTrigger>
 					<TabsTrigger value="criteria">Kriterien</TabsTrigger>
 					<TabsTrigger value="calibration">Kalibrierung</TabsTrigger>
-					<TabsTrigger value="export">Export</TabsTrigger>
+					{canManage && <TabsTrigger value="export">Export</TabsTrigger>}
 				</TabsList>
 
 				<TabsContent className="space-y-4" value="participants">
@@ -91,9 +93,12 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 						ratingScaleMax={results.ratingScaleMax}
 					/>
 				</TabsContent>
-				<TabsContent value="export">
-					<EvaluationExport acName={acName} rows={results.exportRows} />
-				</TabsContent>
+				{/* Not rendered for reviewers, so the rows never reach their browser. */}
+				{canManage && (
+					<TabsContent value="export">
+						<EvaluationExport acName={acName} rows={results.exportRows} />
+					</TabsContent>
+				)}
 			</Tabs>
 		</div>
 	);

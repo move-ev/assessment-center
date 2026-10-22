@@ -10,6 +10,8 @@ type Props = {
 	acId: string;
 	isAdmin: boolean;
 	acStatus: AcStatus;
+	/** From getResultsAccess: admins and, once completed, reviewers. */
+	canViewResults: boolean;
 };
 
 type NavItem = {
@@ -18,7 +20,7 @@ type NavItem = {
 	visible: boolean;
 };
 
-function AcNav({ acId, isAdmin, acStatus }: Props) {
+function AcNav({ acId, isAdmin, acStatus, canViewResults }: Props) {
 	const pathname = usePathname();
 
 	const items: NavItem[] = [
@@ -35,8 +37,7 @@ function AcNav({ acId, isAdmin, acStatus }: Props) {
 		{
 			label: "Ergebnisse",
 			href: ROUTES.acResults(acId),
-			visible:
-				isAdmin && (acStatus === "COMPLETED" || acStatus === "ANONYMIZED"),
+			visible: canViewResults,
 		},
 		{
 			label: "Review",

@@ -1,8 +1,10 @@
 import { notFound } from "next/navigation";
+import { getResultsAccess } from "@/lib/results-access";
 import {
 	EvaluationParticipant,
 	getEvaluationResultsData,
 } from "@/modules/evaluation";
+import { getAcRole } from "@/server/ac-role";
 import { db } from "@/server/db";
 
 type Props = {
@@ -11,12 +13,13 @@ type Props = {
 
 export default async function AcResultsPage({ params }: Props) {
 	const { id } = await params;
-	const [results, assessmentCenter] = await Promise.all([
+	const [results, assessmentCenter, role] = await Promise.all([
 		getEvaluationResultsData(id),
 		db.assessmentCenter.findFirst({
 			where: { id, deletedAt: null },
-			select: { name: true },
+			select: { name: true, status: true },
 		}),
+		getAcRole(id),
 	]);
 
 	if (!assessmentCenter) {
@@ -27,6 +30,7 @@ export default async function AcResultsPage({ params }: Props) {
 		<EvaluationParticipant
 			acId={id}
 			acName={assessmentCenter.name}
+			canManage={getResultsAccess(role, assessmentCenter.status).canManage}
 			results={results}
 		/>
 	);

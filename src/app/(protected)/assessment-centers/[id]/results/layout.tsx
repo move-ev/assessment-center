@@ -1,8 +1,9 @@
 import { ShieldCheckIcon } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { formatDate } from "@/lib/format-date";
+import { getResultsAccess } from "@/lib/results-access";
 import { ROUTES } from "@/lib/routes";
-import { getSession } from "@/server/better-auth/server";
+import { getAcRole } from "@/server/ac-role";
 import { db } from "@/server/db";
 
 type Props = {
@@ -13,8 +14,8 @@ type Props = {
 export default async function AcResultsLayout({ children, params }: Props) {
 	const { id } = await params;
 
-	const [session, assessmentCenter] = await Promise.all([
-		getSession(),
+	const [role, assessmentCenter] = await Promise.all([
+		getAcRole(id),
 		db.assessmentCenter.findFirst({
 			where: { id, deletedAt: null },
 			select: { status: true, anonymizedAt: true },
@@ -25,7 +26,11 @@ export default async function AcResultsLayout({ children, params }: Props) {
 		notFound();
 	}
 
-	if (session?.user.role !== "admin") {
+	// Reviewers only see completed results; everyone else goes back to rating.
+	if (
+		role !== "ADMIN" &&
+		!getResultsAccess(role, assessmentCenter.status).canView
+	) {
 		redirect(ROUTES.acReview(id));
 	}
 
