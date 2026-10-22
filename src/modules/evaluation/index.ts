@@ -1,8 +1,11 @@
 export {
+	EvaluationComparison,
 	EvaluationOverview,
 	EvaluationParticipant,
 	EvaluationParticipantDetail,
 } from "./components";
+export type { EvaluationComparisonData } from "./server/get-evaluation-comparison-data";
+export { getEvaluationComparisonData } from "./server/get-evaluation-comparison-data";
 export type { EvaluationOverviewData } from "./server/get-evaluation-overview";
 export { getEvaluationOverviewData } from "./server/get-evaluation-overview";
 export type { EvaluationParticipantDetailData } from "./server/get-evaluation-participant-detail-data";

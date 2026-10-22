@@ -1,3 +1,4 @@
+export { EvaluationComparison } from "./evaluation-comparison";
 export { EvaluationCriteria } from "./evaluation-criteria";
 export { EvaluationExport } from "./evaluation-export";
 export { EvaluationOverview } from "./evaluation-overview";
