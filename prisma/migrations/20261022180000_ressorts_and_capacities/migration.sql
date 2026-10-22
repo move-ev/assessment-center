@@ -38,8 +38,13 @@ ALTER TABLE "AcRessortCapacity" ADD CONSTRAINT "AcRessortCapacity_assessmentCent
 ALTER TABLE "AcRessortCapacity" ADD CONSTRAINT "AcRessortCapacity_ressortId_fkey" FOREIGN KEY ("ressortId") REFERENCES "Ressort"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 
--- Whole numbers from 0, and no more active members than registered ones
+-- Whole numbers from 0 to 9999, and no more active members than registered ones
 -- (same rule as getCapacityError in src/lib/ressort-capacity.ts).
 ALTER TABLE "AcRessortCapacity"
     ADD CONSTRAINT chk_ressort_capacity_values
-    CHECK ("registered" >= 0 AND "active" >= 0 AND "toAdmit" >= 0 AND "active" <= "registered");
+    CHECK (
+        "registered" BETWEEN 0 AND 9999
+        AND "active" BETWEEN 0 AND 9999
+        AND "toAdmit" BETWEEN 0 AND 9999
+        AND "active" <= "registered"
+    );

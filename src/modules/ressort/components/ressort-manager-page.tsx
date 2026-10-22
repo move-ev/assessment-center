@@ -103,11 +103,14 @@ function RessortRow({ ressort }: { ressort: Ressort }) {
 		onError,
 	});
 	const isUsed = ressort._count.capacities > 0;
+	const usedHintId = `ressort-used-${ressort.id}`;
 	const changed = name.trim() !== "" && name.trim() !== ressort.name;
 
 	const onSubmit = (event: FormEvent) => {
 		event.preventDefault();
-		rename.mutate({ id: ressort.id, name });
+		const trimmed = name.trim();
+		setName(trimmed);
+		rename.mutate({ id: ressort.id, name: trimmed });
 	};
 
 	return (
@@ -127,17 +130,18 @@ function RessortRow({ ressort }: { ressort: Ressort }) {
 					Umbenennen
 				</Button>
 			</form>
+			{isUsed && (
+				<span className="text-muted-foreground text-xs" id={usedHintId}>
+					In einem AC verwendet
+				</span>
+			)}
 			<Button
+				aria-describedby={isUsed ? usedHintId : undefined}
 				aria-label={`${ressort.name} löschen`}
 				// The server refuses too; this just saves a pointless click.
 				disabled={isUsed || remove.isPending}
 				onClick={() => remove.mutate({ id: ressort.id })}
 				size="icon"
-				title={
-					isUsed
-						? "Hat schon Zahlen in einem AC und kann nicht gelöscht werden"
-						: "Löschen"
-				}
 				variant="ghost"
 			>
 				<Trash2Icon />

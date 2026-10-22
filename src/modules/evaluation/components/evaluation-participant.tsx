@@ -59,7 +59,7 @@ function EvaluationParticipant({
 	if (results.participants.length === 0) {
 		// Ressort numbers do not depend on ratings, so they stay reachable.
 		return (
-			<div className="space-y-6 p-6">
+			<div className="flex flex-1 flex-col gap-6 p-6">
 				<ResultsEmptyState acId={acId} canManage={canManage} />
 				<section className="space-y-2">
 					<h2 className="font-medium">Ressorts</h2>

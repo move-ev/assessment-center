@@ -1,6 +1,7 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getCapacityError } from "@/lib/ressort-capacity";
+import { getResultsAccess } from "@/lib/results-access";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
 import type { db } from "@/server/db";
 
@@ -116,12 +117,19 @@ export const ressortRouter = createTRPCRouter({
 
 			const ac = await ctx.db.assessmentCenter.findFirst({
 				where: { id: acId, deletedAt: null },
-				select: { id: true },
+				select: { status: true },
 			});
 			if (!ac) {
 				throw new TRPCError({
 					code: "NOT_FOUND",
 					message: "Assessment Center nicht gefunden",
+				});
+			}
+			// The numbers live in the results tab, so they follow its rules.
+			if (!getResultsAccess("ADMIN", ac.status).canManage) {
+				throw new TRPCError({
+					code: "FORBIDDEN",
+					message: "Ressort-Zahlen gibt es erst ab dem abgeschlossenen AC",
 				});
 			}
 			await findRessort(ctx.db, ressortId);

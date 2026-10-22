@@ -21,26 +21,36 @@ describe("getCapacityError", () => {
 		);
 	});
 
-	it("refuses numbers above the maximum", () => {
-		assert.equal(
-			getCapacityError({ registered: 10_000, active: 0, toAdmit: 0 }),
-			"Nur ganze Zahlen von 0 bis 9999.",
-		);
+	it("refuses numbers above the maximum in every field", () => {
+		for (const capacity of [
+			{ registered: 10_000, active: 0, toAdmit: 0 },
+			{ registered: 9999, active: 10_000, toAdmit: 0 },
+			{ registered: 0, active: 0, toAdmit: 10_000 },
+		]) {
+			assert.equal(
+				getCapacityError(capacity),
+				"Nur ganze Zahlen von 0 bis 9999.",
+			);
+		}
 		assert.equal(
 			getCapacityError({ registered: 9999, active: 9999, toAdmit: 9999 }),
 			null,
 		);
 	});
 
-	it("refuses negative or fractional numbers", () => {
-		assert.equal(
-			getCapacityError({ registered: -1, active: 0, toAdmit: 0 }),
-			"Nur ganze Zahlen von 0 bis 9999.",
-		);
-		assert.equal(
-			getCapacityError({ registered: 3, active: 1.5, toAdmit: 0 }),
-			"Nur ganze Zahlen von 0 bis 9999.",
-		);
+	it("refuses negative or fractional numbers in every field", () => {
+		for (const capacity of [
+			{ registered: -1, active: 0, toAdmit: 0 },
+			{ registered: 3, active: 1.5, toAdmit: 0 },
+			{ registered: 3, active: 1, toAdmit: -1 },
+			{ registered: 3, active: 1, toAdmit: 0.5 },
+			{ registered: 3, active: 1, toAdmit: Number.NaN },
+		]) {
+			assert.equal(
+				getCapacityError(capacity),
+				"Nur ganze Zahlen von 0 bis 9999.",
+			);
+		}
 	});
 });
 

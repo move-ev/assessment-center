@@ -108,8 +108,8 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
         ├── /overview                             Admin: live completion matrix (ACTIVE only)
         │
         ├── /results                              Admin (COMPLETED, ANONYMIZED), reviewers of the AC read-only (COMPLETED)
-        │   ├── /[participantId]                  One participant in detail (same access)
         │   │                                     Tab "Ressorts": planned numbers per ressort (admins edit)
+        │   ├── /[participantId]                  One participant in detail (same access)
         │   └── /compare?ids=a,b,c                2–3 participants side by side (same access)
         │
         └── /review                               Reviewer: workspace root
