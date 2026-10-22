@@ -210,7 +210,7 @@ src/modules/
 │   │   ├── review-participant-list.tsx  Participants for a task, with per-row status
 │   │   ├── review-rating-form.tsx     Criteria entry form (optimistic, auto-save)
 │   │   ├── review-quantitative-field.tsx  0–5 scale input + optional notes
-│   │   ├── review-qualitative-field.tsx   Required text area
+│   │   ├── review-qualitative-field.tsx   Optional free text, autosaved; clearing deletes it
 │   │   ├── review-team-observation.tsx    Optional team dynamics note field
 │   │   └── index.ts
 │   └── index.ts
@@ -325,7 +325,7 @@ src/server/api/routers/
 ├── schedule.ts             Create/delete ScheduleEntry records; reorder
 ├── reviewer.ts             Add/remove Reviewer records; list reviewers for AC
 ├── assignment.ts           Create/delete ReviewerAssignment (reviewer × participant × task)
-├── rating.ts               Upsert QuantitativeRating, QualitativeRating, TeamTaskObservation
+├── rating.ts               Upsert QuantitativeRating, QualitativeRating (blank deletes), TeamTaskObservation
 └── evaluation.ts           Read-only: aggregate scores, completion status
 ```
 
@@ -390,6 +390,8 @@ testable with `bun run test` without any setup.
   Required criteria are quantitative and not marked optional; free-text
   criteria never block completion. Used by the review lists, the rating form's
   live progress, the live overview and the results.
+- `src/lib/qualitative-write.ts`: whether a free-text save stores the text
+  or deletes the entry (blank text). Used by the rating router.
 - `src/lib/ac-status.ts`: AC status type and labels, and which statuses lock
   setup changes (`COMPLETED`, `ANONYMIZED`). Used by the routers (via
   `assertAcEditable`), the setup layout and the details form.

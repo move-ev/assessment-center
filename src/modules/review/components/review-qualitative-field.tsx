@@ -32,47 +32,68 @@ function ReviewQualitativeField({
 		"idle" | "saving" | "saved" | "error"
 	>("idle");
 	const mutation = api.rating.upsertQualitative.useMutation();
+	// Read through a ref: the mutation object changes with every request
+	// state, and the save effect must only rerun when the text changes.
+	const save = useRef(mutation.mutateAsync);
+	save.current = mutation.mutateAsync;
+	// Text the server has confirmed, and the last text sent (or confirmed).
 	const lastSaved = useRef(criterion.text.trim());
+	const lastRequested = useRef(criterion.text.trim());
+	// Saves run one after another, so the server always ends on the latest
+	// text, even when the field is cleared while a save is still running.
+	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const normalizedText = useMemo(() => text.trim(), [text]);
+	// What the field shows now: a finished save only updates the status and
+	// progress if the field still holds the text it saved.
+	const currentText = useRef(normalizedText);
+	currentText.current = normalizedText;
 
 	useEffect(() => {
 		onPersisted(criterion.id, normalizedText !== "");
 	}, [criterion.id, normalizedText, onPersisted]);
 
 	useEffect(() => {
-		if (normalizedText === "" || normalizedText === lastSaved.current) {
+		// An emptied field is saved too: it removes the entry.
+		if (normalizedText === lastRequested.current) {
+			// Typed and reverted before the save: nothing new to send.
+			if (lastRequested.current === lastSaved.current) {
+				setSaveState((state) => (state === "saving" ? "idle" : state));
+			}
 			return;
 		}
 
 		setSaveState("saving");
-		const timer = window.setTimeout(async () => {
-			try {
-				await mutation.mutateAsync({
-					acId,
-					taskId,
-					participantId,
-					criteriaId: criterion.id,
-					text: normalizedText,
-				});
-				lastSaved.current = normalizedText;
-				setSaveState("saved");
-				onPersisted(criterion.id, true);
-			} catch (error) {
-				setSaveState("error");
-				toast.error(getErrorMessage(error));
-			}
+		const timer = window.setTimeout(() => {
+			const textToSave = normalizedText;
+			lastRequested.current = textToSave;
+			saveQueue.current = saveQueue.current.then(async () => {
+				const isLatest = () => currentText.current === textToSave;
+				try {
+					await save.current({
+						acId,
+						taskId,
+						participantId,
+						criteriaId: criterion.id,
+						text: textToSave,
+					});
+					lastSaved.current = textToSave;
+					if (isLatest()) {
+						setSaveState("saved");
+						onPersisted(criterion.id, textToSave !== "");
+					}
+				} catch (error) {
+					toast.error(getErrorMessage(error));
+					if (isLatest()) {
+						// The next edit sends again, even back to this same text.
+						lastRequested.current = lastSaved.current;
+						setSaveState("error");
+					}
+				}
+			});
 		}, 500);
 
 		return () => window.clearTimeout(timer);
-	}, [
-		acId,
-		criterion.id,
-		mutation,
-		normalizedText,
-		onPersisted,
-		participantId,
-		taskId,
-	]);
+	}, [acId, criterion.id, normalizedText, onPersisted, participantId, taskId]);
 
 	return (
 		<Card>
@@ -95,9 +116,7 @@ function ReviewQualitativeField({
 					value={text}
 				/>
 				<p className="text-muted-foreground text-xs">
-					{normalizedText === ""
-						? "Dieses Feld ist erforderlich."
-						: getSaveStateLabel(saveState)}
+					{getSaveStateLabel(saveState)}
 				</p>
 			</CardContent>
 		</Card>
