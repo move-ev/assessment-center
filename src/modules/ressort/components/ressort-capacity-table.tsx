@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { type FormEvent, useState } from "react";
 import { toast } from "sonner";
@@ -13,11 +14,13 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { sortByRank } from "@/lib/ressort-assignment";
 import {
 	CAPACITY_MAX,
 	getCapacityError,
 	type RessortCapacity,
 } from "@/lib/ressort-capacity";
+import { ROUTES } from "@/lib/routes";
 import { api } from "@/trpc/react";
 import type { RessortCapacityRow } from "../server/get-ressort-capacities";
 
@@ -26,6 +29,8 @@ type Props = {
 	rows: RessortCapacityRow[];
 	/** Admins enter the numbers; everyone else only reads them. */
 	canManage: boolean;
+	/** Rank in the ranking per person, to list assigned people in rank order. */
+	ranks: Record<string, number | null>;
 };
 
 const CAPACITY_FIELDS = [
@@ -34,7 +39,7 @@ const CAPACITY_FIELDS = [
 	{ key: "toAdmit", label: "Aufzunehmen" },
 ] as const;
 
-function RessortCapacityTable({ acId, rows, canManage }: Props) {
+function RessortCapacityTable({ acId, rows, canManage, ranks }: Props) {
 	if (rows.length === 0) {
 		return (
 			<p className="text-muted-foreground text-sm">
@@ -63,9 +68,19 @@ function RessortCapacityTable({ acId, rows, canManage }: Props) {
 			<TableBody>
 				{rows.map((row) =>
 					canManage ? (
-						<EditableRow acId={acId} key={row.ressortId} row={row} />
+						<EditableRow
+							acId={acId}
+							key={row.ressortId}
+							ranks={ranks}
+							row={row}
+						/>
 					) : (
-						<ReadOnlyRow key={row.ressortId} row={row} />
+						<ReadOnlyRow
+							acId={acId}
+							key={row.ressortId}
+							ranks={ranks}
+							row={row}
+						/>
 					),
 				)}
 			</TableBody>
@@ -73,10 +88,19 @@ function RessortCapacityTable({ acId, rows, canManage }: Props) {
 	);
 }
 
-function ReadOnlyRow({ row }: { row: RessortCapacityRow }) {
+type RowProps = {
+	acId: string;
+	row: RessortCapacityRow;
+	ranks: Props["ranks"];
+};
+
+function ReadOnlyRow({ acId, row, ranks }: RowProps) {
 	return (
 		<TableRow>
-			<TableCell className="font-medium">{row.name}</TableCell>
+			<TableCell className="align-top font-medium">
+				{row.name}
+				<AssignedPeople acId={acId} ranks={ranks} row={row} />
+			</TableCell>
 			{CAPACITY_FIELDS.map((field) => (
 				<TableCell className="text-right tabular-nums" key={field.key}>
 					{row.capacity ? row.capacity[field.key] : "–"}
@@ -108,7 +132,7 @@ function parseDraft(draft: Draft): RessortCapacity {
 	};
 }
 
-function EditableRow({ acId, row }: { acId: string; row: RessortCapacityRow }) {
+function EditableRow({ acId, row, ranks }: RowProps) {
 	const router = useRouter();
 	const [draft, setDraft] = useState(() => toDraft(row.capacity));
 	const [error, setError] = useState<string | null>(null);
@@ -133,8 +157,9 @@ function EditableRow({ acId, row }: { acId: string; row: RessortCapacityRow }) {
 
 	return (
 		<TableRow>
-			<TableCell className="font-medium">
+			<TableCell className="align-top font-medium">
 				{row.name}
+				<AssignedPeople acId={acId} ranks={ranks} row={row} />
 				{error && (
 					<p className="font-normal text-destructive text-xs" role="alert">
 						{error}
@@ -176,15 +201,42 @@ function EditableRow({ acId, row }: { acId: string; row: RessortCapacityRow }) {
 	);
 }
 
+/** The people assigned to the ressort, best rank first. */
+function AssignedPeople({ acId, row, ranks }: RowProps) {
+	if (row.people.length === 0) return null;
+	const byRank = sortByRank(row.people, ranks);
+	return (
+		<ul
+			aria-label={`Zugeteilt zu ${row.name}`}
+			className="mt-1 space-y-0.5 font-normal text-muted-foreground text-xs"
+		>
+			{byRank.map((person) => (
+				<li key={person.id}>
+					<Link
+						className="underline-offset-4 hover:underline"
+						href={ROUTES.acResultsParticipant(acId, person.id)}
+					>
+						{ranks[person.id] ? `${ranks[person.id]}. ` : ""}
+						{person.name}
+					</Link>
+				</li>
+			))}
+		</ul>
+	);
+}
+
 function SlotCells({ row }: { row: RessortCapacityRow }) {
-	const overTarget = row.freeSlots !== null && row.freeSlots < 0;
+	const { freeSlots, overBy, label } = row.slots;
 	return (
 		<>
-			<TableCell className="text-right tabular-nums">{row.assigned}</TableCell>
+			<TableCell className="text-right align-top tabular-nums">
+				{row.people.length}
+			</TableCell>
 			<TableCell
-				className={`text-right tabular-nums ${overTarget ? "text-destructive" : ""}`}
+				className={`text-right align-top tabular-nums ${overBy > 0 ? "font-medium text-destructive" : ""}`}
 			>
-				{row.freeSlots ?? "–"}
+				{freeSlots ?? "–"}
+				{overBy > 0 && <p className="text-xs">{label}</p>}
 			</TableCell>
 		</>
 	);

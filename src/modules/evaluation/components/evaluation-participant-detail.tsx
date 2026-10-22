@@ -22,6 +22,7 @@ import {
 	formatSpread,
 } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
+import { RessortAssignment, type RessortCapacityRow } from "@/modules/ressort";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
 import { CriteriaDrilldown } from "./criteria-drilldown";
 import { DeviationBadge } from "./deviation-badge";
@@ -32,6 +33,9 @@ import { RankingBandBadge } from "./ranking-band-badge";
 type Props = {
 	acId: string;
 	data: EvaluationParticipantDetailData;
+	/** Admins assign the ressort here; everyone else reads it. */
+	canManage: boolean;
+	ressorts: RessortCapacityRow[];
 };
 
 function getInitials(name: string): string {
@@ -43,7 +47,12 @@ function getInitials(name: string): string {
 		.slice(0, 2);
 }
 
-function EvaluationParticipantDetail({ acId, data }: Props) {
+function EvaluationParticipantDetail({
+	acId,
+	data,
+	canManage,
+	ressorts,
+}: Props) {
 	const initials = getInitials(data.participant.name);
 	const {
 		completedAssignmentCount,
@@ -87,6 +96,17 @@ function EvaluationParticipantDetail({ acId, data }: Props) {
 								{completedAssignmentCount} / {totalAssignmentCount} Bewertungen
 								abgeschlossen
 							</p>
+							<div className="mt-2 flex items-center">
+								<span className="mr-2 text-muted-foreground text-sm">
+									Ressort:
+								</span>
+								<RessortAssignment
+									acId={acId}
+									canManage={canManage}
+									participant={data.participant}
+									ressorts={ressorts}
+								/>
+							</div>
 						</div>
 					</div>
 

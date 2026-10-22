@@ -1,5 +1,6 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { getSlotStatus } from "@/lib/ressort-assignment";
 import { getCapacityError } from "@/lib/ressort-capacity";
 import { getResultsAccess } from "@/lib/results-access";
 import { adminProcedure, createTRPCRouter } from "@/server/api/trpc";
@@ -22,6 +23,14 @@ const capacityInput = z.object({
 
 type Db = typeof db;
 
+/** What makes a ressort "used" and therefore not deletable. */
+const USAGE_COUNTS = { capacities: true, participants: true } as const;
+
+/** Numbers in an AC or assigned people would be lost by deleting it. */
+function isRessortUsed(counts: { capacities: number; participants: number }) {
+	return counts.capacities > 0 || counts.participants > 0;
+}
+
 async function assertNameFree(db: Db, name: string, exceptId?: string) {
 	const existing = await db.ressort.findFirst({
 		where: {
@@ -41,7 +50,7 @@ async function assertNameFree(db: Db, name: string, exceptId?: string) {
 async function findRessort(db: Db, id: string) {
 	const ressort = await db.ressort.findUnique({
 		where: { id },
-		select: { id: true, _count: { select: { capacities: true } } },
+		select: { id: true, name: true, _count: { select: USAGE_COUNTS } },
 	});
 	if (!ressort) {
 		throw new TRPCError({
@@ -53,20 +62,64 @@ async function findRessort(db: Db, id: string) {
 }
 
 /**
+ * An AC whose results tab admins may change: not deleted and completed or
+ * anonymized (see getResultsAccess). Ressort numbers and assignments live
+ * there, so they follow its rules.
+ */
+async function findManageableAc(db: Db, acId: string) {
+	const ac = await db.assessmentCenter.findFirst({
+		where: { id: acId, deletedAt: null },
+		select: { status: true },
+	});
+	if (!ac) {
+		throw new TRPCError({
+			code: "NOT_FOUND",
+			message: "Assessment Center nicht gefunden",
+		});
+	}
+	if (!getResultsAccess("ADMIN", ac.status).canManage) {
+		throw new TRPCError({
+			code: "FORBIDDEN",
+			message: "Ressorts gibt es erst ab dem abgeschlossenen AC",
+		});
+	}
+}
+
+/** Where the ressort stands in one AC after an assignment, for the warning. */
+async function getAcSlotStatus(db: Db, acId: string, ressortId: string) {
+	const [assigned, capacity] = await Promise.all([
+		db.participant.count({
+			where: { assessmentCenterId: acId, ressortId, deletedAt: null },
+		}),
+		db.acRessortCapacity.findUnique({
+			where: {
+				assessmentCenterId_ressortId: { assessmentCenterId: acId, ressortId },
+			},
+			select: { toAdmit: true },
+		}),
+	]);
+	return getSlotStatus(capacity?.toAdmit ?? null, assigned);
+}
+
+/**
  * Ressorts are shared by all ACs; their planned numbers belong to one AC.
  * Only admins change either.
  */
 export const ressortRouter = createTRPCRouter({
-	list: adminProcedure.query(({ ctx }) =>
-		ctx.db.ressort.findMany({
+	list: adminProcedure.query(async ({ ctx }) => {
+		const ressorts = await ctx.db.ressort.findMany({
 			select: {
 				id: true,
 				name: true,
-				_count: { select: { capacities: true } },
+				_count: { select: USAGE_COUNTS },
 			},
 			orderBy: { name: "asc" },
-		}),
-	),
+		});
+		return ressorts.map(({ _count, ...ressort }) => ({
+			...ressort,
+			isUsed: isRessortUsed(_count),
+		}));
+	}),
 
 	create: adminProcedure
 		.input(z.object({ name: ressortName }))
@@ -94,12 +147,11 @@ export const ressortRouter = createTRPCRouter({
 		.input(z.object({ id: z.string() }))
 		.mutation(async ({ ctx, input }) => {
 			const ressort = await findRessort(ctx.db, input.id);
-			// Planned numbers would be lost: a used ressort stays.
-			if (ressort._count.capacities > 0) {
+			if (isRessortUsed(ressort._count)) {
 				throw new TRPCError({
 					code: "CONFLICT",
 					message:
-						"Dieses Ressort hat schon Zahlen in einem Assessment Center und kann nicht gelöscht werden",
+						"Dieses Ressort wird schon in einem Assessment Center verwendet und kann nicht gelöscht werden",
 				});
 			}
 			await ctx.db.ressort.delete({ where: { id: input.id } });
@@ -115,23 +167,7 @@ export const ressortRouter = createTRPCRouter({
 				throw new TRPCError({ code: "BAD_REQUEST", message: error });
 			}
 
-			const ac = await ctx.db.assessmentCenter.findFirst({
-				where: { id: acId, deletedAt: null },
-				select: { status: true },
-			});
-			if (!ac) {
-				throw new TRPCError({
-					code: "NOT_FOUND",
-					message: "Assessment Center nicht gefunden",
-				});
-			}
-			// The numbers live in the results tab, so they follow its rules.
-			if (!getResultsAccess("ADMIN", ac.status).canManage) {
-				throw new TRPCError({
-					code: "FORBIDDEN",
-					message: "Ressort-Zahlen gibt es erst ab dem abgeschlossenen AC",
-				});
-			}
+			await findManageableAc(ctx.db, acId);
 			await findRessort(ctx.db, ressortId);
 
 			return ctx.db.acRessortCapacity.upsert({
@@ -150,5 +186,51 @@ export const ressortRouter = createTRPCRouter({
 					toAdmit: true,
 				},
 			});
+		}),
+
+	/**
+	 * Assigns a person to a ressort, moves them to another one, or removes the
+	 * assignment (ressortId null). Going beyond the target is allowed; the
+	 * returned status lets the caller warn.
+	 */
+	assign: adminProcedure
+		.input(
+			z.object({
+				acId: z.string(),
+				participantId: z.string(),
+				// null removes the assignment; an empty id is no ressort.
+				ressortId: z.string().min(1).nullable(),
+			}),
+		)
+		.mutation(async ({ ctx, input }) => {
+			await findManageableAc(ctx.db, input.acId);
+			const ressort = input.ressortId
+				? await findRessort(ctx.db, input.ressortId)
+				: null;
+
+			const { count } = await ctx.db.participant.updateMany({
+				where: {
+					id: input.participantId,
+					assessmentCenterId: input.acId,
+					deletedAt: null,
+				},
+				data: { ressortId: input.ressortId },
+			});
+			if (count === 0) {
+				throw new TRPCError({
+					code: "NOT_FOUND",
+					message: "Bewerbende nicht gefunden",
+				});
+			}
+
+			if (!ressort) {
+				return { ressort: null };
+			}
+			return {
+				ressort: {
+					name: ressort.name,
+					...(await getAcSlotStatus(ctx.db, input.acId, ressort.id)),
+				},
+			};
 		}),
 });

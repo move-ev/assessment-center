@@ -1,3 +1,4 @@
+import type { AssignedRessort } from "@/lib/ressort-assignment";
 import "server-only";
 
 import { notFound } from "next/navigation";
@@ -35,6 +36,7 @@ export type EvaluationParticipantDetailData = {
 		id: string;
 		name: string;
 		groupName: string | null;
+		ressort: AssignedRessort | null;
 		overallScore: number | null;
 		/** Rank in the ranking (shared on identical results); null without a score. */
 		rank: number | null;
@@ -187,6 +189,7 @@ export async function getEvaluationParticipantDetailData(
 			id: participant.id,
 			name: participant.name,
 			groupName: participant.groupName,
+			ressort: participant.ressort,
 			overallScore: participant.overallScore,
 			rank: participant.rank,
 			showsDecimal: participant.showsDecimal,

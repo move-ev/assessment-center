@@ -17,10 +17,16 @@ import {
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatOverallScore, formatPercent } from "@/lib/format-percent";
+import {
+	matchesRessortFilter,
+	type RessortFilter,
+} from "@/lib/ressort-assignment";
 import { ROUTES } from "@/lib/routes";
 import {
+	RessortAssignment,
 	type RessortCapacityRow,
 	RessortCapacityTable,
+	RessortFilterSelect,
 } from "@/modules/ressort";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
@@ -43,6 +49,8 @@ type Props = {
 	canManage: boolean;
 	results: EvaluationResultsData;
 	ressorts: RessortCapacityRow[];
+	/** Narrows the ranking to one ressort or unassigned people (`?ressort=`). */
+	ressortFilter: RessortFilter;
 };
 
 function EvaluationParticipant({
@@ -51,9 +59,21 @@ function EvaluationParticipant({
 	canManage,
 	results,
 	ressorts,
+	ressortFilter,
 }: Props) {
+	const ranks = Object.fromEntries(
+		results.participants.map((participant) => [
+			participant.id,
+			participant.rank,
+		]),
+	);
 	const ressortTable = (
-		<RessortCapacityTable acId={acId} canManage={canManage} rows={ressorts} />
+		<RessortCapacityTable
+			acId={acId}
+			canManage={canManage}
+			ranks={ranks}
+			rows={ressorts}
+		/>
 	);
 
 	if (results.participants.length === 0) {
@@ -97,7 +117,19 @@ function EvaluationParticipant({
 						averageScore={results.summary.averageOverallScore}
 						participants={results.participants}
 					/>
-					<ParticipantTable acId={acId} participants={results.participants} />
+					<div className="flex items-center justify-end">
+						<RessortFilterSelect filter={ressortFilter} ressorts={ressorts} />
+					</div>
+					<ParticipantTable
+						acId={acId}
+						participants={results.participants.filter((participant) =>
+							matchesRessortFilter(
+								participant.ressort?.id ?? null,
+								ressortFilter,
+							),
+						)}
+						ressortColumn={{ canManage, ressorts }}
+					/>
 				</TabsContent>
 				<TabsContent className="space-y-4" value="comparison">
 					<ComparisonTab acId={acId} results={results} />
@@ -231,9 +263,12 @@ const RANKING_BAND_ROW: Record<RankingBand, string> = {
 function ParticipantTable({
 	acId,
 	participants,
+	ressortColumn,
 }: {
 	acId: string;
 	participants: EvaluationResultsData["participants"];
+	/** Admins pick the ressort in the row; everyone else reads it. */
+	ressortColumn: { canManage: boolean; ressorts: RessortCapacityRow[] };
 }) {
 	return (
 		<ComparisonSelection acId={acId}>
@@ -247,12 +282,23 @@ function ParticipantTable({
 						<TableHead>Bewerbende</TableHead>
 						<TableHead>Gesamtwert</TableHead>
 						<TableHead>Gruppe</TableHead>
+						<TableHead>Ressort</TableHead>
 						<TableHead>Aufgaben</TableHead>
 						<TableHead>Bewertungen</TableHead>
 						<TableHead>Aufgaben-Details</TableHead>
 					</TableRow>
 				</TableHeader>
 				<TableBody>
+					{participants.length === 0 && (
+						<TableRow>
+							<TableCell
+								className="text-center text-muted-foreground"
+								colSpan={9}
+							>
+								Niemand in dieser Auswahl.
+							</TableCell>
+						</TableRow>
+					)}
 					{participants.map((participant) => (
 						<TableRow
 							className={
@@ -299,6 +345,14 @@ function ParticipantTable({
 							</TableCell>
 							<TableCell className="text-muted-foreground">
 								{participant.groupName ?? "Keine Gruppe"}
+							</TableCell>
+							<TableCell>
+								<RessortAssignment
+									acId={acId}
+									canManage={ressortColumn.canManage}
+									participant={participant}
+									ressorts={ressortColumn.ressorts}
+								/>
 							</TableCell>
 							<TableCell className="text-muted-foreground">
 								{participant.completedTaskCount} / {participant.totalTaskCount}

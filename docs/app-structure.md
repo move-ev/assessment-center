@@ -108,7 +108,8 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
         ├── /overview                             Admin: live completion matrix (ACTIVE only)
         │
         ├── /results                              Admin (COMPLETED, ANONYMIZED), reviewers of the AC read-only (COMPLETED)
-        │   │                                     Tab "Ressorts": planned numbers per ressort (admins edit)
+        │   │                                     Tab "Ressorts": planned numbers and assigned people per ressort (admins edit)
+        │   │                                     ?ressort=<id>|none filters the ranking by ressort
         │   ├── /[participantId]                  One participant in detail (same access)
         │   └── /compare?ids=a,b,c                2–3 participants side by side (same access)
         │
@@ -139,6 +140,10 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
   ACs; one is deleted only while no AC has numbers for it. How many people a
   ressort has (registered, active) and should admit is kept per AC in the
   results tab "Ressorts", including after anonymizing.
+- Admins assign each participant to at most one ressort (`Participant.ressortId`)
+  in the ranking or on the detail page, from COMPLETED on and after
+  anonymizing; reviewers only read it. Going beyond "aufzunehmen" is allowed
+  and warned about. A ressort with numbers or assigned people stays.
 - Removing a reviewer, a task or an assignment is refused while submitted
   ratings exist (deleting assignments would cascade to the ratings).
 - Access to `/review` is blocked for users who are not assigned as a
@@ -252,10 +257,13 @@ src/modules/
 └── ressort/
     ├── components/
     │   ├── ressort-manager-page.tsx   Admin list: add, rename, delete (client)
-    │   ├── ressort-capacity-table.tsx Results tab: numbers per ressort, inputs for admins
+    │   ├── ressort-capacity-table.tsx Results tab: numbers and assigned people per ressort
+    │   ├── ressort-assignment.tsx     A person's ressort: picker for admins, name otherwise
+    │   ├── ressort-select.tsx         "Zu Ressort hinzufügen" picker with warning (client)
+    │   ├── ressort-filter-select.tsx  Ranking filter via ?ressort= (client)
     │   └── index.ts
     ├── server/
-    │   └── get-ressort-capacities.ts  Every ressort with its numbers in one AC
+    │   └── get-ressort-capacities.ts  Every ressort with its numbers and people in one AC
     └── index.ts
 ```
 
@@ -346,7 +354,7 @@ src/server/api/routers/
 ├── assignment.ts           Create/delete ReviewerAssignment (reviewer × participant × task)
 ├── rating.ts               Upsert QuantitativeRating, QualitativeRating (blank deletes), TeamTaskObservation
 ├── evaluation.ts           Read-only: aggregate scores, completion status
-└── ressort.ts              Admin: create/rename/delete ressorts; numbers per AC
+└── ressort.ts              Admin: create/rename/delete ressorts; numbers per AC; assign participants
 ```
 
 All routers are registered in `src/server/api/root.ts`.
@@ -427,6 +435,9 @@ testable with `bun run test` without any setup.
 - `src/lib/ressort-capacity.ts`: valid ressort numbers per AC (whole numbers
   from 0 to 9999, active at most registered) and free slots (negative = more assigned
   than should be admitted). Used by the ressort router and the results tab.
+- `src/lib/ressort-assignment.ts`: people per ressort in rank order, where a
+  ressort stands against its target ("noch 3 frei", "voll", "2 über dem Ziel")
+  and the ranking filter. Used by the ressort router, loader and components.
 - `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and
   4-star anchor texts, shared by the criteria editor, the rating view and the
   task router.

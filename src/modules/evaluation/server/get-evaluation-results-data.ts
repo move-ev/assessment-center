@@ -1,3 +1,4 @@
+import type { AssignedRessort } from "@/lib/ressort-assignment";
 import "server-only";
 
 import { notFound } from "next/navigation";
@@ -95,6 +96,8 @@ type ParticipantResult = {
 	name: string;
 	groupId: string | null;
 	groupName: string | null;
+	/** Ressort the person is assigned to (#46); null while unassigned. */
+	ressort: AssignedRessort | null;
 	overallScore: number | null;
 	completedTaskCount: number;
 	totalTaskCount: number;
@@ -229,6 +232,7 @@ async function fetchEvaluationResultsSourceData(acId: string) {
 				select: {
 					id: true,
 					name: true,
+					ressort: { select: { id: true, name: true } },
 					groupMemberships: {
 						select: {
 							group: {
@@ -474,6 +478,7 @@ function buildParticipantResults(
 			name: participant.name,
 			groupId: group?.id ?? null,
 			groupName: group?.name ?? null,
+			ressort: participant.ressort,
 			overallScore: computeWeightedMean(weightedTaskScores),
 			completedTaskCount,
 			totalTaskCount: sortedTaskResults.length,
@@ -658,6 +663,7 @@ function buildExportRows(
 			Rang: participant.rank?.toString() ?? "",
 			Teilnehmer: participant.name,
 			Gruppe: participant.groupName ?? "Keine Gruppe",
+			Ressort: participant.ressort?.name ?? "",
 			Gesamtwert_Prozent: formatPercentForExport(participant.overallScore),
 			Abgeschlossene_Aufgaben: `${participant.completedTaskCount}/${participant.totalTaskCount}`,
 			Abgeschlossene_Bewertungen: `${participant.completedAssignmentCount}/${participant.totalAssignmentCount}`,

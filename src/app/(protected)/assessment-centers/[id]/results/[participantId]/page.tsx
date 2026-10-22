@@ -2,6 +2,7 @@ import {
 	EvaluationParticipantDetail,
 	getEvaluationParticipantDetailData,
 } from "@/modules/evaluation";
+import { getRessortCapacities } from "@/modules/ressort";
 import { requireResultsAccess } from "@/server/ac-role";
 
 type Props = {
@@ -10,8 +11,18 @@ type Props = {
 
 export default async function AcResultParticipantPage({ params }: Props) {
 	const { id, participantId } = await params;
-	await requireResultsAccess(id);
-	const data = await getEvaluationParticipantDetailData(id, participantId);
+	const { canManage } = await requireResultsAccess(id);
+	const [data, ressorts] = await Promise.all([
+		getEvaluationParticipantDetailData(id, participantId),
+		getRessortCapacities(id),
+	]);
 
-	return <EvaluationParticipantDetail acId={id} data={data} />;
+	return (
+		<EvaluationParticipantDetail
+			acId={id}
+			canManage={canManage}
+			data={data}
+			ressorts={ressorts}
+		/>
+	);
 }

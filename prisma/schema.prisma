@@ -209,10 +209,15 @@ model Participant {
   updatedAt          DateTime         @updatedAt
   deletedAt          DateTime?
 
+  /// The ressort the person is assigned to after the AC; at most one.
+  ressortId           String?
+  ressort             Ressort?         @relation(fields: [ressortId], references: [id], onDelete: Restrict)
+
   groupMemberships    ParticipantGroupMembership[]
   reviewerAssignments ReviewerAssignment[]
 
   @@index([assessmentCenterId])
+  @@index([ressortId])
 }
 
 /// A system User acting as a reviewer within a specific AC.
@@ -442,7 +447,8 @@ model Ressort {
   name       String               @unique
   createdAt  DateTime             @default(now())
   updatedAt  DateTime             @updatedAt
-  capacities AcRessortCapacity[]
+  capacities   AcRessortCapacity[]
+  participants Participant[]
 }
 
 /// Planned numbers of one ressort for one AC (one application phase).
