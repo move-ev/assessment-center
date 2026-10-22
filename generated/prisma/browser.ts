@@ -112,3 +112,13 @@ export type QualitativeRating = Prisma.QualitativeRatingModel
  * 
  */
 export type TeamTaskObservation = Prisma.TeamTaskObservationModel
+/**
+ * Model Ressort
+ * 
+ */
+export type Ressort = Prisma.RessortModel
+/**
+ * Model AcRessortCapacity
+ * 
+ */
+export type AcRessortCapacity = Prisma.AcRessortCapacityModel

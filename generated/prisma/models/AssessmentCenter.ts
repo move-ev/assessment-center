@@ -261,6 +261,7 @@ export type AssessmentCenterWhereInput = {
   participants?: Prisma.ParticipantListRelationFilter
   reviewers?: Prisma.ReviewerListRelationFilter
   tasks?: Prisma.TaskListRelationFilter
+  ressortCapacities?: Prisma.AcRessortCapacityListRelationFilter
 }
 
 export type AssessmentCenterOrderByWithRelationInput = {
@@ -279,6 +280,7 @@ export type AssessmentCenterOrderByWithRelationInput = {
   participants?: Prisma.ParticipantOrderByRelationAggregateInput
   reviewers?: Prisma.ReviewerOrderByRelationAggregateInput
   tasks?: Prisma.TaskOrderByRelationAggregateInput
+  ressortCapacities?: Prisma.AcRessortCapacityOrderByRelationAggregateInput
 }
 
 export type AssessmentCenterWhereUniqueInput = Prisma.AtLeast<{
@@ -300,6 +302,7 @@ export type AssessmentCenterWhereUniqueInput = Prisma.AtLeast<{
   participants?: Prisma.ParticipantListRelationFilter
   reviewers?: Prisma.ReviewerListRelationFilter
   tasks?: Prisma.TaskListRelationFilter
+  ressortCapacities?: Prisma.AcRessortCapacityListRelationFilter
 }, "id">
 
 export type AssessmentCenterOrderByWithAggregationInput = {
@@ -352,6 +355,7 @@ export type AssessmentCenterCreateInput = {
   participants?: Prisma.ParticipantCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUncheckedCreateInput = {
@@ -370,6 +374,7 @@ export type AssessmentCenterUncheckedCreateInput = {
   participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerUncheckedCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUpdateInput = {
@@ -388,6 +393,7 @@ export type AssessmentCenterUpdateInput = {
   participants?: Prisma.ParticipantUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterUncheckedUpdateInput = {
@@ -406,6 +412,7 @@ export type AssessmentCenterUncheckedUpdateInput = {
   participants?: Prisma.ParticipantUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterCreateManyInput = {
@@ -581,6 +588,20 @@ export type AssessmentCenterUpdateOneRequiredWithoutTasksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentCenterUpdateToOneWithWhereWithoutTasksInput, Prisma.AssessmentCenterUpdateWithoutTasksInput>, Prisma.AssessmentCenterUncheckedUpdateWithoutTasksInput>
 }
 
+export type AssessmentCenterCreateNestedOneWithoutRessortCapacitiesInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCenterCreateWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUncheckedCreateWithoutRessortCapacitiesInput>
+  connectOrCreate?: Prisma.AssessmentCenterCreateOrConnectWithoutRessortCapacitiesInput
+  connect?: Prisma.AssessmentCenterWhereUniqueInput
+}
+
+export type AssessmentCenterUpdateOneRequiredWithoutRessortCapacitiesNestedInput = {
+  create?: Prisma.XOR<Prisma.AssessmentCenterCreateWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUncheckedCreateWithoutRessortCapacitiesInput>
+  connectOrCreate?: Prisma.AssessmentCenterCreateOrConnectWithoutRessortCapacitiesInput
+  upsert?: Prisma.AssessmentCenterUpsertWithoutRessortCapacitiesInput
+  connect?: Prisma.AssessmentCenterWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AssessmentCenterUpdateToOneWithWhereWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUpdateWithoutRessortCapacitiesInput>, Prisma.AssessmentCenterUncheckedUpdateWithoutRessortCapacitiesInput>
+}
+
 export type AssessmentCenterCreateWithoutDaysInput = {
   id?: string
   name: string
@@ -596,6 +617,7 @@ export type AssessmentCenterCreateWithoutDaysInput = {
   participants?: Prisma.ParticipantCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUncheckedCreateWithoutDaysInput = {
@@ -613,6 +635,7 @@ export type AssessmentCenterUncheckedCreateWithoutDaysInput = {
   participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerUncheckedCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterCreateOrConnectWithoutDaysInput = {
@@ -646,6 +669,7 @@ export type AssessmentCenterUpdateWithoutDaysInput = {
   participants?: Prisma.ParticipantUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterUncheckedUpdateWithoutDaysInput = {
@@ -663,6 +687,7 @@ export type AssessmentCenterUncheckedUpdateWithoutDaysInput = {
   participants?: Prisma.ParticipantUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterCreateWithoutGroupsInput = {
@@ -680,6 +705,7 @@ export type AssessmentCenterCreateWithoutGroupsInput = {
   participants?: Prisma.ParticipantCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUncheckedCreateWithoutGroupsInput = {
@@ -697,6 +723,7 @@ export type AssessmentCenterUncheckedCreateWithoutGroupsInput = {
   participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerUncheckedCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterCreateOrConnectWithoutGroupsInput = {
@@ -730,6 +757,7 @@ export type AssessmentCenterUpdateWithoutGroupsInput = {
   participants?: Prisma.ParticipantUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterUncheckedUpdateWithoutGroupsInput = {
@@ -747,6 +775,7 @@ export type AssessmentCenterUncheckedUpdateWithoutGroupsInput = {
   participants?: Prisma.ParticipantUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterCreateWithoutParticipantsInput = {
@@ -764,6 +793,7 @@ export type AssessmentCenterCreateWithoutParticipantsInput = {
   groups?: Prisma.ParticipantGroupCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUncheckedCreateWithoutParticipantsInput = {
@@ -781,6 +811,7 @@ export type AssessmentCenterUncheckedCreateWithoutParticipantsInput = {
   groups?: Prisma.ParticipantGroupUncheckedCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerUncheckedCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterCreateOrConnectWithoutParticipantsInput = {
@@ -814,6 +845,7 @@ export type AssessmentCenterUpdateWithoutParticipantsInput = {
   groups?: Prisma.ParticipantGroupUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterUncheckedUpdateWithoutParticipantsInput = {
@@ -831,6 +863,7 @@ export type AssessmentCenterUncheckedUpdateWithoutParticipantsInput = {
   groups?: Prisma.ParticipantGroupUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterCreateWithoutReviewersInput = {
@@ -848,6 +881,7 @@ export type AssessmentCenterCreateWithoutReviewersInput = {
   groups?: Prisma.ParticipantGroupCreateNestedManyWithoutAssessmentCenterInput
   participants?: Prisma.ParticipantCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUncheckedCreateWithoutReviewersInput = {
@@ -865,6 +899,7 @@ export type AssessmentCenterUncheckedCreateWithoutReviewersInput = {
   groups?: Prisma.ParticipantGroupUncheckedCreateNestedManyWithoutAssessmentCenterInput
   participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutAssessmentCenterInput
   tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterCreateOrConnectWithoutReviewersInput = {
@@ -898,6 +933,7 @@ export type AssessmentCenterUpdateWithoutReviewersInput = {
   groups?: Prisma.ParticipantGroupUpdateManyWithoutAssessmentCenterNestedInput
   participants?: Prisma.ParticipantUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterUncheckedUpdateWithoutReviewersInput = {
@@ -915,6 +951,7 @@ export type AssessmentCenterUncheckedUpdateWithoutReviewersInput = {
   groups?: Prisma.ParticipantGroupUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   participants?: Prisma.ParticipantUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   tasks?: Prisma.TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterCreateWithoutTasksInput = {
@@ -932,6 +969,7 @@ export type AssessmentCenterCreateWithoutTasksInput = {
   groups?: Prisma.ParticipantGroupCreateNestedManyWithoutAssessmentCenterInput
   participants?: Prisma.ParticipantCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterUncheckedCreateWithoutTasksInput = {
@@ -949,6 +987,7 @@ export type AssessmentCenterUncheckedCreateWithoutTasksInput = {
   groups?: Prisma.ParticipantGroupUncheckedCreateNestedManyWithoutAssessmentCenterInput
   participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutAssessmentCenterInput
   reviewers?: Prisma.ReviewerUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutAssessmentCenterInput
 }
 
 export type AssessmentCenterCreateOrConnectWithoutTasksInput = {
@@ -982,6 +1021,7 @@ export type AssessmentCenterUpdateWithoutTasksInput = {
   groups?: Prisma.ParticipantGroupUpdateManyWithoutAssessmentCenterNestedInput
   participants?: Prisma.ParticipantUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 export type AssessmentCenterUncheckedUpdateWithoutTasksInput = {
@@ -999,6 +1039,95 @@ export type AssessmentCenterUncheckedUpdateWithoutTasksInput = {
   groups?: Prisma.ParticipantGroupUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   participants?: Prisma.ParticipantUncheckedUpdateManyWithoutAssessmentCenterNestedInput
   reviewers?: Prisma.ReviewerUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  ressortCapacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+}
+
+export type AssessmentCenterCreateWithoutRessortCapacitiesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  status?: $Enums.AcStatus
+  isDemo?: boolean
+  anonymizedAt?: Date | string | null
+  ratingScaleMax?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  days?: Prisma.AssessmentDayCreateNestedManyWithoutAssessmentCenterInput
+  groups?: Prisma.ParticipantGroupCreateNestedManyWithoutAssessmentCenterInput
+  participants?: Prisma.ParticipantCreateNestedManyWithoutAssessmentCenterInput
+  reviewers?: Prisma.ReviewerCreateNestedManyWithoutAssessmentCenterInput
+  tasks?: Prisma.TaskCreateNestedManyWithoutAssessmentCenterInput
+}
+
+export type AssessmentCenterUncheckedCreateWithoutRessortCapacitiesInput = {
+  id?: string
+  name: string
+  description?: string | null
+  status?: $Enums.AcStatus
+  isDemo?: boolean
+  anonymizedAt?: Date | string | null
+  ratingScaleMax?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  days?: Prisma.AssessmentDayUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  groups?: Prisma.ParticipantGroupUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  reviewers?: Prisma.ReviewerUncheckedCreateNestedManyWithoutAssessmentCenterInput
+  tasks?: Prisma.TaskUncheckedCreateNestedManyWithoutAssessmentCenterInput
+}
+
+export type AssessmentCenterCreateOrConnectWithoutRessortCapacitiesInput = {
+  where: Prisma.AssessmentCenterWhereUniqueInput
+  create: Prisma.XOR<Prisma.AssessmentCenterCreateWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUncheckedCreateWithoutRessortCapacitiesInput>
+}
+
+export type AssessmentCenterUpsertWithoutRessortCapacitiesInput = {
+  update: Prisma.XOR<Prisma.AssessmentCenterUpdateWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUncheckedUpdateWithoutRessortCapacitiesInput>
+  create: Prisma.XOR<Prisma.AssessmentCenterCreateWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUncheckedCreateWithoutRessortCapacitiesInput>
+  where?: Prisma.AssessmentCenterWhereInput
+}
+
+export type AssessmentCenterUpdateToOneWithWhereWithoutRessortCapacitiesInput = {
+  where?: Prisma.AssessmentCenterWhereInput
+  data: Prisma.XOR<Prisma.AssessmentCenterUpdateWithoutRessortCapacitiesInput, Prisma.AssessmentCenterUncheckedUpdateWithoutRessortCapacitiesInput>
+}
+
+export type AssessmentCenterUpdateWithoutRessortCapacitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  anonymizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratingScaleMax?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  days?: Prisma.AssessmentDayUpdateManyWithoutAssessmentCenterNestedInput
+  groups?: Prisma.ParticipantGroupUpdateManyWithoutAssessmentCenterNestedInput
+  participants?: Prisma.ParticipantUpdateManyWithoutAssessmentCenterNestedInput
+  reviewers?: Prisma.ReviewerUpdateManyWithoutAssessmentCenterNestedInput
+  tasks?: Prisma.TaskUpdateManyWithoutAssessmentCenterNestedInput
+}
+
+export type AssessmentCenterUncheckedUpdateWithoutRessortCapacitiesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumAcStatusFieldUpdateOperationsInput | $Enums.AcStatus
+  isDemo?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  anonymizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ratingScaleMax?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  days?: Prisma.AssessmentDayUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  groups?: Prisma.ParticipantGroupUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  participants?: Prisma.ParticipantUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  reviewers?: Prisma.ReviewerUncheckedUpdateManyWithoutAssessmentCenterNestedInput
+  tasks?: Prisma.TaskUncheckedUpdateManyWithoutAssessmentCenterNestedInput
 }
 
 
@@ -1012,6 +1141,7 @@ export type AssessmentCenterCountOutputType = {
   participants: number
   reviewers: number
   tasks: number
+  ressortCapacities: number
 }
 
 export type AssessmentCenterCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1020,6 +1150,7 @@ export type AssessmentCenterCountOutputTypeSelect<ExtArgs extends runtime.Types.
   participants?: boolean | AssessmentCenterCountOutputTypeCountParticipantsArgs
   reviewers?: boolean | AssessmentCenterCountOutputTypeCountReviewersArgs
   tasks?: boolean | AssessmentCenterCountOutputTypeCountTasksArgs
+  ressortCapacities?: boolean | AssessmentCenterCountOutputTypeCountRessortCapacitiesArgs
 }
 
 /**
@@ -1067,6 +1198,13 @@ export type AssessmentCenterCountOutputTypeCountTasksArgs<ExtArgs extends runtim
   where?: Prisma.TaskWhereInput
 }
 
+/**
+ * AssessmentCenterCountOutputType without action
+ */
+export type AssessmentCenterCountOutputTypeCountRessortCapacitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AcRessortCapacityWhereInput
+}
+
 
 export type AssessmentCenterSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1084,6 +1222,7 @@ export type AssessmentCenterSelect<ExtArgs extends runtime.Types.Extensions.Inte
   participants?: boolean | Prisma.AssessmentCenter$participantsArgs<ExtArgs>
   reviewers?: boolean | Prisma.AssessmentCenter$reviewersArgs<ExtArgs>
   tasks?: boolean | Prisma.AssessmentCenter$tasksArgs<ExtArgs>
+  ressortCapacities?: boolean | Prisma.AssessmentCenter$ressortCapacitiesArgs<ExtArgs>
   _count?: boolean | Prisma.AssessmentCenterCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["assessmentCenter"]>
 
@@ -1133,6 +1272,7 @@ export type AssessmentCenterInclude<ExtArgs extends runtime.Types.Extensions.Int
   participants?: boolean | Prisma.AssessmentCenter$participantsArgs<ExtArgs>
   reviewers?: boolean | Prisma.AssessmentCenter$reviewersArgs<ExtArgs>
   tasks?: boolean | Prisma.AssessmentCenter$tasksArgs<ExtArgs>
+  ressortCapacities?: boolean | Prisma.AssessmentCenter$ressortCapacitiesArgs<ExtArgs>
   _count?: boolean | Prisma.AssessmentCenterCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type AssessmentCenterIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1146,6 +1286,7 @@ export type $AssessmentCenterPayload<ExtArgs extends runtime.Types.Extensions.In
     participants: Prisma.$ParticipantPayload<ExtArgs>[]
     reviewers: Prisma.$ReviewerPayload<ExtArgs>[]
     tasks: Prisma.$TaskPayload<ExtArgs>[]
+    ressortCapacities: Prisma.$AcRessortCapacityPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1564,6 +1705,7 @@ export interface Prisma__AssessmentCenterClient<T, Null = never, ExtArgs extends
   participants<T extends Prisma.AssessmentCenter$participantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentCenter$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewers<T extends Prisma.AssessmentCenter$reviewersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentCenter$reviewersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   tasks<T extends Prisma.AssessmentCenter$tasksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentCenter$tasksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TaskPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  ressortCapacities<T extends Prisma.AssessmentCenter$ressortCapacitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentCenter$ressortCapacitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AcRessortCapacityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2113,6 +2255,30 @@ export type AssessmentCenter$tasksArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.TaskScalarFieldEnum | Prisma.TaskScalarFieldEnum[]
+}
+
+/**
+ * AssessmentCenter.ressortCapacities
+ */
+export type AssessmentCenter$ressortCapacitiesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AcRessortCapacity
+   */
+  select?: Prisma.AcRessortCapacitySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AcRessortCapacity
+   */
+  omit?: Prisma.AcRessortCapacityOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AcRessortCapacityInclude<ExtArgs> | null
+  where?: Prisma.AcRessortCapacityWhereInput
+  orderBy?: Prisma.AcRessortCapacityOrderByWithRelationInput | Prisma.AcRessortCapacityOrderByWithRelationInput[]
+  cursor?: Prisma.AcRessortCapacityWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AcRessortCapacityScalarFieldEnum | Prisma.AcRessortCapacityScalarFieldEnum[]
 }
 
 /**

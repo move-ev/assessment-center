@@ -4,6 +4,7 @@ export const AUTH_ROUTE = "/auth";
 export const ROUTES = {
 	auth: () => "/auth",
 	dashboard: () => "/dashboard",
+	ressorts: () => "/ressorts",
 	acNew: () => "/assessment-centers/new",
 	ac: (id: string) => `/assessment-centers/${id}`,
 	acSetup: (id: string) => `/assessment-centers/${id}/setup`,

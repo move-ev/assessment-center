@@ -15,18 +15,26 @@ function DashboardLayout({ userName, isAdmin, children }: Props) {
 	return (
 		<div className="flex min-h-screen flex-col">
 			<header className="border-b bg-background px-6 py-3">
-				<div className="flex items-center justify-between">
+				<div className="flex flex-wrap items-center justify-between gap-3">
 					<span className="font-semibold text-foreground">
 						Assessment Center
 					</span>
-					<div className="flex items-center gap-3">
+					<div className="flex flex-wrap items-center gap-3">
 						{isAdmin && (
-							<Link
-								className={buttonVariants({ size: "sm" })}
-								href={ROUTES.acNew()}
-							>
-								Neues AC
-							</Link>
+							<>
+								<Link
+									className={buttonVariants({ size: "sm", variant: "outline" })}
+									href={ROUTES.ressorts()}
+								>
+									Ressorts
+								</Link>
+								<Link
+									className={buttonVariants({ size: "sm" })}
+									href={ROUTES.acNew()}
+								>
+									Neues AC
+								</Link>
+							</>
 						)}
 						<span className="text-muted-foreground text-sm">{userName}</span>
 						<LogoutButton variant="outline" />
