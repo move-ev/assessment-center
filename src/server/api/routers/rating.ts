@@ -32,8 +32,12 @@ const qualitativeInput = z.object({
 	participantId: z.string(),
 	criteriaId: z.string(),
 	// Empty or blank clears the entry (see getQualitativeWrite).
-	text: z.string().max(QUALITATIVE_TEXT_MAX_LENGTH),
+	text: z.string().trim().max(QUALITATIVE_TEXT_MAX_LENGTH),
 });
+
+type QualitativeSaveResult =
+	| { deleted: true }
+	| { deleted: false; id: string; text: string; updatedAt: Date };
 
 const teamObservationInput = z.object({
 	acId: z.string(),
@@ -273,20 +277,26 @@ export const ratingRouter = createTRPCRouter({
 				criteriaId: input.criteriaId,
 			};
 
-			return writeUnlessAnonymized(ctx.db, input.acId, async (tx) => {
-				if (write.kind === "DELETE") {
-					await tx.qualitativeRating.deleteMany({ where: key });
-					return { deleted: true as const };
-				}
+			return writeUnlessAnonymized(
+				ctx.db,
+				input.acId,
+				async (tx): Promise<QualitativeSaveResult> => {
+					if (write.kind === "DELETE") {
+						// Deleted for good rather than soft-deleted: a cleared free text
+						// should not linger in the database (data minimization).
+						await tx.qualitativeRating.deleteMany({ where: key });
+						return { deleted: true };
+					}
 
-				const saved = await tx.qualitativeRating.upsert({
-					where: { reviewerAssignmentId_criteriaId: key },
-					create: { ...key, text: write.text },
-					update: { text: write.text, deletedAt: null },
-					select: { id: true, text: true, updatedAt: true },
-				});
-				return { deleted: false as const, ...saved };
-			});
+					const saved = await tx.qualitativeRating.upsert({
+						where: { reviewerAssignmentId_criteriaId: key },
+						create: { ...key, text: write.text },
+						update: { text: write.text, deletedAt: null },
+						select: { id: true, text: true, updatedAt: true },
+					});
+					return { deleted: false, ...saved };
+				},
+			);
 		}),
 
 	upsertTeamObservation: protectedProcedure

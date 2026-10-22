@@ -32,7 +32,12 @@ function ReviewQualitativeField({
 		"idle" | "saving" | "saved" | "error"
 	>("idle");
 	const mutation = api.rating.upsertQualitative.useMutation();
+	// Text the server has confirmed, and the last text sent (or confirmed).
 	const lastSaved = useRef(criterion.text.trim());
+	const lastRequested = useRef(criterion.text.trim());
+	// Saves run one after another, so the server always ends on the latest
+	// text, even when the field is cleared while a save is still running.
+	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const normalizedText = useMemo(() => text.trim(), [text]);
 
 	useEffect(() => {
@@ -41,27 +46,42 @@ function ReviewQualitativeField({
 
 	useEffect(() => {
 		// An emptied field is saved too: it removes the entry.
-		if (normalizedText === lastSaved.current) {
+		if (normalizedText === lastRequested.current) {
+			// Typed and reverted before the save: nothing new to send.
+			if (lastRequested.current === lastSaved.current) {
+				setSaveState((state) => (state === "saving" ? "idle" : state));
+			}
 			return;
 		}
 
 		setSaveState("saving");
-		const timer = window.setTimeout(async () => {
-			try {
-				await mutation.mutateAsync({
-					acId,
-					taskId,
-					participantId,
-					criteriaId: criterion.id,
-					text: normalizedText,
-				});
-				lastSaved.current = normalizedText;
-				setSaveState("saved");
-				onPersisted(criterion.id, normalizedText !== "");
-			} catch (error) {
-				setSaveState("error");
-				toast.error(getErrorMessage(error));
-			}
+		const timer = window.setTimeout(() => {
+			const textToSave = normalizedText;
+			lastRequested.current = textToSave;
+			saveQueue.current = saveQueue.current.then(async () => {
+				const isLatest = () => lastRequested.current === textToSave;
+				try {
+					await mutation.mutateAsync({
+						acId,
+						taskId,
+						participantId,
+						criteriaId: criterion.id,
+						text: textToSave,
+					});
+					lastSaved.current = textToSave;
+					if (isLatest()) {
+						setSaveState("saved");
+						onPersisted(criterion.id, textToSave !== "");
+					}
+				} catch (error) {
+					toast.error(getErrorMessage(error));
+					if (isLatest()) {
+						// Let the next edit send again.
+						lastRequested.current = lastSaved.current;
+						setSaveState("error");
+					}
+				}
+			});
 		}, 500);
 
 		return () => window.clearTimeout(timer);
