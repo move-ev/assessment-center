@@ -28,6 +28,7 @@ export default async function AcResultsPage({ params, searchParams }: Props) {
 			// A repeated ?ressort= takes the first value.
 			ressortFilter={parseRessortFilter(
 				Array.isArray(ressort) ? ressort[0] : ressort,
+				ressorts.map((row) => row.ressortId),
 			)}
 			ressorts={ressorts}
 			results={results}

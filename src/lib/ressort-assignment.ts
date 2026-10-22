@@ -12,11 +12,12 @@ export function groupByRessort<T extends { ressortId: string | null }>(
 ): Map<string, T[]> {
 	const groups = new Map<string, T[]>();
 	for (const person of people) {
-		if (person.ressortId !== null) {
-			groups.set(person.ressortId, [
-				...(groups.get(person.ressortId) ?? []),
-				person,
-			]);
+		if (person.ressortId === null) continue;
+		const group = groups.get(person.ressortId);
+		if (group) {
+			group.push(person);
+		} else {
+			groups.set(person.ressortId, [person]);
 		}
 	}
 	return groups;
@@ -73,10 +74,18 @@ export type RessortFilter =
 	| { kind: "none" }
 	| { kind: "ressort"; ressortId: string };
 
-/** Reads the ranking filter from its URL value (`?ressort=`). */
-export function parseRessortFilter(value: string | undefined): RessortFilter {
+/**
+ * Reads the ranking filter from its URL value (`?ressort=`). An id that is
+ * not among the existing ressorts (a deleted one, a typo) shows everyone,
+ * so a stale link never hides the whole ranking.
+ */
+export function parseRessortFilter(
+	value: string | undefined,
+	ressortIds: string[],
+): RessortFilter {
 	if (!value) return { kind: "all" };
 	if (value === UNASSIGNED_FILTER_VALUE) return { kind: "none" };
+	if (!ressortIds.includes(value)) return { kind: "all" };
 	return { kind: "ressort", ressortId: value };
 }
 

@@ -198,7 +198,8 @@ export const ressortRouter = createTRPCRouter({
 			z.object({
 				acId: z.string(),
 				participantId: z.string(),
-				ressortId: z.string().nullable(),
+				// null removes the assignment; an empty id is no ressort.
+				ressortId: z.string().min(1).nullable(),
 			}),
 		)
 		.mutation(async ({ ctx, input }) => {

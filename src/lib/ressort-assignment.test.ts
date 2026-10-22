@@ -9,6 +9,7 @@ import {
 	toRessortFilterValue,
 } from "./ressort-assignment.ts";
 
+const KNOWN = ["r1", "r2"];
 const person = (id: string, ressortId: string | null) => ({ id, ressortId });
 const countIn = (
 	groups: ReturnType<typeof groupByRessort>,
@@ -102,25 +103,32 @@ describe("getSlotStatus", () => {
 
 describe("ressort filter", () => {
 	it("reads all, unassigned or one ressort from the URL value", () => {
-		assert.deepEqual(parseRessortFilter(undefined), { kind: "all" });
-		assert.deepEqual(parseRessortFilter(""), { kind: "all" });
-		assert.deepEqual(parseRessortFilter("none"), { kind: "none" });
-		assert.deepEqual(parseRessortFilter("r1"), {
+		assert.deepEqual(parseRessortFilter(undefined, KNOWN), { kind: "all" });
+		assert.deepEqual(parseRessortFilter("", KNOWN), { kind: "all" });
+		assert.deepEqual(parseRessortFilter("none", KNOWN), { kind: "none" });
+		assert.deepEqual(parseRessortFilter("r1", KNOWN), {
 			kind: "ressort",
 			ressortId: "r1",
 		});
 	});
 
+	it("shows everyone for a ressort that no longer exists", () => {
+		assert.deepEqual(parseRessortFilter("deleted", KNOWN), { kind: "all" });
+	});
+
 	it("turns a filter back into its URL value", () => {
 		for (const value of ["", "none", "r1"]) {
-			assert.equal(toRessortFilterValue(parseRessortFilter(value)), value);
+			assert.equal(
+				toRessortFilterValue(parseRessortFilter(value, KNOWN)),
+				value,
+			);
 		}
 	});
 
 	it("matches people by their ressort", () => {
-		const all = parseRessortFilter(undefined);
-		const none = parseRessortFilter("none");
-		const it1 = parseRessortFilter("r1");
+		const all = parseRessortFilter(undefined, KNOWN);
+		const none = parseRessortFilter("none", KNOWN);
+		const it1 = parseRessortFilter("r1", KNOWN);
 		assert.equal(matchesRessortFilter("r1", all), true);
 		assert.equal(matchesRessortFilter(null, all), true);
 		assert.equal(matchesRessortFilter(null, none), true);
