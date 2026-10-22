@@ -2,6 +2,22 @@
 
 This is a [T3 Stack](https://create.t3.gg/) project bootstrapped with `create-t3-app`.
 
+## Beispieldaten
+
+`bun run db:seed-sample` legt in der Datenbank aus `DATABASE_URL` ein
+Beispiel-AC an. Es heißt „Beispiel-AC (Testdaten)“ und ist als Demo markiert.
+Es enthält 12 Bewerbende in zwei Gruppen, drei gewichtete Aufgaben,
+Bewertungen von zwei Demo-Beobachtern, Freitexte, Gruppenbeobachtungen und
+Ressorts mit Zahlen und Zuteilungen. Ein erneuter Lauf ersetzt es.
+
+- `-- --reviewer-email du@move-ev.de` trägt dich zusätzlich als Beobachter ein.
+  Dafür musst du dich vorher einmal angemeldet haben.
+- `-- --status ACTIVE` legt das AC laufend an: Nur die Demo-Beobachter haben
+  bewertet, und du kannst selbst bewerten.
+
+Nur gegen eine Entwicklungsdatenbank ausführen, nie gegen die Produktion. Die
+Migrationen müssen vorher eingespielt sein (`bun run db:migrate`).
+
 ## What's next? How do I make an app with this?
 
 We try to keep this project as simple as possible, so you can start with just the scaffolding we set up for you, and add additional things later when they become necessary.
