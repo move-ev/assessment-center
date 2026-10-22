@@ -1,7 +1,5 @@
+import type { AcRole } from "./ac-role.ts";
 import type { AcStatus } from "./ac-status.ts";
-
-/** What someone is in one AC: an admin, one of its reviewers, or neither. */
-export type AcRole = "ADMIN" | "REVIEWER" | "NONE";
 
 export type ResultsAccess = {
 	/** May open the results pages. */

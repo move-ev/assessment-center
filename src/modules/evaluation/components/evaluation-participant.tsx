@@ -42,7 +42,7 @@ type Props = {
 
 function EvaluationParticipant({ acId, acName, canManage, results }: Props) {
 	if (results.participants.length === 0) {
-		return <ResultsEmptyState acId={acId} />;
+		return <ResultsEmptyState acId={acId} canManage={canManage} />;
 	}
 
 	return (
@@ -308,7 +308,13 @@ function TaskBadge({
 	);
 }
 
-function ResultsEmptyState({ acId }: { acId: string }) {
+function ResultsEmptyState({
+	acId,
+	canManage,
+}: {
+	acId: string;
+	canManage: boolean;
+}) {
 	return (
 		<div className="flex flex-1 items-center justify-center p-6">
 			<Empty className="max-w-xl border">
@@ -316,8 +322,14 @@ function ResultsEmptyState({ acId }: { acId: string }) {
 					<EmptyTitle>Noch keine Ergebnisse verfügbar</EmptyTitle>
 					<EmptyDescription>
 						Für dieses Assessment Center liegen noch keine Bewertungen vor.
-						Prüfe zuerst Zuweisungen und abgeschlossene Reviews unter{" "}
-						<a href={ROUTES.acOverview(acId)}>Live-Übersicht</a>.
+						{/* The live overview is for admins only. */}
+						{canManage && (
+							<>
+								{" "}
+								Prüfe zuerst Zuweisungen und abgeschlossene Reviews unter{" "}
+								<a href={ROUTES.acOverview(acId)}>Live-Übersicht</a>.
+							</>
+						)}
 					</EmptyDescription>
 				</EmptyHeader>
 			</Empty>

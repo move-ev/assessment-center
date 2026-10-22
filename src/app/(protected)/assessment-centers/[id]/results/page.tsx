@@ -1,11 +1,8 @@
-import { notFound } from "next/navigation";
-import { getResultsAccess } from "@/lib/results-access";
 import {
 	EvaluationParticipant,
 	getEvaluationResultsData,
 } from "@/modules/evaluation";
-import { getAcRole } from "@/server/ac-role";
-import { db } from "@/server/db";
+import { requireResultsAccess } from "@/server/ac-role";
 
 type Props = {
 	params: Promise<{ id: string }>;
@@ -13,24 +10,14 @@ type Props = {
 
 export default async function AcResultsPage({ params }: Props) {
 	const { id } = await params;
-	const [results, assessmentCenter, role] = await Promise.all([
-		getEvaluationResultsData(id),
-		db.assessmentCenter.findFirst({
-			where: { id, deletedAt: null },
-			select: { name: true, status: true },
-		}),
-		getAcRole(id),
-	]);
-
-	if (!assessmentCenter) {
-		notFound();
-	}
+	const { assessmentCenter, canManage } = await requireResultsAccess(id);
+	const results = await getEvaluationResultsData(id);
 
 	return (
 		<EvaluationParticipant
 			acId={id}
 			acName={assessmentCenter.name}
-			canManage={getResultsAccess(role, assessmentCenter.status).canManage}
+			canManage={canManage}
 			results={results}
 		/>
 	);
