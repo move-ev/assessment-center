@@ -219,8 +219,8 @@ function ParticipantTable({
 						</TableHead>
 						<TableHead>Rang</TableHead>
 						<TableHead>Bewerbende</TableHead>
-						<TableHead>Gruppe</TableHead>
 						<TableHead>Gesamtwert</TableHead>
+						<TableHead>Gruppe</TableHead>
 						<TableHead>Aufgaben</TableHead>
 						<TableHead>Bewertungen</TableHead>
 						<TableHead>Aufgaben-Details</TableHead>
@@ -265,14 +265,14 @@ function ParticipantTable({
 									)}
 								</div>
 							</TableCell>
-							<TableCell className="text-muted-foreground">
-								{participant.groupName ?? "Keine Gruppe"}
-							</TableCell>
 							<TableCell className="tabular-nums">
 								{formatOverallScore(
 									participant.overallScore,
 									participant.showsDecimal,
 								)}
+							</TableCell>
+							<TableCell className="text-muted-foreground">
+								{participant.groupName ?? "Keine Gruppe"}
 							</TableCell>
 							<TableCell className="text-muted-foreground">
 								{participant.completedTaskCount} / {participant.totalTaskCount}
