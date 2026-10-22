@@ -20,6 +20,7 @@ import { formatOverallScore, formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
+import { CompareCheckbox, ComparisonSelection } from "./comparison-selection";
 import { DeviationBadge } from "./deviation-badge";
 import { EvaluationCalibration } from "./evaluation-calibration";
 import { EvaluationCriteria } from "./evaluation-criteria";
@@ -204,76 +205,89 @@ function ParticipantTable({
 	participants: EvaluationResultsData["participants"];
 }) {
 	return (
-		<Table>
-			<TableHeader>
-				<TableRow>
-					<TableHead>Rang</TableHead>
-					<TableHead>Bewerbende</TableHead>
-					<TableHead>Gruppe</TableHead>
-					<TableHead>Gesamtwert</TableHead>
-					<TableHead>Aufgaben</TableHead>
-					<TableHead>Bewertungen</TableHead>
-					<TableHead>Aufgaben-Details</TableHead>
-				</TableRow>
-			</TableHeader>
-			<TableBody>
-				{participants.map((participant) => (
-					<TableRow
-						className={
-							participant.rankingBand
-								? RANKING_BAND_ROW[participant.rankingBand]
-								: undefined
-						}
-						key={participant.id}
-					>
-						<TableCell className="font-medium">
-							<div className="flex items-center gap-2">
-								{participant.rank ?? "–"}
-								{participant.rankingBand && (
-									<RankingBandBadge band={participant.rankingBand} />
-								)}
-							</div>
-						</TableCell>
-						<TableCell className="font-medium">
-							<div className="flex flex-wrap items-center gap-2">
-								<Link
-									className="text-primary underline-offset-4 hover:underline"
-									href={ROUTES.acResultsParticipant(acId, participant.id)}
-								>
-									{participant.name}
-								</Link>
-								{participant.deviatingTaskNames.length > 0 && (
-									<DeviationBadge taskNames={participant.deviatingTaskNames} />
-								)}
-							</div>
-						</TableCell>
-						<TableCell className="text-muted-foreground">
-							{participant.groupName ?? "Keine Gruppe"}
-						</TableCell>
-						<TableCell className="tabular-nums">
-							{formatOverallScore(
-								participant.overallScore,
-								participant.showsDecimal,
-							)}
-						</TableCell>
-						<TableCell className="text-muted-foreground">
-							{participant.completedTaskCount} / {participant.totalTaskCount}
-						</TableCell>
-						<TableCell className="text-muted-foreground">
-							{participant.completedAssignmentCount} /{" "}
-							{participant.totalAssignmentCount}
-						</TableCell>
-						<TableCell className="max-w-xl whitespace-normal">
-							<div className="flex flex-wrap gap-2">
-								{participant.taskResults.map((task) => (
-									<TaskBadge key={task.taskId} task={task} />
-								))}
-							</div>
-						</TableCell>
+		<ComparisonSelection acId={acId}>
+			<Table>
+				<TableHeader>
+					<TableRow>
+						<TableHead className="w-10">
+							<span className="sr-only">Gegenüberstellen</span>
+						</TableHead>
+						<TableHead>Rang</TableHead>
+						<TableHead>Bewerbende</TableHead>
+						<TableHead>Gruppe</TableHead>
+						<TableHead>Gesamtwert</TableHead>
+						<TableHead>Aufgaben</TableHead>
+						<TableHead>Bewertungen</TableHead>
+						<TableHead>Aufgaben-Details</TableHead>
 					</TableRow>
-				))}
-			</TableBody>
-		</Table>
+				</TableHeader>
+				<TableBody>
+					{participants.map((participant) => (
+						<TableRow
+							className={
+								participant.rankingBand
+									? RANKING_BAND_ROW[participant.rankingBand]
+									: undefined
+							}
+							key={participant.id}
+						>
+							<TableCell>
+								<CompareCheckbox
+									name={participant.name}
+									participantId={participant.id}
+								/>
+							</TableCell>
+							<TableCell className="font-medium">
+								<div className="flex items-center gap-2">
+									{participant.rank ?? "–"}
+									{participant.rankingBand && (
+										<RankingBandBadge band={participant.rankingBand} />
+									)}
+								</div>
+							</TableCell>
+							<TableCell className="font-medium">
+								<div className="flex flex-wrap items-center gap-2">
+									<Link
+										className="text-primary underline-offset-4 hover:underline"
+										href={ROUTES.acResultsParticipant(acId, participant.id)}
+									>
+										{participant.name}
+									</Link>
+									{participant.deviatingTaskNames.length > 0 && (
+										<DeviationBadge
+											taskNames={participant.deviatingTaskNames}
+										/>
+									)}
+								</div>
+							</TableCell>
+							<TableCell className="text-muted-foreground">
+								{participant.groupName ?? "Keine Gruppe"}
+							</TableCell>
+							<TableCell className="tabular-nums">
+								{formatOverallScore(
+									participant.overallScore,
+									participant.showsDecimal,
+								)}
+							</TableCell>
+							<TableCell className="text-muted-foreground">
+								{participant.completedTaskCount} / {participant.totalTaskCount}
+							</TableCell>
+							<TableCell className="text-muted-foreground">
+								{participant.completedAssignmentCount} /{" "}
+								{participant.totalAssignmentCount}
+							</TableCell>
+							<TableCell className="max-w-xl whitespace-normal">
+								<div className="flex flex-wrap gap-2">
+									{participant.taskResults.map((task) => (
+										<TaskBadge key={task.taskId} task={task} />
+									))}
+								</div>
+							</TableCell>
+						</TableRow>
+					))}
+				</TableBody>
+			</Table>
+		</ComparisonSelection>
 	);
 }
 

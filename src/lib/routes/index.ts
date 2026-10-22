@@ -22,6 +22,8 @@ export const ROUTES = {
 	acResults: (id: string) => `/assessment-centers/${id}/results`,
 	acResultsParticipant: (id: string, participantId: string) =>
 		`/assessment-centers/${id}/results/${participantId}`,
+	acResultsCompare: (id: string, participantIds: string[]) =>
+		`/assessment-centers/${id}/results/compare?ids=${participantIds.map(encodeURIComponent).join(",")}`,
 	acReview: (id: string) => `/assessment-centers/${id}/review`,
 	acReviewTask: (id: string, taskId: string) =>
 		`/assessment-centers/${id}/review/${taskId}`,
