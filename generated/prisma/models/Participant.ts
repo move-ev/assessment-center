@@ -34,6 +34,7 @@ export type ParticipantMinAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
+  ressortId: string | null
 }
 
 export type ParticipantMaxAggregateOutputType = {
@@ -46,6 +47,7 @@ export type ParticipantMaxAggregateOutputType = {
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
+  ressortId: string | null
 }
 
 export type ParticipantCountAggregateOutputType = {
@@ -58,6 +60,7 @@ export type ParticipantCountAggregateOutputType = {
   createdAt: number
   updatedAt: number
   deletedAt: number
+  ressortId: number
   _all: number
 }
 
@@ -72,6 +75,7 @@ export type ParticipantMinAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  ressortId?: true
 }
 
 export type ParticipantMaxAggregateInputType = {
@@ -84,6 +88,7 @@ export type ParticipantMaxAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  ressortId?: true
 }
 
 export type ParticipantCountAggregateInputType = {
@@ -96,6 +101,7 @@ export type ParticipantCountAggregateInputType = {
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
+  ressortId?: true
   _all?: true
 }
 
@@ -181,6 +187,7 @@ export type ParticipantGroupByOutputType = {
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
+  ressortId: string | null
   _count: ParticipantCountAggregateOutputType | null
   _min: ParticipantMinAggregateOutputType | null
   _max: ParticipantMaxAggregateOutputType | null
@@ -214,7 +221,9 @@ export type ParticipantWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
+  ressortId?: Prisma.StringNullableFilter<"Participant"> | string | null
   assessmentCenter?: Prisma.XOR<Prisma.AssessmentCenterScalarRelationFilter, Prisma.AssessmentCenterWhereInput>
+  ressort?: Prisma.XOR<Prisma.RessortNullableScalarRelationFilter, Prisma.RessortWhereInput> | null
   groupMemberships?: Prisma.ParticipantGroupMembershipListRelationFilter
   reviewerAssignments?: Prisma.ReviewerAssignmentListRelationFilter
 }
@@ -229,7 +238,9 @@ export type ParticipantOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ressortId?: Prisma.SortOrderInput | Prisma.SortOrder
   assessmentCenter?: Prisma.AssessmentCenterOrderByWithRelationInput
+  ressort?: Prisma.RessortOrderByWithRelationInput
   groupMemberships?: Prisma.ParticipantGroupMembershipOrderByRelationAggregateInput
   reviewerAssignments?: Prisma.ReviewerAssignmentOrderByRelationAggregateInput
 }
@@ -247,7 +258,9 @@ export type ParticipantWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
+  ressortId?: Prisma.StringNullableFilter<"Participant"> | string | null
   assessmentCenter?: Prisma.XOR<Prisma.AssessmentCenterScalarRelationFilter, Prisma.AssessmentCenterWhereInput>
+  ressort?: Prisma.XOR<Prisma.RessortNullableScalarRelationFilter, Prisma.RessortWhereInput> | null
   groupMemberships?: Prisma.ParticipantGroupMembershipListRelationFilter
   reviewerAssignments?: Prisma.ReviewerAssignmentListRelationFilter
 }, "id">
@@ -262,6 +275,7 @@ export type ParticipantOrderByWithAggregationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  ressortId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ParticipantCountOrderByAggregateInput
   _max?: Prisma.ParticipantMaxOrderByAggregateInput
   _min?: Prisma.ParticipantMinOrderByAggregateInput
@@ -280,6 +294,7 @@ export type ParticipantScalarWhereWithAggregatesInput = {
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Participant"> | Date | string | null
+  ressortId?: Prisma.StringNullableWithAggregatesFilter<"Participant"> | string | null
 }
 
 export type ParticipantCreateInput = {
@@ -292,6 +307,7 @@ export type ParticipantCreateInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutParticipantsInput
+  ressort?: Prisma.RessortCreateNestedOneWithoutParticipantsInput
   groupMemberships?: Prisma.ParticipantGroupMembershipCreateNestedManyWithoutParticipantInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutParticipantInput
 }
@@ -306,6 +322,7 @@ export type ParticipantUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressortId?: string | null
   groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedCreateNestedManyWithoutParticipantInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutParticipantInput
 }
@@ -320,6 +337,7 @@ export type ParticipantUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutParticipantsNestedInput
+  ressort?: Prisma.RessortUpdateOneWithoutParticipantsNestedInput
   groupMemberships?: Prisma.ParticipantGroupMembershipUpdateManyWithoutParticipantNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutParticipantNestedInput
 }
@@ -334,6 +352,7 @@ export type ParticipantUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressortId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedUpdateManyWithoutParticipantNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutParticipantNestedInput
 }
@@ -348,6 +367,7 @@ export type ParticipantCreateManyInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressortId?: string | null
 }
 
 export type ParticipantUpdateManyMutationInput = {
@@ -371,6 +391,7 @@ export type ParticipantUncheckedUpdateManyInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressortId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type ParticipantListRelationFilter = {
@@ -398,6 +419,7 @@ export type ParticipantCountOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  ressortId?: Prisma.SortOrder
 }
 
 export type ParticipantMaxOrderByAggregateInput = {
@@ -410,6 +432,7 @@ export type ParticipantMaxOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  ressortId?: Prisma.SortOrder
 }
 
 export type ParticipantMinOrderByAggregateInput = {
@@ -422,6 +445,7 @@ export type ParticipantMinOrderByAggregateInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
+  ressortId?: Prisma.SortOrder
 }
 
 export type ParticipantCreateNestedManyWithoutAssessmentCenterInput = {
@@ -494,6 +518,48 @@ export type ParticipantUpdateOneRequiredWithoutReviewerAssignmentsNestedInput = 
   update?: Prisma.XOR<Prisma.XOR<Prisma.ParticipantUpdateToOneWithWhereWithoutReviewerAssignmentsInput, Prisma.ParticipantUpdateWithoutReviewerAssignmentsInput>, Prisma.ParticipantUncheckedUpdateWithoutReviewerAssignmentsInput>
 }
 
+export type ParticipantCreateNestedManyWithoutRessortInput = {
+  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutRessortInput, Prisma.ParticipantUncheckedCreateWithoutRessortInput> | Prisma.ParticipantCreateWithoutRessortInput[] | Prisma.ParticipantUncheckedCreateWithoutRessortInput[]
+  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutRessortInput | Prisma.ParticipantCreateOrConnectWithoutRessortInput[]
+  createMany?: Prisma.ParticipantCreateManyRessortInputEnvelope
+  connect?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+}
+
+export type ParticipantUncheckedCreateNestedManyWithoutRessortInput = {
+  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutRessortInput, Prisma.ParticipantUncheckedCreateWithoutRessortInput> | Prisma.ParticipantCreateWithoutRessortInput[] | Prisma.ParticipantUncheckedCreateWithoutRessortInput[]
+  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutRessortInput | Prisma.ParticipantCreateOrConnectWithoutRessortInput[]
+  createMany?: Prisma.ParticipantCreateManyRessortInputEnvelope
+  connect?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+}
+
+export type ParticipantUpdateManyWithoutRessortNestedInput = {
+  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutRessortInput, Prisma.ParticipantUncheckedCreateWithoutRessortInput> | Prisma.ParticipantCreateWithoutRessortInput[] | Prisma.ParticipantUncheckedCreateWithoutRessortInput[]
+  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutRessortInput | Prisma.ParticipantCreateOrConnectWithoutRessortInput[]
+  upsert?: Prisma.ParticipantUpsertWithWhereUniqueWithoutRessortInput | Prisma.ParticipantUpsertWithWhereUniqueWithoutRessortInput[]
+  createMany?: Prisma.ParticipantCreateManyRessortInputEnvelope
+  set?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  disconnect?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  delete?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  connect?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  update?: Prisma.ParticipantUpdateWithWhereUniqueWithoutRessortInput | Prisma.ParticipantUpdateWithWhereUniqueWithoutRessortInput[]
+  updateMany?: Prisma.ParticipantUpdateManyWithWhereWithoutRessortInput | Prisma.ParticipantUpdateManyWithWhereWithoutRessortInput[]
+  deleteMany?: Prisma.ParticipantScalarWhereInput | Prisma.ParticipantScalarWhereInput[]
+}
+
+export type ParticipantUncheckedUpdateManyWithoutRessortNestedInput = {
+  create?: Prisma.XOR<Prisma.ParticipantCreateWithoutRessortInput, Prisma.ParticipantUncheckedCreateWithoutRessortInput> | Prisma.ParticipantCreateWithoutRessortInput[] | Prisma.ParticipantUncheckedCreateWithoutRessortInput[]
+  connectOrCreate?: Prisma.ParticipantCreateOrConnectWithoutRessortInput | Prisma.ParticipantCreateOrConnectWithoutRessortInput[]
+  upsert?: Prisma.ParticipantUpsertWithWhereUniqueWithoutRessortInput | Prisma.ParticipantUpsertWithWhereUniqueWithoutRessortInput[]
+  createMany?: Prisma.ParticipantCreateManyRessortInputEnvelope
+  set?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  disconnect?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  delete?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  connect?: Prisma.ParticipantWhereUniqueInput | Prisma.ParticipantWhereUniqueInput[]
+  update?: Prisma.ParticipantUpdateWithWhereUniqueWithoutRessortInput | Prisma.ParticipantUpdateWithWhereUniqueWithoutRessortInput[]
+  updateMany?: Prisma.ParticipantUpdateManyWithWhereWithoutRessortInput | Prisma.ParticipantUpdateManyWithWhereWithoutRessortInput[]
+  deleteMany?: Prisma.ParticipantScalarWhereInput | Prisma.ParticipantScalarWhereInput[]
+}
+
 export type ParticipantCreateWithoutAssessmentCenterInput = {
   id?: string
   name: string
@@ -503,6 +569,7 @@ export type ParticipantCreateWithoutAssessmentCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressort?: Prisma.RessortCreateNestedOneWithoutParticipantsInput
   groupMemberships?: Prisma.ParticipantGroupMembershipCreateNestedManyWithoutParticipantInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutParticipantInput
 }
@@ -516,6 +583,7 @@ export type ParticipantUncheckedCreateWithoutAssessmentCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressortId?: string | null
   groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedCreateNestedManyWithoutParticipantInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutParticipantInput
 }
@@ -559,6 +627,7 @@ export type ParticipantScalarWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Participant"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Participant"> | Date | string | null
+  ressortId?: Prisma.StringNullableFilter<"Participant"> | string | null
 }
 
 export type ParticipantCreateWithoutGroupMembershipsInput = {
@@ -571,6 +640,7 @@ export type ParticipantCreateWithoutGroupMembershipsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutParticipantsInput
+  ressort?: Prisma.RessortCreateNestedOneWithoutParticipantsInput
   reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutParticipantInput
 }
 
@@ -584,6 +654,7 @@ export type ParticipantUncheckedCreateWithoutGroupMembershipsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressortId?: string | null
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutParticipantInput
 }
 
@@ -613,6 +684,7 @@ export type ParticipantUpdateWithoutGroupMembershipsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutParticipantsNestedInput
+  ressort?: Prisma.RessortUpdateOneWithoutParticipantsNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutParticipantNestedInput
 }
 
@@ -626,6 +698,7 @@ export type ParticipantUncheckedUpdateWithoutGroupMembershipsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressortId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutParticipantNestedInput
 }
 
@@ -639,6 +712,7 @@ export type ParticipantCreateWithoutReviewerAssignmentsInput = {
   updatedAt?: Date | string
   deletedAt?: Date | string | null
   assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutParticipantsInput
+  ressort?: Prisma.RessortCreateNestedOneWithoutParticipantsInput
   groupMemberships?: Prisma.ParticipantGroupMembershipCreateNestedManyWithoutParticipantInput
 }
 
@@ -652,6 +726,7 @@ export type ParticipantUncheckedCreateWithoutReviewerAssignmentsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressortId?: string | null
   groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedCreateNestedManyWithoutParticipantInput
 }
 
@@ -681,6 +756,7 @@ export type ParticipantUpdateWithoutReviewerAssignmentsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutParticipantsNestedInput
+  ressort?: Prisma.RessortUpdateOneWithoutParticipantsNestedInput
   groupMemberships?: Prisma.ParticipantGroupMembershipUpdateManyWithoutParticipantNestedInput
 }
 
@@ -694,7 +770,62 @@ export type ParticipantUncheckedUpdateWithoutReviewerAssignmentsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressortId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedUpdateManyWithoutParticipantNestedInput
+}
+
+export type ParticipantCreateWithoutRessortInput = {
+  id?: string
+  name: string
+  email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  assessmentCenter: Prisma.AssessmentCenterCreateNestedOneWithoutParticipantsInput
+  groupMemberships?: Prisma.ParticipantGroupMembershipCreateNestedManyWithoutParticipantInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentCreateNestedManyWithoutParticipantInput
+}
+
+export type ParticipantUncheckedCreateWithoutRessortInput = {
+  id?: string
+  assessmentCenterId: string
+  name: string
+  email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedCreateNestedManyWithoutParticipantInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedCreateNestedManyWithoutParticipantInput
+}
+
+export type ParticipantCreateOrConnectWithoutRessortInput = {
+  where: Prisma.ParticipantWhereUniqueInput
+  create: Prisma.XOR<Prisma.ParticipantCreateWithoutRessortInput, Prisma.ParticipantUncheckedCreateWithoutRessortInput>
+}
+
+export type ParticipantCreateManyRessortInputEnvelope = {
+  data: Prisma.ParticipantCreateManyRessortInput | Prisma.ParticipantCreateManyRessortInput[]
+  skipDuplicates?: boolean
+}
+
+export type ParticipantUpsertWithWhereUniqueWithoutRessortInput = {
+  where: Prisma.ParticipantWhereUniqueInput
+  update: Prisma.XOR<Prisma.ParticipantUpdateWithoutRessortInput, Prisma.ParticipantUncheckedUpdateWithoutRessortInput>
+  create: Prisma.XOR<Prisma.ParticipantCreateWithoutRessortInput, Prisma.ParticipantUncheckedCreateWithoutRessortInput>
+}
+
+export type ParticipantUpdateWithWhereUniqueWithoutRessortInput = {
+  where: Prisma.ParticipantWhereUniqueInput
+  data: Prisma.XOR<Prisma.ParticipantUpdateWithoutRessortInput, Prisma.ParticipantUncheckedUpdateWithoutRessortInput>
+}
+
+export type ParticipantUpdateManyWithWhereWithoutRessortInput = {
+  where: Prisma.ParticipantScalarWhereInput
+  data: Prisma.XOR<Prisma.ParticipantUpdateManyMutationInput, Prisma.ParticipantUncheckedUpdateManyWithoutRessortInput>
 }
 
 export type ParticipantCreateManyAssessmentCenterInput = {
@@ -706,6 +837,7 @@ export type ParticipantCreateManyAssessmentCenterInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
+  ressortId?: string | null
 }
 
 export type ParticipantUpdateWithoutAssessmentCenterInput = {
@@ -717,6 +849,7 @@ export type ParticipantUpdateWithoutAssessmentCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressort?: Prisma.RessortUpdateOneWithoutParticipantsNestedInput
   groupMemberships?: Prisma.ParticipantGroupMembershipUpdateManyWithoutParticipantNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutParticipantNestedInput
 }
@@ -730,12 +863,66 @@ export type ParticipantUncheckedUpdateWithoutAssessmentCenterInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressortId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedUpdateManyWithoutParticipantNestedInput
   reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutParticipantNestedInput
 }
 
 export type ParticipantUncheckedUpdateManyWithoutAssessmentCenterInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  ressortId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type ParticipantCreateManyRessortInput = {
+  id?: string
+  assessmentCenterId: string
+  name: string
+  email?: string | null
+  avatarUrl?: string | null
+  avatarFileKey?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+}
+
+export type ParticipantUpdateWithoutRessortInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  assessmentCenter?: Prisma.AssessmentCenterUpdateOneRequiredWithoutParticipantsNestedInput
+  groupMemberships?: Prisma.ParticipantGroupMembershipUpdateManyWithoutParticipantNestedInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentUpdateManyWithoutParticipantNestedInput
+}
+
+export type ParticipantUncheckedUpdateWithoutRessortInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  avatarFileKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  groupMemberships?: Prisma.ParticipantGroupMembershipUncheckedUpdateManyWithoutParticipantNestedInput
+  reviewerAssignments?: Prisma.ReviewerAssignmentUncheckedUpdateManyWithoutParticipantNestedInput
+}
+
+export type ParticipantUncheckedUpdateManyWithoutRessortInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  assessmentCenterId?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -795,7 +982,9 @@ export type ParticipantSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  ressortId?: boolean
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  ressort?: boolean | Prisma.Participant$ressortArgs<ExtArgs>
   groupMemberships?: boolean | Prisma.Participant$groupMembershipsArgs<ExtArgs>
   reviewerAssignments?: boolean | Prisma.Participant$reviewerAssignmentsArgs<ExtArgs>
   _count?: boolean | Prisma.ParticipantCountOutputTypeDefaultArgs<ExtArgs>
@@ -811,7 +1000,9 @@ export type ParticipantSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  ressortId?: boolean
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  ressort?: boolean | Prisma.Participant$ressortArgs<ExtArgs>
 }, ExtArgs["result"]["participant"]>
 
 export type ParticipantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -824,7 +1015,9 @@ export type ParticipantSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  ressortId?: boolean
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  ressort?: boolean | Prisma.Participant$ressortArgs<ExtArgs>
 }, ExtArgs["result"]["participant"]>
 
 export type ParticipantSelectScalar = {
@@ -837,26 +1030,31 @@ export type ParticipantSelectScalar = {
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
+  ressortId?: boolean
 }
 
-export type ParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "email" | "avatarUrl" | "avatarFileKey" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["participant"]>
+export type ParticipantOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "assessmentCenterId" | "name" | "email" | "avatarUrl" | "avatarFileKey" | "createdAt" | "updatedAt" | "deletedAt" | "ressortId", ExtArgs["result"]["participant"]>
 export type ParticipantInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  ressort?: boolean | Prisma.Participant$ressortArgs<ExtArgs>
   groupMemberships?: boolean | Prisma.Participant$groupMembershipsArgs<ExtArgs>
   reviewerAssignments?: boolean | Prisma.Participant$reviewerAssignmentsArgs<ExtArgs>
   _count?: boolean | Prisma.ParticipantCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ParticipantIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  ressort?: boolean | Prisma.Participant$ressortArgs<ExtArgs>
 }
 export type ParticipantIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   assessmentCenter?: boolean | Prisma.AssessmentCenterDefaultArgs<ExtArgs>
+  ressort?: boolean | Prisma.Participant$ressortArgs<ExtArgs>
 }
 
 export type $ParticipantPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Participant"
   objects: {
     assessmentCenter: Prisma.$AssessmentCenterPayload<ExtArgs>
+    ressort: Prisma.$RessortPayload<ExtArgs> | null
     groupMemberships: Prisma.$ParticipantGroupMembershipPayload<ExtArgs>[]
     reviewerAssignments: Prisma.$ReviewerAssignmentPayload<ExtArgs>[]
   }
@@ -870,6 +1068,10 @@ export type $ParticipantPayload<ExtArgs extends runtime.Types.Extensions.Interna
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
+    /**
+     * The ressort the person is assigned to after the AC; at most one.
+     */
+    ressortId: string | null
   }, ExtArgs["result"]["participant"]>
   composites: {}
 }
@@ -1265,6 +1467,7 @@ readonly fields: ParticipantFieldRefs;
 export interface Prisma__ParticipantClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   assessmentCenter<T extends Prisma.AssessmentCenterDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AssessmentCenterDefaultArgs<ExtArgs>>): Prisma.Prisma__AssessmentCenterClient<runtime.Types.Result.GetResult<Prisma.$AssessmentCenterPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  ressort<T extends Prisma.Participant$ressortArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$ressortArgs<ExtArgs>>): Prisma.Prisma__RessortClient<runtime.Types.Result.GetResult<Prisma.$RessortPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   groupMemberships<T extends Prisma.Participant$groupMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$groupMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParticipantGroupMembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   reviewerAssignments<T extends Prisma.Participant$reviewerAssignmentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Participant$reviewerAssignmentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ReviewerAssignmentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1305,6 +1508,7 @@ export interface ParticipantFieldRefs {
   readonly createdAt: Prisma.FieldRef<"Participant", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Participant", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Participant", 'DateTime'>
+  readonly ressortId: Prisma.FieldRef<"Participant", 'String'>
 }
     
 
@@ -1703,6 +1907,25 @@ export type ParticipantDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.I
    * Limit how many Participants to delete.
    */
   limit?: number
+}
+
+/**
+ * Participant.ressort
+ */
+export type Participant$ressortArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Ressort
+   */
+  select?: Prisma.RessortSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Ressort
+   */
+  omit?: Prisma.RessortOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RessortInclude<ExtArgs> | null
+  where?: Prisma.RessortWhereInput
 }
 
 /**

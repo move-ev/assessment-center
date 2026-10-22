@@ -2148,7 +2148,8 @@ export const ParticipantScalarFieldEnum = {
   avatarFileKey: 'avatarFileKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  deletedAt: 'deletedAt'
+  deletedAt: 'deletedAt',
+  ressortId: 'ressortId'
 } as const
 
 export type ParticipantScalarFieldEnum = (typeof ParticipantScalarFieldEnum)[keyof typeof ParticipantScalarFieldEnum]

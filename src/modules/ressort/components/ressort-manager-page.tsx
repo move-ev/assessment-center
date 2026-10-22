@@ -12,7 +12,8 @@ import { api } from "@/trpc/react";
 type Ressort = {
 	id: string;
 	name: string;
-	_count: { capacities: number };
+	/** Has numbers or assigned people in an AC, so it cannot be deleted. */
+	isUsed: boolean;
 };
 
 /** Admin page: the ressorts all ACs plan with. */
@@ -102,7 +103,7 @@ function RessortRow({ ressort }: { ressort: Ressort }) {
 		onSuccess: () => utils.ressort.list.invalidate(),
 		onError,
 	});
-	const isUsed = ressort._count.capacities > 0;
+	const { isUsed } = ressort;
 	const usedHintId = `ressort-used-${ressort.id}`;
 	const changed = name.trim() !== "" && name.trim() !== ressort.name;
 

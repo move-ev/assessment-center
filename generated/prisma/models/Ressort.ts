@@ -175,6 +175,7 @@ export type RessortWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Ressort"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ressort"> | Date | string
   capacities?: Prisma.AcRessortCapacityListRelationFilter
+  participants?: Prisma.ParticipantListRelationFilter
 }
 
 export type RessortOrderByWithRelationInput = {
@@ -183,6 +184,7 @@ export type RessortOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   capacities?: Prisma.AcRessortCapacityOrderByRelationAggregateInput
+  participants?: Prisma.ParticipantOrderByRelationAggregateInput
 }
 
 export type RessortWhereUniqueInput = Prisma.AtLeast<{
@@ -194,6 +196,7 @@ export type RessortWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Ressort"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Ressort"> | Date | string
   capacities?: Prisma.AcRessortCapacityListRelationFilter
+  participants?: Prisma.ParticipantListRelationFilter
 }, "id" | "name">
 
 export type RessortOrderByWithAggregationInput = {
@@ -222,6 +225,7 @@ export type RessortCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   capacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutRessortInput
+  participants?: Prisma.ParticipantCreateNestedManyWithoutRessortInput
 }
 
 export type RessortUncheckedCreateInput = {
@@ -230,6 +234,7 @@ export type RessortUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   capacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutRessortInput
+  participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutRessortInput
 }
 
 export type RessortUpdateInput = {
@@ -238,6 +243,7 @@ export type RessortUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacities?: Prisma.AcRessortCapacityUpdateManyWithoutRessortNestedInput
+  participants?: Prisma.ParticipantUpdateManyWithoutRessortNestedInput
 }
 
 export type RessortUncheckedUpdateInput = {
@@ -246,6 +252,7 @@ export type RessortUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   capacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutRessortNestedInput
+  participants?: Prisma.ParticipantUncheckedUpdateManyWithoutRessortNestedInput
 }
 
 export type RessortCreateManyInput = {
@@ -267,6 +274,11 @@ export type RessortUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type RessortNullableScalarRelationFilter = {
+  is?: Prisma.RessortWhereInput | null
+  isNot?: Prisma.RessortWhereInput | null
 }
 
 export type RessortCountOrderByAggregateInput = {
@@ -295,6 +307,22 @@ export type RessortScalarRelationFilter = {
   isNot?: Prisma.RessortWhereInput
 }
 
+export type RessortCreateNestedOneWithoutParticipantsInput = {
+  create?: Prisma.XOR<Prisma.RessortCreateWithoutParticipantsInput, Prisma.RessortUncheckedCreateWithoutParticipantsInput>
+  connectOrCreate?: Prisma.RessortCreateOrConnectWithoutParticipantsInput
+  connect?: Prisma.RessortWhereUniqueInput
+}
+
+export type RessortUpdateOneWithoutParticipantsNestedInput = {
+  create?: Prisma.XOR<Prisma.RessortCreateWithoutParticipantsInput, Prisma.RessortUncheckedCreateWithoutParticipantsInput>
+  connectOrCreate?: Prisma.RessortCreateOrConnectWithoutParticipantsInput
+  upsert?: Prisma.RessortUpsertWithoutParticipantsInput
+  disconnect?: Prisma.RessortWhereInput | boolean
+  delete?: Prisma.RessortWhereInput | boolean
+  connect?: Prisma.RessortWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.RessortUpdateToOneWithWhereWithoutParticipantsInput, Prisma.RessortUpdateWithoutParticipantsInput>, Prisma.RessortUncheckedUpdateWithoutParticipantsInput>
+}
+
 export type RessortCreateNestedOneWithoutCapacitiesInput = {
   create?: Prisma.XOR<Prisma.RessortCreateWithoutCapacitiesInput, Prisma.RessortUncheckedCreateWithoutCapacitiesInput>
   connectOrCreate?: Prisma.RessortCreateOrConnectWithoutCapacitiesInput
@@ -309,11 +337,60 @@ export type RessortUpdateOneRequiredWithoutCapacitiesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.RessortUpdateToOneWithWhereWithoutCapacitiesInput, Prisma.RessortUpdateWithoutCapacitiesInput>, Prisma.RessortUncheckedUpdateWithoutCapacitiesInput>
 }
 
+export type RessortCreateWithoutParticipantsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  capacities?: Prisma.AcRessortCapacityCreateNestedManyWithoutRessortInput
+}
+
+export type RessortUncheckedCreateWithoutParticipantsInput = {
+  id?: string
+  name: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  capacities?: Prisma.AcRessortCapacityUncheckedCreateNestedManyWithoutRessortInput
+}
+
+export type RessortCreateOrConnectWithoutParticipantsInput = {
+  where: Prisma.RessortWhereUniqueInput
+  create: Prisma.XOR<Prisma.RessortCreateWithoutParticipantsInput, Prisma.RessortUncheckedCreateWithoutParticipantsInput>
+}
+
+export type RessortUpsertWithoutParticipantsInput = {
+  update: Prisma.XOR<Prisma.RessortUpdateWithoutParticipantsInput, Prisma.RessortUncheckedUpdateWithoutParticipantsInput>
+  create: Prisma.XOR<Prisma.RessortCreateWithoutParticipantsInput, Prisma.RessortUncheckedCreateWithoutParticipantsInput>
+  where?: Prisma.RessortWhereInput
+}
+
+export type RessortUpdateToOneWithWhereWithoutParticipantsInput = {
+  where?: Prisma.RessortWhereInput
+  data: Prisma.XOR<Prisma.RessortUpdateWithoutParticipantsInput, Prisma.RessortUncheckedUpdateWithoutParticipantsInput>
+}
+
+export type RessortUpdateWithoutParticipantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  capacities?: Prisma.AcRessortCapacityUpdateManyWithoutRessortNestedInput
+}
+
+export type RessortUncheckedUpdateWithoutParticipantsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  capacities?: Prisma.AcRessortCapacityUncheckedUpdateManyWithoutRessortNestedInput
+}
+
 export type RessortCreateWithoutCapacitiesInput = {
   id?: string
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  participants?: Prisma.ParticipantCreateNestedManyWithoutRessortInput
 }
 
 export type RessortUncheckedCreateWithoutCapacitiesInput = {
@@ -321,6 +398,7 @@ export type RessortUncheckedCreateWithoutCapacitiesInput = {
   name: string
   createdAt?: Date | string
   updatedAt?: Date | string
+  participants?: Prisma.ParticipantUncheckedCreateNestedManyWithoutRessortInput
 }
 
 export type RessortCreateOrConnectWithoutCapacitiesInput = {
@@ -344,6 +422,7 @@ export type RessortUpdateWithoutCapacitiesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  participants?: Prisma.ParticipantUpdateManyWithoutRessortNestedInput
 }
 
 export type RessortUncheckedUpdateWithoutCapacitiesInput = {
@@ -351,6 +430,7 @@ export type RessortUncheckedUpdateWithoutCapacitiesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  participants?: Prisma.ParticipantUncheckedUpdateManyWithoutRessortNestedInput
 }
 
 
@@ -360,10 +440,12 @@ export type RessortUncheckedUpdateWithoutCapacitiesInput = {
 
 export type RessortCountOutputType = {
   capacities: number
+  participants: number
 }
 
 export type RessortCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   capacities?: boolean | RessortCountOutputTypeCountCapacitiesArgs
+  participants?: boolean | RessortCountOutputTypeCountParticipantsArgs
 }
 
 /**
@@ -383,6 +465,13 @@ export type RessortCountOutputTypeCountCapacitiesArgs<ExtArgs extends runtime.Ty
   where?: Prisma.AcRessortCapacityWhereInput
 }
 
+/**
+ * RessortCountOutputType without action
+ */
+export type RessortCountOutputTypeCountParticipantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ParticipantWhereInput
+}
+
 
 export type RessortSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -390,6 +479,7 @@ export type RessortSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   createdAt?: boolean
   updatedAt?: boolean
   capacities?: boolean | Prisma.Ressort$capacitiesArgs<ExtArgs>
+  participants?: boolean | Prisma.Ressort$participantsArgs<ExtArgs>
   _count?: boolean | Prisma.RessortCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["ressort"]>
 
@@ -417,6 +507,7 @@ export type RessortSelectScalar = {
 export type RessortOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["ressort"]>
 export type RessortInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   capacities?: boolean | Prisma.Ressort$capacitiesArgs<ExtArgs>
+  participants?: boolean | Prisma.Ressort$participantsArgs<ExtArgs>
   _count?: boolean | Prisma.RessortCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type RessortIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -426,6 +517,7 @@ export type $RessortPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   name: "Ressort"
   objects: {
     capacities: Prisma.$AcRessortCapacityPayload<ExtArgs>[]
+    participants: Prisma.$ParticipantPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -827,6 +919,7 @@ readonly fields: RessortFieldRefs;
 export interface Prisma__RessortClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   capacities<T extends Prisma.Ressort$capacitiesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ressort$capacitiesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AcRessortCapacityPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  participants<T extends Prisma.Ressort$participantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Ressort$participantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ParticipantPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1274,6 +1367,30 @@ export type Ressort$capacitiesArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.AcRessortCapacityScalarFieldEnum | Prisma.AcRessortCapacityScalarFieldEnum[]
+}
+
+/**
+ * Ressort.participants
+ */
+export type Ressort$participantsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Participant
+   */
+  select?: Prisma.ParticipantSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Participant
+   */
+  omit?: Prisma.ParticipantOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ParticipantInclude<ExtArgs> | null
+  where?: Prisma.ParticipantWhereInput
+  orderBy?: Prisma.ParticipantOrderByWithRelationInput | Prisma.ParticipantOrderByWithRelationInput[]
+  cursor?: Prisma.ParticipantWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ParticipantScalarFieldEnum | Prisma.ParticipantScalarFieldEnum[]
 }
 
 /**
