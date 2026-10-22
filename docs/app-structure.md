@@ -105,9 +105,9 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
         │
         ├── /overview                             Admin: live completion matrix (ACTIVE only)
         │
-        ├── /results                              Admin: aggregated evaluation (COMPLETED, ANONYMIZED)
-        │   ├── /[participantId]                  Admin: one participant in detail
-        │   └── /compare?ids=a,b,c                Admin: 2–3 participants side by side
+        ├── /results                              Admin (COMPLETED, ANONYMIZED), reviewers of the AC read-only (COMPLETED)
+        │   ├── /[participantId]                  One participant in detail (same access)
+        │   └── /compare?ids=a,b,c                2–3 participants side by side (same access)
         │
         └── /review                               Reviewer: workspace root
             └── /[taskId]                         Reviewer: participant list for this task
@@ -124,8 +124,14 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
 - `/setup` redirects to `/setup/details`
 - Access to `/setup` is blocked for non-admins and non-DRAFT status (with a
   guard in the layout that allows read-only viewing once ACTIVE/COMPLETED).
-- Access to `/overview` and `/results` is blocked for non-admins. `/overview`
-  redirects to `/results` once the AC is ANONYMIZED.
+- Access to `/overview` is blocked for non-admins and redirects to `/results`
+  once the AC is ANONYMIZED.
+- `/results` (ranking, detail pages, comparison) follows `getResultsAccess`
+  (`src/lib/results-access.ts`): admins once COMPLETED or ANONYMIZED; the AC's
+  reviewers read-only once COMPLETED (not while rating runs, not after
+  anonymizing). Export and every change stay with admins. Layout and every
+  page call `requireResultsAccess` (`src/server/ac-role.ts`), since Next.js
+  renders layouts and pages in parallel.
 - Removing a reviewer, a task or an assignment is refused while submitted
   ratings exist (deleting assignments would cascade to the ratings).
 - Access to `/review` is blocked for users who are not assigned as a
@@ -291,7 +297,7 @@ src/app/
             │   └── page.tsx           → <EvaluationOverview /> (live)
             │
             ├── results/
-            │   ├── layout.tsx         Admin guard + COMPLETED guard
+            │   ├── layout.tsx         requireResultsAccess + anonymized banner
             │   ├── page.tsx           → <EvaluationParticipant /> + <EvaluationExport />
             │   ├── [participantId]/page.tsx → <EvaluationParticipantDetail />
             │   └── compare/page.tsx   → <EvaluationComparison /> (?ids=a,b,c)

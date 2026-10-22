@@ -35,12 +35,14 @@ import { TaskScatter } from "./task-scatter";
 type Props = {
 	acId: string;
 	acName: string;
+	/** Admins only: the export (and later changes) are not for reviewers. */
+	canManage: boolean;
 	results: EvaluationResultsData;
 };
 
-function EvaluationParticipant({ acId, acName, results }: Props) {
+function EvaluationParticipant({ acId, acName, canManage, results }: Props) {
 	if (results.participants.length === 0) {
-		return <ResultsEmptyState acId={acId} />;
+		return <ResultsEmptyState acId={acId} canManage={canManage} />;
 	}
 
 	return (
@@ -61,7 +63,7 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 					<TabsTrigger value="tasks">Aufgaben</TabsTrigger>
 					<TabsTrigger value="criteria">Kriterien</TabsTrigger>
 					<TabsTrigger value="calibration">Kalibrierung</TabsTrigger>
-					<TabsTrigger value="export">Export</TabsTrigger>
+					{canManage && <TabsTrigger value="export">Export</TabsTrigger>}
 				</TabsList>
 
 				<TabsContent className="space-y-4" value="participants">
@@ -91,9 +93,12 @@ function EvaluationParticipant({ acId, acName, results }: Props) {
 						ratingScaleMax={results.ratingScaleMax}
 					/>
 				</TabsContent>
-				<TabsContent value="export">
-					<EvaluationExport acName={acName} rows={results.exportRows} />
-				</TabsContent>
+				{/* Not rendered for reviewers, so the rows never reach their browser. */}
+				{canManage && (
+					<TabsContent value="export">
+						<EvaluationExport acName={acName} rows={results.exportRows} />
+					</TabsContent>
+				)}
 			</Tabs>
 		</div>
 	);
@@ -303,7 +308,13 @@ function TaskBadge({
 	);
 }
 
-function ResultsEmptyState({ acId }: { acId: string }) {
+function ResultsEmptyState({
+	acId,
+	canManage,
+}: {
+	acId: string;
+	canManage: boolean;
+}) {
 	return (
 		<div className="flex flex-1 items-center justify-center p-6">
 			<Empty className="max-w-xl border">
@@ -311,8 +322,14 @@ function ResultsEmptyState({ acId }: { acId: string }) {
 					<EmptyTitle>Noch keine Ergebnisse verfügbar</EmptyTitle>
 					<EmptyDescription>
 						Für dieses Assessment Center liegen noch keine Bewertungen vor.
-						Prüfe zuerst Zuweisungen und abgeschlossene Reviews unter{" "}
-						<a href={ROUTES.acOverview(acId)}>Live-Übersicht</a>.
+						{/* The live overview is for admins only. */}
+						{canManage && (
+							<>
+								{" "}
+								Prüfe zuerst Zuweisungen und abgeschlossene Reviews unter{" "}
+								<a href={ROUTES.acOverview(acId)}>Live-Übersicht</a>.
+							</>
+						)}
 					</EmptyDescription>
 				</EmptyHeader>
 			</Empty>

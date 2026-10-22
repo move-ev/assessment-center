@@ -1,7 +1,8 @@
 import { notFound, redirect } from "next/navigation";
+import { getResultsAccess } from "@/lib/results-access";
 import { ROUTES } from "@/lib/routes";
 import { AcHeader, AcNav } from "@/modules/assessment-center";
-import { getSession } from "@/server/better-auth/server";
+import { getAcRole } from "@/server/ac-role";
 import { db } from "@/server/db";
 
 type Props = {
@@ -12,8 +13,8 @@ type Props = {
 export default async function AcLayout({ children, params }: Props) {
 	const { id } = await params;
 
-	const [session, ac] = await Promise.all([
-		getSession(),
+	const [role, ac] = await Promise.all([
+		getAcRole(id),
 		db.assessmentCenter.findFirst({
 			where: { id, deletedAt: null },
 			select: { id: true, name: true, status: true },
@@ -24,24 +25,22 @@ export default async function AcLayout({ children, params }: Props) {
 		notFound();
 	}
 
-	const isAdmin = session?.user.role === "admin";
-	const reviewer = isAdmin
-		? null
-		: await db.reviewer.findFirst({
-				where: { assessmentCenterId: id, userId: session?.user.id ?? "" },
-				select: { id: true },
-			});
-	const isReviewer = reviewer !== null;
+	const isAdmin = role === "ADMIN";
 
 	// Anonymized ACs are only visible to admins.
-	if (!isAdmin && (!isReviewer || ac.status === "ANONYMIZED")) {
+	if (role === "NONE" || (!isAdmin && ac.status === "ANONYMIZED")) {
 		redirect(ROUTES.dashboard());
 	}
 
 	return (
 		<div className="flex min-h-screen flex-col">
 			<AcHeader id={id} name={ac.name} status={ac.status} />
-			<AcNav acId={id} acStatus={ac.status} isAdmin={isAdmin} />
+			<AcNav
+				acId={id}
+				acStatus={ac.status}
+				canViewResults={getResultsAccess(role, ac.status).canView}
+				isAdmin={isAdmin}
+			/>
 			<div className="flex flex-1 flex-col">{children}</div>
 		</div>
 	);
