@@ -1,6 +1,10 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import {
+	getQualitativeWrite,
+	QUALITATIVE_TEXT_MAX_LENGTH,
+} from "@/lib/qualitative-write";
+import {
 	assertRatingScaleMax,
 	isValidRating,
 	RATING_SCALE_MAXIMUMS,
@@ -27,7 +31,8 @@ const qualitativeInput = z.object({
 	taskId: z.string(),
 	participantId: z.string(),
 	criteriaId: z.string(),
-	text: z.string().trim().min(1).max(10_000),
+	// Empty or blank clears the entry (see getQualitativeWrite).
+	text: z.string().max(QUALITATIVE_TEXT_MAX_LENGTH),
 });
 
 const teamObservationInput = z.object({
@@ -262,30 +267,26 @@ export const ratingRouter = createTRPCRouter({
 				});
 			}
 
-			return writeUnlessAnonymized(ctx.db, input.acId, (tx) =>
-				tx.qualitativeRating.upsert({
-					where: {
-						reviewerAssignmentId_criteriaId: {
-							reviewerAssignmentId: access.id,
-							criteriaId: input.criteriaId,
-						},
-					},
-					create: {
-						reviewerAssignmentId: access.id,
-						criteriaId: input.criteriaId,
-						text: input.text,
-					},
-					update: {
-						text: input.text,
-						deletedAt: null,
-					},
-					select: {
-						id: true,
-						text: true,
-						updatedAt: true,
-					},
-				}),
-			);
+			const write = getQualitativeWrite(input.text);
+			const key = {
+				reviewerAssignmentId: access.id,
+				criteriaId: input.criteriaId,
+			};
+
+			return writeUnlessAnonymized(ctx.db, input.acId, async (tx) => {
+				if (write.kind === "DELETE") {
+					await tx.qualitativeRating.deleteMany({ where: key });
+					return { deleted: true as const };
+				}
+
+				const saved = await tx.qualitativeRating.upsert({
+					where: { reviewerAssignmentId_criteriaId: key },
+					create: { ...key, text: write.text },
+					update: { text: write.text, deletedAt: null },
+					select: { id: true, text: true, updatedAt: true },
+				});
+				return { deleted: false as const, ...saved };
+			});
 		}),
 
 	upsertTeamObservation: protectedProcedure

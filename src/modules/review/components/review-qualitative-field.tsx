@@ -40,7 +40,8 @@ function ReviewQualitativeField({
 	}, [criterion.id, normalizedText, onPersisted]);
 
 	useEffect(() => {
-		if (normalizedText === "" || normalizedText === lastSaved.current) {
+		// An emptied field is saved too: it removes the entry.
+		if (normalizedText === lastSaved.current) {
 			return;
 		}
 
@@ -56,7 +57,7 @@ function ReviewQualitativeField({
 				});
 				lastSaved.current = normalizedText;
 				setSaveState("saved");
-				onPersisted(criterion.id, true);
+				onPersisted(criterion.id, normalizedText !== "");
 			} catch (error) {
 				setSaveState("error");
 				toast.error(getErrorMessage(error));
@@ -95,9 +96,7 @@ function ReviewQualitativeField({
 					value={text}
 				/>
 				<p className="text-muted-foreground text-xs">
-					{normalizedText === ""
-						? "Dieses Feld ist erforderlich."
-						: getSaveStateLabel(saveState)}
+					{getSaveStateLabel(saveState)}
 				</p>
 			</CardContent>
 		</Card>
