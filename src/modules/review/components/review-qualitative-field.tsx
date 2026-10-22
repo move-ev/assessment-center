@@ -32,6 +32,10 @@ function ReviewQualitativeField({
 		"idle" | "saving" | "saved" | "error"
 	>("idle");
 	const mutation = api.rating.upsertQualitative.useMutation();
+	// Read through a ref: the mutation object changes with every request
+	// state, and the save effect must only rerun when the text changes.
+	const save = useRef(mutation.mutateAsync);
+	save.current = mutation.mutateAsync;
 	// Text the server has confirmed, and the last text sent (or confirmed).
 	const lastSaved = useRef(criterion.text.trim());
 	const lastRequested = useRef(criterion.text.trim());
@@ -39,6 +43,10 @@ function ReviewQualitativeField({
 	// text, even when the field is cleared while a save is still running.
 	const saveQueue = useRef<Promise<void>>(Promise.resolve());
 	const normalizedText = useMemo(() => text.trim(), [text]);
+	// What the field shows now: a finished save only updates the status and
+	// progress if the field still holds the text it saved.
+	const currentText = useRef(normalizedText);
+	currentText.current = normalizedText;
 
 	useEffect(() => {
 		onPersisted(criterion.id, normalizedText !== "");
@@ -59,9 +67,9 @@ function ReviewQualitativeField({
 			const textToSave = normalizedText;
 			lastRequested.current = textToSave;
 			saveQueue.current = saveQueue.current.then(async () => {
-				const isLatest = () => lastRequested.current === textToSave;
+				const isLatest = () => currentText.current === textToSave;
 				try {
-					await mutation.mutateAsync({
+					await save.current({
 						acId,
 						taskId,
 						participantId,
@@ -76,7 +84,7 @@ function ReviewQualitativeField({
 				} catch (error) {
 					toast.error(getErrorMessage(error));
 					if (isLatest()) {
-						// Let the next edit send again.
+						// The next edit sends again, even back to this same text.
 						lastRequested.current = lastSaved.current;
 						setSaveState("error");
 					}
@@ -85,15 +93,7 @@ function ReviewQualitativeField({
 		}, 500);
 
 		return () => window.clearTimeout(timer);
-	}, [
-		acId,
-		criterion.id,
-		mutation,
-		normalizedText,
-		onPersisted,
-		participantId,
-		taskId,
-	]);
+	}, [acId, criterion.id, normalizedText, onPersisted, participantId, taskId]);
 
 	return (
 		<Card>

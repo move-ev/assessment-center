@@ -387,11 +387,11 @@ That keeps it usable on the server and in client components alike, and
 testable with `bun run test` without any setup.
 
 - `src/lib/review-completion.ts`: when a rating sheet counts as complete.
-- `src/lib/qualitative-write.ts`: whether a free-text save stores the text
-  or deletes the entry (blank text).
   Required criteria are quantitative and not marked optional; free-text
   criteria never block completion. Used by the review lists, the rating form's
   live progress, the live overview and the results.
+- `src/lib/qualitative-write.ts`: whether a free-text save stores the text
+  or deletes the entry (blank text). Used by the rating router.
 - `src/lib/ac-status.ts`: AC status type and labels, and which statuses lock
   setup changes (`COMPLETED`, `ANONYMIZED`). Used by the routers (via
   `assertAcEditable`), the setup layout and the details form.
