@@ -140,6 +140,7 @@ model AssessmentCenter {
   participants Participant[]
   reviewers    Reviewer[]
   tasks        Task[]
+  ressortCapacities AcRessortCapacity[]
 }
 
 /// A calendar date on which the AC takes place.
@@ -431,4 +432,38 @@ model TeamTaskObservation {
 
   @@unique([taskId, groupId, reviewerId])
   @@index([groupId, taskId])
+}
+
+/// A department of the association that applicants are admitted to.
+/// Shared by all ACs and maintained by admins.
+
+model Ressort {
+  id         String               @id @default(cuid())
+  name       String               @unique
+  createdAt  DateTime             @default(now())
+  updatedAt  DateTime             @updatedAt
+  capacities AcRessortCapacity[]
+}
+
+/// Planned numbers of one ressort for one AC (one application phase).
+/// Non-negative, active <= registered: enforced via check constraints in migration.
+/// A ressort with numbers cannot be deleted (Restrict).
+
+model AcRessortCapacity {
+  id                 String           @id @default(cuid())
+  assessmentCenterId String
+  assessmentCenter   AssessmentCenter @relation(fields: [assessmentCenterId], references: [id], onDelete: Cascade)
+  ressortId          String
+  ressort            Ressort          @relation(fields: [ressortId], references: [id], onDelete: Restrict)
+  /// Members currently registered in the ressort.
+  registered         Int
+  /// Of those, members who actually work in it.
+  active             Int
+  /// People to admit to the ressort from this AC.
+  toAdmit            Int
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  @@unique([assessmentCenterId, ressortId])
+  @@index([ressortId])
 }

@@ -21,12 +21,20 @@ function DashboardLayout({ userName, isAdmin, children }: Props) {
 					</span>
 					<div className="flex items-center gap-3">
 						{isAdmin && (
-							<Link
-								className={buttonVariants({ size: "sm" })}
-								href={ROUTES.acNew()}
-							>
-								Neues AC
-							</Link>
+							<>
+								<Link
+									className={buttonVariants({ size: "sm", variant: "outline" })}
+									href={ROUTES.ressorts()}
+								>
+									Ressorts
+								</Link>
+								<Link
+									className={buttonVariants({ size: "sm" })}
+									href={ROUTES.acNew()}
+								>
+									Neues AC
+								</Link>
+							</>
 						)}
 						<span className="text-muted-foreground text-sm">{userName}</span>
 						<LogoutButton variant="outline" />

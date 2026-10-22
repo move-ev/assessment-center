@@ -18,6 +18,10 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatOverallScore, formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
+import {
+	type RessortCapacityRow,
+	RessortCapacityTable,
+} from "@/modules/ressort";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
 import type { RankingBand } from "../server/ranking";
 import { CompareCheckbox, ComparisonSelection } from "./comparison-selection";
@@ -38,11 +42,31 @@ type Props = {
 	/** Admins only: the export (and later changes) are not for reviewers. */
 	canManage: boolean;
 	results: EvaluationResultsData;
+	ressorts: RessortCapacityRow[];
 };
 
-function EvaluationParticipant({ acId, acName, canManage, results }: Props) {
+function EvaluationParticipant({
+	acId,
+	acName,
+	canManage,
+	results,
+	ressorts,
+}: Props) {
+	const ressortTable = (
+		<RessortCapacityTable acId={acId} canManage={canManage} rows={ressorts} />
+	);
+
 	if (results.participants.length === 0) {
-		return <ResultsEmptyState acId={acId} canManage={canManage} />;
+		// Ressort numbers do not depend on ratings, so they stay reachable.
+		return (
+			<div className="space-y-6 p-6">
+				<ResultsEmptyState acId={acId} canManage={canManage} />
+				<section className="space-y-2">
+					<h2 className="font-medium">Ressorts</h2>
+					{ressortTable}
+				</section>
+			</div>
+		);
 	}
 
 	return (
@@ -63,6 +87,7 @@ function EvaluationParticipant({ acId, acName, canManage, results }: Props) {
 					<TabsTrigger value="tasks">Aufgaben</TabsTrigger>
 					<TabsTrigger value="criteria">Kriterien</TabsTrigger>
 					<TabsTrigger value="calibration">Kalibrierung</TabsTrigger>
+					<TabsTrigger value="ressorts">Ressorts</TabsTrigger>
 					{canManage && <TabsTrigger value="export">Export</TabsTrigger>}
 				</TabsList>
 
@@ -93,6 +118,7 @@ function EvaluationParticipant({ acId, acName, canManage, results }: Props) {
 						ratingScaleMax={results.ratingScaleMax}
 					/>
 				</TabsContent>
+				<TabsContent value="ressorts">{ressortTable}</TabsContent>
 				{/* Not rendered for reviewers, so the rows never reach their browser. */}
 				{canManage && (
 					<TabsContent value="export">

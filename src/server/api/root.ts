@@ -4,6 +4,7 @@ import { groupRouter } from "@/server/api/routers/group";
 import { participantRouter } from "@/server/api/routers/participant";
 import { postRouter } from "@/server/api/routers/post";
 import { ratingRouter } from "@/server/api/routers/rating";
+import { ressortRouter } from "@/server/api/routers/ressort";
 import { reviewerRouter } from "@/server/api/routers/reviewer";
 import { scheduleRouter } from "@/server/api/routers/schedule";
 import { taskRouter } from "@/server/api/routers/task";
@@ -23,6 +24,7 @@ export const appRouter = createTRPCRouter({
 	reviewer: reviewerRouter,
 	assignment: assignmentRouter,
 	rating: ratingRouter,
+	ressort: ressortRouter,
 	post: postRouter,
 });
 

@@ -88,6 +88,8 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
 │
 ├── /dashboard                                    Role-sensitive landing page
 │
+├── /ressorts                                     Admin: ressorts shared by all ACs
+│
 └── /assessment-centers
     ├── /new                                      Create a new AC
     │
@@ -107,6 +109,7 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
         │
         ├── /results                              Admin (COMPLETED, ANONYMIZED), reviewers of the AC read-only (COMPLETED)
         │   ├── /[participantId]                  One participant in detail (same access)
+        │   │                                     Tab "Ressorts": planned numbers per ressort (admins edit)
         │   └── /compare?ids=a,b,c                2–3 participants side by side (same access)
         │
         └── /review                               Reviewer: workspace root
@@ -132,6 +135,10 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
   anonymizing). Export and every change stay with admins. Layout and every
   page call `requireResultsAccess` (`src/server/ac-role.ts`), since Next.js
   renders layouts and pages in parallel.
+- `/ressorts` redirects non-admins to `/dashboard`. Ressorts are shared by all
+  ACs; one is deleted only while no AC has numbers for it. How many people a
+  ressort has (registered, active) and should admit is kept per AC in the
+  results tab "Ressorts", including after anonymizing.
 - Removing a reviewer, a task or an assignment is refused while submitted
   ratings exist (deleting assignments would cascade to the ratings).
 - Access to `/review` is blocked for users who are not assigned as a
@@ -215,31 +222,40 @@ src/modules/
 │   │   └── index.ts
 │   └── index.ts
 │
-└── evaluation/
+├── evaluation/
+│   ├── components/
+│   │   ├── evaluation-overview.tsx    Participant × task matrix (admin)
+│   │   ├── evaluation-participant.tsx Per-participant weighted score breakdown
+│   │   ├── evaluation-task.tsx        Per-task average scores across participants
+│   │   ├── evaluation-criteria.tsx    Per-criteria breakdown with weights
+│   │   ├── evaluation-export.tsx      Export trigger (CSV / PDF)
+│   │   ├── evaluation-calibration.tsx Reviewer leniency, criterion disagreement
+│   │   ├── score-distribution.tsx     Overall scores as dots on 0–100 %
+│   │   ├── results-heatmap.tsx        Participants × tasks heat map
+│   │   ├── score-composition.tsx      Overall score split into task shares
+│   │   ├── task-scatter.tsx           Two tasks against each other (client)
+│   │   ├── participant-profile.tsx    Person against the AC per task
+│   │   ├── criteria-drilldown.tsx     Stars per reviewer and criterion, texts
+│   │   ├── score-strip.tsx            Shared 0–100 % axis, marks and legend
+│   │   ├── evaluation-comparison.tsx  2–3 participants side by side
+│   │   ├── comparison-selection.tsx   Pick 2–3 people in the ranking (client)
+│   │   ├── comparison-picker.tsx      Swap, add, remove people on the page (client)
+│   │   └── index.ts
+│   ├── server/                        Data loaders and pure scoring logic
+│   │   ├── scoring.ts, ranking.ts, deviation.ts
+│   │   ├── comparison.ts              Summaries, positions, task shares, correlation
+│   │   ├── calibration.ts             Leniency and disagreement
+│   │   ├── criteria-breakdown.ts      Rows per criterion for one person
+│   │   └── participant-comparison.ts  Who leads per task, gap to the best, URL ids
+│   └── index.ts
+│
+└── ressort/
     ├── components/
-    │   ├── evaluation-overview.tsx    Participant × task matrix (admin)
-    │   ├── evaluation-participant.tsx Per-participant weighted score breakdown
-    │   ├── evaluation-task.tsx        Per-task average scores across participants
-    │   ├── evaluation-criteria.tsx    Per-criteria breakdown with weights
-    │   ├── evaluation-export.tsx      Export trigger (CSV / PDF)
-    │   ├── evaluation-calibration.tsx Reviewer leniency, criterion disagreement
-    │   ├── score-distribution.tsx     Overall scores as dots on 0–100 %
-    │   ├── results-heatmap.tsx        Participants × tasks heat map
-    │   ├── score-composition.tsx      Overall score split into task shares
-    │   ├── task-scatter.tsx           Two tasks against each other (client)
-    │   ├── participant-profile.tsx    Person against the AC per task
-    │   ├── criteria-drilldown.tsx     Stars per reviewer and criterion, texts
-    │   ├── score-strip.tsx            Shared 0–100 % axis, marks and legend
-    │   ├── evaluation-comparison.tsx  2–3 participants side by side
-    │   ├── comparison-selection.tsx   Pick 2–3 people in the ranking (client)
-    │   ├── comparison-picker.tsx      Swap, add, remove people on the page (client)
+    │   ├── ressort-manager-page.tsx   Admin list: add, rename, delete (client)
+    │   ├── ressort-capacity-table.tsx Results tab: numbers per ressort, inputs for admins
     │   └── index.ts
-    ├── server/                        Data loaders and pure scoring logic
-    │   ├── scoring.ts, ranking.ts, deviation.ts
-    │   ├── comparison.ts              Summaries, positions, task shares, correlation
-    │   ├── calibration.ts             Leniency and disagreement
-    │   ├── criteria-breakdown.ts      Rows per criterion for one person
-    │   └── participant-comparison.ts  Who leads per task, gap to the best, URL ids
+    ├── server/
+    │   └── get-ressort-capacities.ts  Every ressort with its numbers in one AC
     └── index.ts
 ```
 
@@ -263,6 +279,9 @@ src/app/
     │
     ├── dashboard/
     │   └── page.tsx                   → <DashboardAcList />
+    │
+    ├── ressorts/
+    │   └── page.tsx                   Admin guard → <RessortManagerPage />
     │
     └── assessment-centers/
         ├── new/
@@ -326,7 +345,8 @@ src/server/api/routers/
 ├── reviewer.ts             Add/remove Reviewer records; list reviewers for AC
 ├── assignment.ts           Create/delete ReviewerAssignment (reviewer × participant × task)
 ├── rating.ts               Upsert QuantitativeRating, QualitativeRating (blank deletes), TeamTaskObservation
-└── evaluation.ts           Read-only: aggregate scores, completion status
+├── evaluation.ts           Read-only: aggregate scores, completion status
+└── ressort.ts              Admin: create/rename/delete ressorts; numbers per AC
 ```
 
 All routers are registered in `src/server/api/root.ts`.
@@ -350,6 +370,7 @@ constructing paths manually.
 export const ROUTES = {
   auth: () => "/auth",
   dashboard: () => "/dashboard",
+  ressorts: () => "/ressorts",
   acNew: () => "/assessment-centers/new",
   ac: (id: string) => `/assessment-centers/${id}`,
   acSetup: (id: string) => `/assessment-centers/${id}/setup`,
@@ -403,6 +424,9 @@ testable with `bun run test` without any setup.
   and one decimal in the export.
 - `src/lib/pseudonyms.ts`: pseudonyms "Bewerbende n" / "Gruppe n" for
   anonymizing an AC, shuffled for participants.
+- `src/lib/ressort-capacity.ts`: valid ressort numbers per AC (whole numbers
+  from 0 to 9999, active at most registered) and free slots (negative = more assigned
+  than should be admitted). Used by the ressort router and the results tab.
 - `src/lib/rating-anchors.ts`: labels and maximum length of the 2- and
   4-star anchor texts, shared by the criteria editor, the rating view and the
   task router.

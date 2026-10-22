@@ -402,7 +402,9 @@ export const ModelName = {
   ReviewerAssignment: 'ReviewerAssignment',
   QuantitativeRating: 'QuantitativeRating',
   QualitativeRating: 'QualitativeRating',
-  TeamTaskObservation: 'TeamTaskObservation'
+  TeamTaskObservation: 'TeamTaskObservation',
+  Ressort: 'Ressort',
+  AcRessortCapacity: 'AcRessortCapacity'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -418,7 +420,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "post" | "user" | "session" | "account" | "verification" | "assessmentCenter" | "assessmentDay" | "participantGroup" | "participantGroupMembership" | "participant" | "reviewer" | "task" | "scheduleEntry" | "reviewCriteriaGroup" | "reviewCriteria" | "reviewerAssignment" | "quantitativeRating" | "qualitativeRating" | "teamTaskObservation"
+    modelProps: "post" | "user" | "session" | "account" | "verification" | "assessmentCenter" | "assessmentDay" | "participantGroup" | "participantGroupMembership" | "participant" | "reviewer" | "task" | "scheduleEntry" | "reviewCriteriaGroup" | "reviewCriteria" | "reviewerAssignment" | "quantitativeRating" | "qualitativeRating" | "teamTaskObservation" | "ressort" | "acRessortCapacity"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1828,6 +1830,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Ressort: {
+      payload: Prisma.$RessortPayload<ExtArgs>
+      fields: Prisma.RessortFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RessortFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RessortFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>
+        }
+        findFirst: {
+          args: Prisma.RessortFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RessortFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>
+        }
+        findMany: {
+          args: Prisma.RessortFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>[]
+        }
+        create: {
+          args: Prisma.RessortCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>
+        }
+        createMany: {
+          args: Prisma.RessortCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RessortCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>[]
+        }
+        delete: {
+          args: Prisma.RessortDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>
+        }
+        update: {
+          args: Prisma.RessortUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>
+        }
+        deleteMany: {
+          args: Prisma.RessortDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RessortUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RessortUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>[]
+        }
+        upsert: {
+          args: Prisma.RessortUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RessortPayload>
+        }
+        aggregate: {
+          args: Prisma.RessortAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRessort>
+        }
+        groupBy: {
+          args: Prisma.RessortGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RessortGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RessortCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RessortCountAggregateOutputType> | number
+        }
+      }
+    }
+    AcRessortCapacity: {
+      payload: Prisma.$AcRessortCapacityPayload<ExtArgs>
+      fields: Prisma.AcRessortCapacityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AcRessortCapacityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AcRessortCapacityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>
+        }
+        findFirst: {
+          args: Prisma.AcRessortCapacityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AcRessortCapacityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>
+        }
+        findMany: {
+          args: Prisma.AcRessortCapacityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>[]
+        }
+        create: {
+          args: Prisma.AcRessortCapacityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>
+        }
+        createMany: {
+          args: Prisma.AcRessortCapacityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AcRessortCapacityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>[]
+        }
+        delete: {
+          args: Prisma.AcRessortCapacityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>
+        }
+        update: {
+          args: Prisma.AcRessortCapacityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>
+        }
+        deleteMany: {
+          args: Prisma.AcRessortCapacityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AcRessortCapacityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AcRessortCapacityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>[]
+        }
+        upsert: {
+          args: Prisma.AcRessortCapacityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AcRessortCapacityPayload>
+        }
+        aggregate: {
+          args: Prisma.AcRessortCapacityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAcRessortCapacity>
+        }
+        groupBy: {
+          args: Prisma.AcRessortCapacityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AcRessortCapacityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AcRessortCapacityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AcRessortCapacityCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -2128,6 +2278,30 @@ export const TeamTaskObservationScalarFieldEnum = {
 export type TeamTaskObservationScalarFieldEnum = (typeof TeamTaskObservationScalarFieldEnum)[keyof typeof TeamTaskObservationScalarFieldEnum]
 
 
+export const RessortScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RessortScalarFieldEnum = (typeof RessortScalarFieldEnum)[keyof typeof RessortScalarFieldEnum]
+
+
+export const AcRessortCapacityScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  ressortId: 'ressortId',
+  registered: 'registered',
+  active: 'active',
+  toAdmit: 'toAdmit',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AcRessortCapacityScalarFieldEnum = (typeof AcRessortCapacityScalarFieldEnum)[keyof typeof AcRessortCapacityScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2377,6 +2551,8 @@ export type GlobalOmitConfig = {
   quantitativeRating?: Prisma.QuantitativeRatingOmit
   qualitativeRating?: Prisma.QualitativeRatingOmit
   teamTaskObservation?: Prisma.TeamTaskObservationOmit
+  ressort?: Prisma.RessortOmit
+  acRessortCapacity?: Prisma.AcRessortCapacityOmit
 }
 
 /* Types for Logging */

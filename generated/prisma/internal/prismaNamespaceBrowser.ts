@@ -69,7 +69,9 @@ export const ModelName = {
   ReviewerAssignment: 'ReviewerAssignment',
   QuantitativeRating: 'QuantitativeRating',
   QualitativeRating: 'QualitativeRating',
-  TeamTaskObservation: 'TeamTaskObservation'
+  TeamTaskObservation: 'TeamTaskObservation',
+  Ressort: 'Ressort',
+  AcRessortCapacity: 'AcRessortCapacity'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -347,6 +349,30 @@ export const TeamTaskObservationScalarFieldEnum = {
 } as const
 
 export type TeamTaskObservationScalarFieldEnum = (typeof TeamTaskObservationScalarFieldEnum)[keyof typeof TeamTaskObservationScalarFieldEnum]
+
+
+export const RessortScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RessortScalarFieldEnum = (typeof RessortScalarFieldEnum)[keyof typeof RessortScalarFieldEnum]
+
+
+export const AcRessortCapacityScalarFieldEnum = {
+  id: 'id',
+  assessmentCenterId: 'assessmentCenterId',
+  ressortId: 'ressortId',
+  registered: 'registered',
+  active: 'active',
+  toAdmit: 'toAdmit',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AcRessortCapacityScalarFieldEnum = (typeof AcRessortCapacityScalarFieldEnum)[keyof typeof AcRessortCapacityScalarFieldEnum]
 
 
 export const SortOrder = {
