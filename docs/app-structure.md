@@ -230,6 +230,7 @@ src/modules/
 ├── evaluation/
 │   ├── components/
 │   │   ├── evaluation-overview.tsx    Participant × task matrix (admin)
+│   │   ├── open-reviews-list.tsx      Open rating sheets per reviewer, with missing criteria
 │   │   ├── evaluation-participant.tsx Per-participant weighted score breakdown
 │   │   ├── evaluation-task.tsx        Per-task average scores across participants
 │   │   ├── evaluation-criteria.tsx    Per-criteria breakdown with weights
@@ -465,6 +466,10 @@ testable with `bun run test` without any setup.
 ### Live overview matrix
 - The overview grid shows `participants × tasks` as cells.
 - Each cell displays a completion fraction (e.g. `2/3 reviewers submitted`).
+- Above the grid, "Offene Bewertungen" lists every open rating sheet grouped
+  by reviewer: participant (and group), task, status (not started or
+  `x / y` required criteria) and the required criteria still unrated
+  (`getMissingRequiredCriteria` in `src/lib/review-completion.ts`).
 - Cells update in near real-time via tRPC polling or server-sent events. 
 
 ### Schedule builder

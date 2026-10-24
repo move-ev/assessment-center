@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
-import { getReviewCompletion } from "./review-completion.ts";
+import {
+	getMissingRequiredCriteria,
+	getReviewCompletion,
+} from "./review-completion.ts";
 
 describe("getReviewCompletion", () => {
 	it("is complete when every required criterion is rated, even with an open optional one", () => {
@@ -78,5 +81,27 @@ describe("getReviewCompletion", () => {
 
 		assert.equal(completion.status, "NO_CRITERIA");
 		assert.equal(completion.isComplete, false);
+	});
+});
+
+describe("getMissingRequiredCriteria", () => {
+	const criteria = [
+		{ id: "preparation", type: "QUANTITATIVE" as const, isOptional: false },
+		{ id: "follow-up", type: "QUANTITATIVE" as const, isOptional: true },
+		{ id: "structure", type: "QUANTITATIVE" as const, isOptional: false },
+		{ id: "notes", type: "QUALITATIVE" as const, isOptional: false },
+	];
+	const missingFor = (rated: string[]) =>
+		getMissingRequiredCriteria(criteria, new Set(rated)).map(
+			(criterion) => criterion.id,
+		);
+
+	it("lists only unrated required criteria, in order", () => {
+		assert.deepEqual(missingFor([]), ["preparation", "structure"]);
+		assert.deepEqual(missingFor(["structure", "notes"]), ["preparation"]);
+	});
+
+	it("is empty once the sheet is complete", () => {
+		assert.deepEqual(missingFor(["preparation", "structure"]), []);
 	});
 });

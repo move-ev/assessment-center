@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationOverviewData } from "../server/get-evaluation-overview";
+import { OPEN_REVIEWS_ANCHOR, OpenReviewsList } from "./open-reviews-list";
 
 type Props = {
 	acId: string;
@@ -38,6 +39,10 @@ function EvaluationOverview({ acId, overview }: Props) {
 				<OverviewSetupHint acId={acId} />
 			)}
 
+			{overview.summary.reviewableAssignments > 0 && (
+				<OpenReviewsList openReviews={overview.openReviews} />
+			)}
+
 			<div className="space-y-6">
 				{overview.groups.map((group) => (
 					<GroupCard group={group} key={group.id} />
@@ -61,6 +66,7 @@ function SummaryGrid({
 			/>
 			<SummaryCard
 				description="Noch nicht vollständig erfasste Bewerter-Zuweisungen"
+				href={`#${OPEN_REVIEWS_ANCHOR}`}
 				label="Offene Bewertungen"
 				value={summary.unratedAssignments.toString()}
 			/>
@@ -82,11 +88,12 @@ type SummaryCardProps = {
 	label: string;
 	value: string;
 	description: string;
+	href?: string;
 };
 
-function SummaryCard({ label, value, description }: SummaryCardProps) {
-	return (
-		<Card size="sm">
+function SummaryCard({ label, value, description, href }: SummaryCardProps) {
+	const card = (
+		<Card className={href ? "h-full hover:bg-muted/50" : undefined} size="sm">
 			<CardHeader className="pb-0">
 				<CardTitle className="text-muted-foreground text-sm">{label}</CardTitle>
 			</CardHeader>
@@ -96,6 +103,8 @@ function SummaryCard({ label, value, description }: SummaryCardProps) {
 			</CardContent>
 		</Card>
 	);
+
+	return href ? <a href={href}>{card}</a> : card;
 }
 
 function OverviewSetupHint({ acId }: { acId: string }) {
