@@ -134,7 +134,8 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
   (`src/lib/results-access.ts`): admins read-only while ACTIVE (provisional,
   with a banner), fully once COMPLETED or ANONYMIZED; the AC's reviewers
   read-only once COMPLETED (not while rating runs, not after anonymizing).
-  Export and every change stay with admins once COMPLETED. Layout and every
+  Export and every change are locked while ACTIVE and stay with admins from
+  COMPLETED on. Layout and every
   page call `requireResultsAccess` (`src/server/ac-role.ts`), since Next.js
   renders layouts and pages in parallel.
 - `/ressorts` redirects non-admins to `/dashboard`. Ressorts are shared by all

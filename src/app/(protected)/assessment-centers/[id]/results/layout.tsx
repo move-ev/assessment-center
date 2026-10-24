@@ -36,8 +36,8 @@ export default async function AcResultsLayout({ children, params }: Props) {
 					<HourglassIcon className="h-4 w-4 shrink-0" />
 					<span>
 						Vorläufig: Das AC läuft noch, offene Bewertungen fehlen in den
-						Werten. Export und Ressorts gibt es ab dem Abschluss. Was noch offen
-						ist, zeigt die{" "}
+						Werten. Export gibt es ab dem Abschluss, Ressorts sind bis dahin nur
+						lesbar. Was noch offen ist, zeigt die{" "}
 						<Link
 							className="text-primary underline underline-offset-4"
 							href={ROUTES.acOverview(id)}
