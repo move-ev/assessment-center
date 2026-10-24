@@ -24,7 +24,12 @@ export type RatedAssignment = {
 	qualitativeRatings: Array<{ criteriaId: string }>;
 };
 
-function getRatedCriteriaIds(assignment: RatedAssignment): Set<string> {
+/** Required means quantitative and not marked optional. */
+function isRequiredCriterion(criterion: CompletionCriterion): boolean {
+	return criterion.type === "QUANTITATIVE" && !criterion.isOptional;
+}
+
+export function getRatedCriteriaIds(assignment: RatedAssignment): Set<string> {
 	return new Set([
 		...assignment.quantitativeRatings.map((rating) => rating.criteriaId),
 		...assignment.qualitativeRatings.map((rating) => rating.criteriaId),
@@ -41,9 +46,7 @@ export function getReviewCompletion(
 	criteria: CompletionCriterion[],
 	ratedCriteriaIds: ReadonlySet<string>,
 ): ReviewCompletion {
-	const required = criteria.filter(
-		(criterion) => criterion.type === "QUANTITATIVE" && !criterion.isOptional,
-	);
+	const required = criteria.filter(isRequiredCriterion);
 	const completedRequiredCount = required.filter((criterion) =>
 		ratedCriteriaIds.has(criterion.id),
 	).length;
@@ -68,6 +71,21 @@ export function getReviewCompletion(
 		),
 		status: getStatus(criteria.length, isComplete, hasAnyEntry),
 	};
+}
+
+/**
+ * Required criteria still unrated, in the given order. These are what keeps
+ * a sheet open; a sheet without required criteria has none and stays open
+ * only until its first entry.
+ */
+export function getMissingRequiredCriteria<T extends CompletionCriterion>(
+	criteria: T[],
+	ratedCriteriaIds: ReadonlySet<string>,
+): T[] {
+	return criteria.filter(
+		(criterion) =>
+			isRequiredCriterion(criterion) && !ratedCriteriaIds.has(criterion.id),
+	);
 }
 
 export function getAssignmentCompletion(

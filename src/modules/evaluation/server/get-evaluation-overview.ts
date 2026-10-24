@@ -4,6 +4,9 @@ import { notFound } from "next/navigation";
 import {
 	type CompletionCriterion,
 	getAssignmentCompletion,
+	getMissingRequiredCriteria,
+	getRatedCriteriaIds,
+	type ReviewCompletionStatus,
 } from "@/lib/review-completion";
 import { db } from "@/server/db";
 
@@ -39,6 +42,20 @@ type GroupOverview = {
 	completionPercent: number;
 };
 
+export type OpenReview = {
+	assignmentId: string;
+	reviewerId: string;
+	reviewerName: string;
+	participantName: string;
+	groupName: string | null;
+	taskName: string;
+	status: Extract<ReviewCompletionStatus, "NOT_STARTED" | "IN_PROGRESS">;
+	requiredCount: number;
+	completedRequiredCount: number;
+	/** Required criteria still unrated; empty when the task has none required. */
+	missingCriteria: Array<{ id: string; name: string }>;
+};
+
 export type EvaluationOverviewData = {
 	summary: {
 		participantCount: number;
@@ -54,6 +71,7 @@ export type EvaluationOverviewData = {
 		completionPercent: number;
 	};
 	groups: GroupOverview[];
+	openReviews: OpenReview[];
 };
 
 type QueryResult = NonNullable<
@@ -80,7 +98,11 @@ async function fetchOverviewSourceData(acId: string) {
 					isTeamTask: true,
 					criteria: {
 						where: { deletedAt: null },
-						select: { id: true, type: true, isOptional: true },
+						select: { id: true, name: true, type: true, isOptional: true },
+						orderBy: [
+							{ criteriaGroup: { createdAt: "asc" } },
+							{ createdAt: "asc" },
+						],
 					},
 				},
 				orderBy: { createdAt: "asc" },
@@ -118,6 +140,9 @@ async function fetchOverviewSourceData(acId: string) {
 						select: {
 							id: true,
 							taskId: true,
+							reviewer: {
+								select: { id: true, user: { select: { name: true } } },
+							},
 							quantitativeRatings: {
 								where: { deletedAt: null },
 								select: { criteriaId: true },
@@ -140,7 +165,7 @@ type TaskLookupEntry = {
 	id: string;
 	name: string;
 	isTeamTask: boolean;
-	criteria: CompletionCriterion[];
+	criteria: Array<CompletionCriterion & { name: string }>;
 };
 
 function buildTaskLookup(data: QueryResult): Map<string, TaskLookupEntry> {
@@ -405,6 +430,62 @@ function buildSummary(
 	};
 }
 
+function buildOpenReviews(
+	data: QueryResult,
+	taskLookup: ReturnType<typeof buildTaskLookup>,
+): OpenReview[] {
+	const groupNameById = new Map(
+		data.groups.map((group) => [group.id, group.name]),
+	);
+	const openReviews: OpenReview[] = [];
+
+	for (const participant of data.participants) {
+		const primaryGroupId = participant.groupMemberships[0]?.groupId;
+		const groupName = primaryGroupId
+			? (groupNameById.get(primaryGroupId) ?? null)
+			: null;
+
+		for (const assignment of participant.reviewerAssignments) {
+			const task = taskLookup.get(assignment.taskId);
+			if (!task) {
+				continue;
+			}
+
+			const ratedCriteriaIds = getRatedCriteriaIds(assignment);
+			const completion = getAssignmentCompletion(task.criteria, assignment);
+			if (
+				completion.status === "NO_CRITERIA" ||
+				completion.status === "COMPLETED"
+			) {
+				continue;
+			}
+
+			openReviews.push({
+				assignmentId: assignment.id,
+				reviewerId: assignment.reviewer.id,
+				reviewerName: assignment.reviewer.user.name,
+				participantName: participant.name,
+				groupName,
+				taskName: task.name,
+				status: completion.status,
+				requiredCount: completion.requiredCount,
+				completedRequiredCount: completion.completedRequiredCount,
+				missingCriteria: getMissingRequiredCriteria(
+					task.criteria,
+					ratedCriteriaIds,
+				).map(({ id, name }) => ({ id, name })),
+			});
+		}
+	}
+
+	return openReviews.sort(
+		(left, right) =>
+			left.reviewerName.localeCompare(right.reviewerName, "de-DE") ||
+			left.taskName.localeCompare(right.taskName, "de-DE") ||
+			left.participantName.localeCompare(right.participantName, "de-DE"),
+	);
+}
+
 export async function getEvaluationOverviewData(
 	acId: string,
 ): Promise<EvaluationOverviewData> {
@@ -419,5 +500,6 @@ export async function getEvaluationOverviewData(
 	return {
 		summary: buildSummary(data, taskLookup),
 		groups: buildGroups(data, taskLookup),
+		openReviews: buildOpenReviews(data, taskLookup),
 	};
 }
