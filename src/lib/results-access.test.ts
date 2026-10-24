@@ -26,7 +26,14 @@ describe("getResultsAccess", () => {
 				canManage: true,
 			});
 		}
-		assert.equal(getResultsAccess("ADMIN", "ACTIVE").canView, false);
+	});
+
+	it("lets admins read provisional results while the AC runs, without managing them", () => {
+		assert.deepEqual(getResultsAccess("ADMIN", "ACTIVE"), {
+			canView: true,
+			canManage: false,
+		});
+		assert.equal(getResultsAccess("ADMIN", "DRAFT").canView, false);
 	});
 
 	it("gives nobody else access", () => {
