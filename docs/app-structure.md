@@ -32,7 +32,7 @@ DRAFT ──► ACTIVE ──► COMPLETED ──► ANONYMIZED
 | Status | Meaning | What is available |
 |---|---|---|
 | `DRAFT` | Being set up | Setup flow (admin only) |
-| `ACTIVE` | AC is running, participants are on-site | Reviewer workspace; live overview (admin) |
+| `ACTIVE` | AC is running, participants are on-site | Reviewer workspace; live overview and provisional results, read-only (admin) |
 | `COMPLETED` | AC has ended | Results/evaluation (admin); reviewers can still edit ratings |
 | `ANONYMIZED` | Personal data removed after the AC (irreversible) | Read-only results (admin only); hidden from reviewers |
 
@@ -107,7 +107,7 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
         │
         ├── /overview                             Admin: live completion matrix (ACTIVE only)
         │
-        ├── /results                              Admin (COMPLETED, ANONYMIZED), reviewers of the AC read-only (COMPLETED)
+        ├── /results                              Admin (ACTIVE read-only, COMPLETED, ANONYMIZED), reviewers of the AC read-only (COMPLETED)
         │   │                                     Tab "Ressorts": planned numbers and assigned people per ressort (admins edit)
         │   │                                     ?ressort=<id>|none filters the ranking by ressort
         │   ├── /[participantId]                  One participant in detail (same access)
@@ -131,9 +131,10 @@ two reviewers; it is a calibration aid, not an assessment of reviewers.
 - Access to `/overview` is blocked for non-admins and redirects to `/results`
   once the AC is ANONYMIZED.
 - `/results` (ranking, detail pages, comparison) follows `getResultsAccess`
-  (`src/lib/results-access.ts`): admins once COMPLETED or ANONYMIZED; the AC's
-  reviewers read-only once COMPLETED (not while rating runs, not after
-  anonymizing). Export and every change stay with admins. Layout and every
+  (`src/lib/results-access.ts`): admins read-only while ACTIVE (provisional,
+  with a banner), fully once COMPLETED or ANONYMIZED; the AC's reviewers
+  read-only once COMPLETED (not while rating runs, not after anonymizing).
+  Export and every change stay with admins once COMPLETED. Layout and every
   page call `requireResultsAccess` (`src/server/ac-role.ts`), since Next.js
   renders layouts and pages in parallel.
 - `/ressorts` redirects non-admins to `/dashboard`. Ressorts are shared by all

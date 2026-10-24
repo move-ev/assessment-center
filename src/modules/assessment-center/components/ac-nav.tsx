@@ -10,7 +10,7 @@ type Props = {
 	acId: string;
 	isAdmin: boolean;
 	acStatus: AcStatus;
-	/** From getResultsAccess: admins and, once completed, reviewers. */
+	/** From getResultsAccess: admins from ACTIVE on, reviewers once completed. */
 	canViewResults: boolean;
 };
 
