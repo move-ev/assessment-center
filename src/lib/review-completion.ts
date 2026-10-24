@@ -24,6 +24,11 @@ export type RatedAssignment = {
 	qualitativeRatings: Array<{ criteriaId: string }>;
 };
 
+/** Required means quantitative and not marked optional. */
+function isRequiredCriterion(criterion: CompletionCriterion): boolean {
+	return criterion.type === "QUANTITATIVE" && !criterion.isOptional;
+}
+
 export function getRatedCriteriaIds(assignment: RatedAssignment): Set<string> {
 	return new Set([
 		...assignment.quantitativeRatings.map((rating) => rating.criteriaId),
@@ -41,9 +46,7 @@ export function getReviewCompletion(
 	criteria: CompletionCriterion[],
 	ratedCriteriaIds: ReadonlySet<string>,
 ): ReviewCompletion {
-	const required = criteria.filter(
-		(criterion) => criterion.type === "QUANTITATIVE" && !criterion.isOptional,
-	);
+	const required = criteria.filter(isRequiredCriterion);
 	const completedRequiredCount = required.filter((criterion) =>
 		ratedCriteriaIds.has(criterion.id),
 	).length;
@@ -81,9 +84,7 @@ export function getMissingRequiredCriteria<T extends CompletionCriterion>(
 ): T[] {
 	return criteria.filter(
 		(criterion) =>
-			criterion.type === "QUANTITATIVE" &&
-			!criterion.isOptional &&
-			!ratedCriteriaIds.has(criterion.id),
+			isRequiredCriterion(criterion) && !ratedCriteriaIds.has(criterion.id),
 	);
 }
 

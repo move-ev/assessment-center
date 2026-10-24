@@ -66,7 +66,11 @@ function SummaryGrid({
 			/>
 			<SummaryCard
 				description="Noch nicht vollständig erfasste Bewerter-Zuweisungen"
-				href={`#${OPEN_REVIEWS_ANCHOR}`}
+				href={
+					summary.reviewableAssignments > 0
+						? `#${OPEN_REVIEWS_ANCHOR}`
+						: undefined
+				}
 				label="Offene Bewertungen"
 				value={summary.unratedAssignments.toString()}
 			/>
