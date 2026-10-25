@@ -23,7 +23,6 @@ export type ComparedParticipant = Pick<
 	| "overallScore"
 	| "rank"
 	| "rankingBand"
-	| "showsDecimal"
 	| "deviatingTaskNames"
 > &
 	Pick<ComparedPerson, "taskScores">;
@@ -60,7 +59,6 @@ function toComparedParticipant(
 		overallScore: participant.overallScore,
 		rank: participant.rank,
 		rankingBand: participant.rankingBand,
-		showsDecimal: participant.showsDecimal,
 		deviatingTaskNames: participant.deviatingTaskNames,
 		taskScores: Object.fromEntries(
 			participant.taskResults.map((task) => [task.taskId, task.score]),

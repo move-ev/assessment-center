@@ -113,7 +113,7 @@ type ParticipantResult = {
 	taskResults: ParticipantTaskResult[];
 	/** Tasks whose reviewers differ strongly; marks the person in the ranking. */
 	deviatingTaskNames: string[];
-	/** Sonderfall 1 in any task; ranks behind equal whole percents. */
+	/** Sonderfall 1 in any task; ranks behind equal shown scores. */
 	hasStrongDeviation: boolean;
 	/** Share of each task in the overall score; adds up to it. */
 	taskContributions: TaskContribution[];
@@ -199,8 +199,6 @@ export type HypotheticalResults = {
 		name: string;
 		actualScore: number;
 		actualRank: number | null;
-		/** The real ranking shows this score with one decimal. */
-		actualShowsDecimal: boolean;
 		averageReviewer: HypotheticalScore;
 		byReviewer: Record<string, HypotheticalScore>;
 		/**
@@ -740,7 +738,6 @@ function buildHypotheticalResults(
 			name: participant.name,
 			actualScore: participant.overallScore ?? 0,
 			actualRank: participant.rank,
-			actualShowsDecimal: participant.showsDecimal,
 			averageReviewer: averageReviewer.get(participant.id) ?? none,
 			byReviewer: Object.fromEntries(
 				[...byReviewer].map(([reviewerId, scores]) => [

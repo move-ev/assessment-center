@@ -14,11 +14,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	formatOverallScore,
-	formatPercent,
-	formatSignedPoints,
-} from "@/lib/format-percent";
+import { formatPercent, formatSignedPoints } from "@/lib/format-percent";
 import { cn } from "@/lib/utils";
 import type {
 	EvaluationParticipantDetailData,
@@ -104,10 +100,7 @@ function ParticipantHypothetical({
 						label="Tatsächlich"
 						rank={participant.rank}
 						rankedCount={participant.rankedCount}
-						score={formatOverallScore(
-							participant.overallScore,
-							participant.showsDecimal,
-						)}
+						score={formatPercent(participant.overallScore)}
 					/>
 					<ScenarioTile
 						detail={

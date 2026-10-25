@@ -16,7 +16,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { formatOverallScore, formatPercent } from "@/lib/format-percent";
+import { formatPercent } from "@/lib/format-percent";
 import {
 	matchesRessortFilter,
 	type RessortFilter,
@@ -339,10 +339,7 @@ function ParticipantTable({
 								</div>
 							</TableCell>
 							<TableCell className="tabular-nums">
-								{formatOverallScore(
-									participant.overallScore,
-									participant.showsDecimal,
-								)}
+								{formatPercent(participant.overallScore)}
 							</TableCell>
 							<TableCell className="text-muted-foreground">
 								{participant.groupName ?? "Keine Gruppe"}

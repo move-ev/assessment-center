@@ -48,9 +48,9 @@ Scores are percentages, as in the assessment matrix
 (`src/modules/evaluation/server/scoring.ts`): per reviewer and task,
 100 × Σ(stars × weight) ÷ Σ(scale maximum × weight) over the criteria that
 reviewer rated; per task, the mean of the reviewers' percentages; overall, the
-mean of the task percentages weighted by `scoreWeight`. The app shows whole
-percent, except the criteria tab (star averages per criterion); the export
-shows one decimal.
+mean of the task percentages weighted by `scoreWeight`. The app and the
+export show percentages with two decimals (`formatPercent`, e.g. "92,41 %"),
+except the criteria tab (star averages per criterion).
 
 Sonderfall 1 (`deviation.ts`): if at least two reviewers have each rated a
 scored criterion of a task and their percentages differ by more than 7
@@ -59,10 +59,9 @@ is marked in the ranking; the detail page shows the spread per task and which
 task triggers the mark.
 
 Sonderfall 2 (`ranking.ts`, `rankParticipants`): the ranking orders by the
-whole percent shown; on equal whole percent the person without Sonderfall 1
-comes first, then the exact value decides and is shown with one decimal for
-those people. Results identical in exact value and Sonderfall-1 status share
-a rank (1, 2, 2, 4) and the 15 % mark of the better position. Ranking, detail page, export, distribution and heat
+score shown, rounded to two decimals (`toShownPercent`); on an equal shown
+score the person without Sonderfall 1 comes first. Results equal in the shown
+score and Sonderfall-1 status share a rank (1, 2, 2, 4) and the 15 % mark of the better position. Ranking, detail page, export, distribution and heat
 map all show this rank.
 
 Result charts are server-rendered HTML/CSS on the tokens `--series-*`
@@ -448,8 +447,8 @@ testable with `bun run test` without any setup.
   from the assessment matrix), valid values and which values need a
   confirmation. Used by the assessment-center and rating routers, the
   rating form loader, the rating view and the details page.
-- `src/lib/format-percent.ts`: how scores are shown, whole percent in the app
-  and one decimal in the export.
+- `src/lib/format-percent.ts`: how scores are shown, two decimals in the app
+  and in the export.
 - `src/lib/pseudonyms.ts`: pseudonyms "Bewerbende n" / "Gruppe n" for
   anonymizing an AC, shuffled for participants.
 - `src/lib/ressort-capacity.ts`: valid ressort numbers per AC (whole numbers

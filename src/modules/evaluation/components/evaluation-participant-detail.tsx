@@ -16,11 +16,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	formatOverallScore,
-	formatPercent,
-	formatSpread,
-} from "@/lib/format-percent";
+import { formatPercent, formatSpread } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import { RessortAssignment, type RessortCapacityRow } from "@/modules/ressort";
 import type { EvaluationParticipantDetailData } from "../server/get-evaluation-participant-detail-data";
@@ -115,10 +111,7 @@ function EvaluationParticipantDetail({
 						<div className="shrink-0 space-y-1 text-right">
 							<p className="text-muted-foreground text-xs">Gesamtwert</p>
 							<p className="font-bold text-3xl tabular-nums">
-								{formatOverallScore(
-									overallScore,
-									data.participant.showsDecimal,
-								)}
+								{formatPercent(overallScore)}
 							</p>
 							{rank !== null && (
 								<div className="flex items-center justify-end gap-2">

@@ -65,8 +65,6 @@ export type EvaluationParticipantDetailData = {
 		overallScore: number | null;
 		/** Rank in the ranking (shared on identical results); null without a score. */
 		rank: number | null;
-		/** The exact value decided the rank, so it shows one decimal. */
-		showsDecimal: boolean;
 		/** Number of participants with an overall score. */
 		rankedCount: number;
 		rankingBand: RankingBand | null;
@@ -218,7 +216,6 @@ export async function getEvaluationParticipantDetailData(
 			ressort: participant.ressort,
 			overallScore: participant.overallScore,
 			rank: participant.rank,
-			showsDecimal: participant.showsDecimal,
 			rankedCount: results.summary.participantsWithScore,
 			rankingBand: participant.rankingBand,
 			deviatingTaskNames: participant.deviatingTaskNames,
