@@ -6,7 +6,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { formatOverallScore, formatPercent } from "@/lib/format-percent";
+import { formatPercent } from "@/lib/format-percent";
 import type {
 	EvaluationParticipantDetailData,
 	ScoreComparison,
@@ -41,17 +41,15 @@ function ProfileRow({
 	score,
 	comparison,
 	emphasis = false,
-	showsDecimal = false,
 }: {
 	label: string;
 	score: number | null;
 	comparison: ScoreComparison;
 	emphasis?: boolean;
 	/** Overall score whose exact value decided the rank (Sonderfall 2). */
-	showsDecimal?: boolean;
 }) {
 	const { summary } = comparison;
-	const shownScore = formatOverallScore(score, showsDecimal);
+	const shownScore = formatPercent(score);
 	const description = [
 		`${label}: ${shownScore}`,
 		describePosition(comparison),
@@ -161,7 +159,6 @@ function ParticipantProfile({
 						emphasis
 						label="Gesamtwert"
 						score={participant.overallScore}
-						showsDecimal={participant.showsDecimal}
 					/>
 				</ul>
 				<div className="grid grid-cols-[minmax(7rem,11rem)_1fr_4rem] gap-4">

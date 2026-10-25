@@ -1,27 +1,36 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
-	formatOverallScore,
-	formatPercentWithDecimal,
+	formatPercent,
+	formatPercentForExport,
 	formatSignedPoints,
+	toShownPercent,
 } from "./format-percent.ts";
 
-describe("formatPercentWithDecimal", () => {
-	it("shows one decimal with a German comma, for scores the exact value ranked", () => {
-		assert.equal(formatPercentWithDecimal(59.26), "59,3 %");
-		assert.equal(formatPercentWithDecimal(58.6), "58,6 %");
-		assert.equal(formatPercentWithDecimal(60), "60,0 %");
+describe("formatPercent", () => {
+	it("shows two decimals with a German comma", () => {
+		assert.equal(formatPercent(92.414), "92,41 %");
+		assert.equal(formatPercent(69.456), "69,46 %");
+		assert.equal(formatPercent(60), "60,00 %");
 	});
 
 	it("shows a dash without a score", () => {
-		assert.equal(formatPercentWithDecimal(null), "–");
+		assert.equal(formatPercent(null), "–");
 	});
 });
 
-describe("formatOverallScore", () => {
-	it("shows whole percent unless the exact value ranked the person", () => {
-		assert.equal(formatOverallScore(59.26, false), "59 %");
-		assert.equal(formatOverallScore(59.26, true), "59,3 %");
+describe("toShownPercent", () => {
+	it("is the value formatPercent shows, so ranking and display agree", () => {
+		assert.equal(toShownPercent(92.414), 92.41);
+		assert.equal(toShownPercent(92.406), 92.41);
+		assert.equal(toShownPercent(68.5), 68.5);
+	});
+});
+
+describe("formatPercentForExport", () => {
+	it("shows two decimals, and n/a without a score", () => {
+		assert.equal(formatPercentForExport(93.333), "93,33");
+		assert.equal(formatPercentForExport(null), "n/a");
 	});
 });
 

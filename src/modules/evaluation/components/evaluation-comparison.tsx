@@ -13,7 +13,7 @@ import {
 	EmptyHeader,
 	EmptyTitle,
 } from "@/components/ui/empty";
-import { formatOverallScore, formatPercent } from "@/lib/format-percent";
+import { formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type { EvaluationComparisonData } from "../server/get-evaluation-comparison-data";
 import {
@@ -83,7 +83,7 @@ function PersonCard({
 			</CardHeader>
 			<CardContent className="space-y-2">
 				<p className="font-semibold text-3xl tabular-nums">
-					{formatOverallScore(person.overallScore, person.showsDecimal)}
+					{formatPercent(person.overallScore)}
 				</p>
 				<div className="flex flex-wrap items-center gap-2">
 					<span className="text-muted-foreground text-sm">

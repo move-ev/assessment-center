@@ -7,7 +7,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@/components/ui/card";
-import { formatOverallScore } from "@/lib/format-percent";
+import { formatPercent } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import { cn } from "@/lib/utils";
 import type { EvaluationResultsData } from "../server/get-evaluation-results-data";
@@ -38,16 +38,14 @@ function heatLegendLabels(): string[] {
 function HeatCell({
 	score,
 	hasStrongDeviation = false,
-	showsDecimal = false,
 	label,
 }: {
 	score: number | null;
 	hasStrongDeviation?: boolean;
 	label: string;
 	/** Overall score whose exact value decided the rank (Sonderfall 2). */
-	showsDecimal?: boolean;
 }) {
-	const shownScore = formatOverallScore(score, showsDecimal);
+	const shownScore = formatPercent(score);
 	const step = getHeatStep(score);
 
 	return (
@@ -146,7 +144,6 @@ function ResultsHeatmap({
 									<HeatCell
 										label={`${participant.name}, Gesamtwert`}
 										score={participant.overallScore}
-										showsDecimal={participant.showsDecimal}
 									/>
 								</tr>
 							))}

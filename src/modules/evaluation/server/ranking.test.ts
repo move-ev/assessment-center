@@ -42,10 +42,29 @@ function person(
 }
 
 describe("rankParticipants", () => {
-	it("puts the person without a strong reviewer deviation first when the whole percent ties", () => {
+	it("orders by the score shown, even when a lower one has no strong reviewer deviation", () => {
+		// The case from the AC: 69,46 % and 68,60 % with Sonderfall 1 rank
+		// above 68,50 % without.
 		const ranked = rankParticipants([
-			person("Abweichung", 59.4, true),
-			person("Ohne", 58.6),
+			person("Ohne", 68.5),
+			person("Abweichung hoch", 69.46, true),
+			person("Abweichung", 68.6, true),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => [entry.name, entry.rank]),
+			[
+				["Abweichung hoch", 1],
+				["Abweichung", 2],
+				["Ohne", 3],
+			],
+		);
+	});
+
+	it("puts the person without a strong reviewer deviation first when the score shown ties", () => {
+		const ranked = rankParticipants([
+			person("Abweichung", 59.414, true),
+			person("Ohne", 59.406),
 			person("Vorn", 80),
 		]);
 
@@ -59,26 +78,6 @@ describe("rankParticipants", () => {
 		);
 	});
 
-	it("lets the exact value decide a tie of the same status and shows it with a decimal for those people", () => {
-		const ranked = rankParticipants([
-			person("Knapp", 58.6),
-			person("Genau", 59.26),
-			person("Anders", 70),
-			person("Abweichung", 59.4, true),
-		]);
-
-		assert.deepEqual(
-			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
-			[
-				["Anders", 1, false],
-				["Genau", 2, true],
-				["Knapp", 3, true],
-				// alone in its status at 59 %: Sonderfall 1 decided, not the decimal
-				["Abweichung", 4, false],
-			],
-		);
-	});
-
 	it("gives identical results the same rank and skips the places they share", () => {
 		const ranked = rankParticipants([
 			person("Erste", 80),
@@ -88,13 +87,25 @@ describe("rankParticipants", () => {
 		]);
 
 		assert.deepEqual(
-			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
+			ranked.map((entry) => [entry.name, entry.rank]),
 			[
-				["Erste", 1, false],
-				["Gleich A", 2, false],
-				["Gleich B", 2, false],
-				["Danach", 4, false],
+				["Erste", 1],
+				["Gleich A", 2],
+				["Gleich B", 2],
+				["Danach", 4],
 			],
+		);
+	});
+
+	it("shares a rank when only digits beyond the two shown differ", () => {
+		const ranked = rankParticipants([
+			person("Knapp drunter", 62.496),
+			person("Knapp drüber", 62.504),
+		]);
+
+		assert.deepEqual(
+			ranked.map((entry) => entry.rank),
+			[1, 1],
 		);
 	});
 
@@ -172,23 +183,6 @@ describe("rankParticipants", () => {
 				[12, null],
 				[13, "BOTTOM"],
 				[13, "BOTTOM"],
-			],
-		);
-	});
-
-	it("shows the decimal for people sharing a rank when it sets them apart from a third", () => {
-		const ranked = rankParticipants([
-			person("Dritte", 59.1),
-			person("Gleich A", 59.3),
-			person("Gleich B", 59.3),
-		]);
-
-		assert.deepEqual(
-			ranked.map((entry) => [entry.name, entry.rank, entry.showsDecimal]),
-			[
-				["Gleich A", 1, true],
-				["Gleich B", 1, true],
-				["Dritte", 3, true],
 			],
 		);
 	});

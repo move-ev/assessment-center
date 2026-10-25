@@ -1,22 +1,14 @@
-/** Score in whole percent for the app, e.g. "93 %"; a dash without a score. */
-export function formatPercent(value: number | null): string {
-	return value === null ? "–" : `${Math.round(value)} %`;
-}
-
 /**
- * Score with one decimal, e.g. "59,3 %": in the ranking when the exact
- * value decided a tie of the whole percent (Sonderfall 2).
+ * Score as the app shows it, rounded to two decimals: what one reads is
+ * what ranks, so 92.414 and 92.406 both count as 92.41.
  */
-export function formatPercentWithDecimal(value: number | null): string {
-	return value === null ? "–" : `${formatDecimal(value)} %`;
+export function toShownPercent(value: number): number {
+	return Math.round(value * 100) / 100;
 }
 
-/** Overall score as the ranking shows it: one decimal only where it ranked. */
-export function formatOverallScore(
-	value: number | null,
-	showsDecimal: boolean,
-): string {
-	return showsDecimal ? formatPercentWithDecimal(value) : formatPercent(value);
+/** Score in percent with two decimals, e.g. "92,41 %"; a dash without a score. */
+export function formatPercent(value: number | null): string {
+	return value === null ? "–" : `${formatDecimal(value)} %`;
 }
 
 /**
@@ -29,7 +21,7 @@ export function formatSpread(spread: number | null): string {
 }
 
 /**
- * Score in percent with one decimal for the export, e.g. "93,3". Missing
+ * Score in percent with two decimals for the export, e.g. "93,33". Missing
  * scores are "n/a" rather than a dash so spreadsheets don't read a minus.
  */
 export function formatPercentForExport(value: number | null): string {
@@ -37,7 +29,7 @@ export function formatPercentForExport(value: number | null): string {
 }
 
 function formatDecimal(value: number): string {
-	return value.toFixed(1).replace(".", ",");
+	return toShownPercent(value).toFixed(2).replace(".", ",");
 }
 
 /**

@@ -10,9 +10,10 @@ describe("getHeatStep", () => {
 		);
 	});
 
-	it("steps the whole percent shown in the cell, so 59.5 (shown as 60 %) is in the 60s", () => {
-		assert.equal(getHeatStep(59.5), 2);
-		assert.equal(getHeatStep(59.49), 1);
+	it("steps the score shown in the cell, so 59.996 (shown as 60,00 %) is in the 60s", () => {
+		assert.equal(getHeatStep(59.996), 2);
+		assert.equal(getHeatStep(59.994), 1);
+		assert.equal(getHeatStep(59.5), 1);
 	});
 
 	it("has no step without a score", () => {

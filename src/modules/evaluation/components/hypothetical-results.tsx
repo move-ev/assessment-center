@@ -22,11 +22,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	formatOverallScore,
-	formatPercent,
-	formatSignedPoints,
-} from "@/lib/format-percent";
+import { formatPercent, formatSignedPoints } from "@/lib/format-percent";
 import { ROUTES } from "@/lib/routes";
 import type {
 	HypotheticalResults as HypotheticalData,
@@ -219,7 +215,7 @@ function HypotheticalResults({
 						aus Bewertern mit mindestens 3 Vergleichen. Weil ein Bewerter so
 						alle gleich verschiebt, ist die Reihenfolge bei jedem einzelnen
 						Bewerter praktisch dieselbe (Abweichungen nur an der 0- oder
-						100-%-Grenze und bei Gleichstand im ganzen Prozent); sie weicht von
+						100-%-Grenze und bei Gleichstand im angezeigten Wert); sie weicht von
 						der tatsächlichen ab, wo jemand vor allem von strengen oder milden
 						Bewertern gesehen wurde.
 					</span>
@@ -330,10 +326,7 @@ function HypotheticalResults({
 										</Link>
 									</TableCell>
 									<TableCell className="font-semibold tabular-nums">
-										{formatOverallScore(
-											participant.actualScore,
-											participant.actualShowsDecimal,
-										)}
+										{formatPercent(participant.actualScore)}
 									</TableCell>
 									<HypotheticalCell
 										actualRank={participant.actualRank}

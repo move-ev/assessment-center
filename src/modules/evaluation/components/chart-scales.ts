@@ -1,3 +1,5 @@
+import { toShownPercent } from "../../../lib/format-percent.ts";
+
 /** Lower bounds of the heat steps 1–4; step 0 lies below the first. */
 export const HEAT_STEP_BOUNDS = [50, 60, 70, 80] as const;
 
@@ -6,15 +8,15 @@ export type HeatStep = 0 | 1 | 2 | 3 | 4;
 /**
  * Colour step of a score in the heat map. Fixed bands rather than the AC's
  * own range, so the same colour means the same score in every AC. Steps the
- * whole percent the cell shows (formatPercent), so the legend's integer
- * bands match what one reads.
+ * score the cell shows (formatPercent), so 59.996, shown as "60,00 %", is in
+ * the 60s.
  */
 export function getHeatStep(score: number | null): HeatStep | null {
 	if (score === null) {
 		return null;
 	}
 
-	const shown = Math.round(score);
+	const shown = toShownPercent(score);
 	return HEAT_STEP_BOUNDS.filter((bound) => shown >= bound).length as HeatStep;
 }
 
