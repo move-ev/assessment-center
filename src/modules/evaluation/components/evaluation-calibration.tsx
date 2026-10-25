@@ -18,6 +18,7 @@ import {
 import type { RatingScaleMax } from "@/lib/rating-scale";
 import { cn } from "@/lib/utils";
 import type { EvaluationCalibration as CalibrationData } from "../server/get-evaluation-results-data";
+import { HypotheticalResults } from "./hypothetical-results";
 
 /** Fewer shared ratings than this make a reviewer's tendency shaky. */
 const FEW_COMPARISONS = 3;
@@ -246,10 +247,12 @@ function CriterionDisagreementCard({
  * ratings of the same participant in the same task are compared.
  */
 function EvaluationCalibration({
+	acId,
 	calibration,
 	tasks,
 	ratingScaleMax,
 }: {
+	acId: string;
 	calibration: CalibrationData;
 	tasks: Array<{ id: string; name: string }>;
 	ratingScaleMax: RatingScaleMax;
@@ -268,6 +271,7 @@ function EvaluationCalibration({
 				reviewers={calibration.reviewers}
 				taskNames={new Map(tasks.map((task) => [task.id, task.name]))}
 			/>
+			<HypotheticalResults acId={acId} data={calibration.hypothetical} />
 			<CriterionDisagreementCard
 				criteria={calibration.criteria}
 				maxDistance={ratingScaleMax - 1}

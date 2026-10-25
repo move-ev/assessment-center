@@ -39,3 +39,15 @@ export function formatPercentForExport(value: number | null): string {
 function formatDecimal(value: number): string {
 	return value.toFixed(1).replace(".", ",");
 }
+
+/**
+ * Signed percentage points with at most one decimal, e.g. "+4,9 Pkt." or
+ * "−2,7 Pkt." (true minus sign); "±0 Pkt." for no shift.
+ */
+export function formatSignedPoints(value: number): string {
+	const formatted = Math.abs(value).toLocaleString("de-DE", {
+		maximumFractionDigits: 1,
+	});
+	const sign = value > 0 ? "+" : value < 0 ? "−" : "±";
+	return `${sign}${formatted} Pkt.`;
+}

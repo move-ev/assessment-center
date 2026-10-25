@@ -136,6 +136,7 @@ function EvaluationParticipant({
 				</TabsContent>
 				<TabsContent value="calibration">
 					<EvaluationCalibration
+						acId={acId}
 						calibration={results.calibration}
 						ratingScaleMax={results.ratingScaleMax}
 						tasks={results.tasks}

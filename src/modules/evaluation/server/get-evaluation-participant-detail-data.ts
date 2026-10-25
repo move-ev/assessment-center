@@ -13,6 +13,7 @@ import {
 import {
 	type EvaluationResultsData,
 	getEvaluationResultsData,
+	type HypotheticalScore,
 } from "./get-evaluation-results-data";
 import {
 	getParticipantReviewerBreakdown,
@@ -26,6 +27,29 @@ export type ScoreComparison = {
 	/** Position among the participants with a score; null without a score. */
 	position: number | null;
 };
+
+/** Hypothetical result under one reviewer, named with their effect. */
+export type ReviewerScenario = HypotheticalScore & {
+	reviewerName: string;
+	effect: number;
+};
+
+/**
+ * The person's results had one reviewer rated everyone: context for the
+ * real result, never a replacement. Null without a real overall score.
+ */
+export type ParticipantHypothetical = {
+	strictest: ReviewerScenario | null;
+	averageReviewer: HypotheticalScore;
+	mildest: ReviewerScenario | null;
+	tasks: Array<{
+		taskId: string;
+		taskName: string;
+		actualScore: number | null;
+		averageReviewerScore: number;
+		reviewers: Array<{ reviewerName: string; effect: number | null }>;
+	}>;
+} | null;
 
 export type EvaluationParticipantDetailData = {
 	/** Highest star of the AC's scale, for the criteria drill-down. */
@@ -75,6 +99,7 @@ export type EvaluationParticipantDetailData = {
 			updatedAt: Date;
 		}>;
 	}>;
+	hypothetical: ParticipantHypothetical;
 };
 
 async function fetchParticipantGroupId(acId: string, participantId: string) {
@@ -233,6 +258,58 @@ export async function getEvaluationParticipantDetailData(
 			]),
 		),
 		teamObservations,
+		hypothetical: buildParticipantHypothetical(results, participant),
+	};
+}
+
+function buildParticipantHypothetical(
+	results: EvaluationResultsData,
+	participant: EvaluationResultsData["participants"][number],
+): ParticipantHypothetical {
+	const { hypothetical } = results.calibration;
+	const row = hypothetical.participants.find(
+		(entry) => entry.participantId === participant.id,
+	);
+	if (!row) {
+		return null;
+	}
+
+	const scenario = (reviewerId: string | null): ReviewerScenario | null => {
+		const reviewer = hypothetical.reviewers.find(
+			(entry) => entry.reviewerId === reviewerId,
+		);
+		const score = reviewerId ? row.byReviewer[reviewerId] : undefined;
+		return reviewer && score
+			? {
+					...score,
+					reviewerName: reviewer.reviewerName,
+					effect: reviewer.effect,
+				}
+			: null;
+	};
+
+	return {
+		strictest: scenario(hypothetical.strictestReviewerId),
+		averageReviewer: row.averageReviewer,
+		mildest: scenario(hypothetical.mildestReviewerId),
+		// Same task order as the task scores.
+		tasks: participant.taskResults.flatMap((task) => {
+			const entry = row.tasks.find((item) => item.taskId === task.taskId);
+			return entry
+				? [
+						{
+							taskId: task.taskId,
+							taskName: task.taskName,
+							actualScore: task.score,
+							averageReviewerScore: entry.averageReviewerScore,
+							reviewers: entry.reviewers.map(({ reviewerName, effect }) => ({
+								reviewerName,
+								effect,
+							})),
+						},
+					]
+				: [];
+		}),
 	};
 }
 
