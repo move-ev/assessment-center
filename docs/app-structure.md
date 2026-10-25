@@ -75,7 +75,21 @@ position; per task, ties share a position; overall, the ranking's rank), shows r
 reviewer's stars per criterion with the written feedback. The calibration tab
 (`calibration.ts`) compares each reviewer only with others who rated the same
 person in the same task, and ranks criteria by the mean star distance between
-two reviewers; it is a calibration aid, not an assessment of reviewers.
+two reviewers; it is a calibration aid, not an assessment of reviewers. It
+also puts the real results into context (`hypothetical-scores.ts`): each
+reviewer percentage is split into the person's task score and one shift per
+reviewer across all tasks (alternating least squares, shrunk towards 0 by
+three pseudo-ratings, centred so the average reviewer has 0). Shifting the
+average reviewer's task scores by a reviewer's effect gives the overall score
+and rank had that reviewer rated everyone (ranked like the real ranking, with
+the person's real Sonderfall-1 status kept, so only the reviewer effect moves
+anyone): the average, the strictest and the
+mildest reviewer (at least three comparisons), or one picked. The real score
+and rank stay first and authoritative; ranking and export are unaffected.
+The detail page shows the same scenarios for one person last, below all real
+ratings, with each task's average-reviewer score (kept within 0–100 %; a
+dash while unrated) and the effects of the reviewers who rated it (their mean
+is the gap to the real task score).
 
 ---
 
@@ -238,11 +252,13 @@ src/modules/
 │   │   ├── evaluation-criteria.tsx    Per-criteria breakdown with weights
 │   │   ├── evaluation-export.tsx      Export trigger (CSV / PDF)
 │   │   ├── evaluation-calibration.tsx Reviewer leniency, criterion disagreement
+│   │   ├── hypothetical-results.tsx   Results under one reviewer for all (client)
 │   │   ├── score-distribution.tsx     Overall scores as dots on 0–100 %
 │   │   ├── results-heatmap.tsx        Participants × tasks heat map
 │   │   ├── score-composition.tsx      Overall score split into task shares
 │   │   ├── task-scatter.tsx           Two tasks against each other (client)
 │   │   ├── participant-profile.tsx    Person against the AC per task
+│   │   ├── participant-hypothetical.tsx Person under strict, average, mild reviewer
 │   │   ├── criteria-drilldown.tsx     Stars per reviewer and criterion, texts
 │   │   ├── score-strip.tsx            Shared 0–100 % axis, marks and legend
 │   │   ├── evaluation-comparison.tsx  2–3 participants side by side
@@ -253,6 +269,7 @@ src/modules/
 │   │   ├── scoring.ts, ranking.ts, deviation.ts
 │   │   ├── comparison.ts              Summaries, positions, task shares, correlation
 │   │   ├── calibration.ts             Leniency and disagreement
+│   │   ├── hypothetical-scores.ts     Reviewer effects, scores under one reviewer
 │   │   ├── criteria-breakdown.ts      Rows per criterion for one person
 │   │   └── participant-comparison.ts  Who leads per task, gap to the best, URL ids
 │   └── index.ts

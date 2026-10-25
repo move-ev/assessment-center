@@ -20,6 +20,11 @@ import {
 	type TaskContribution,
 } from "./comparison";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
+import {
+	clampPercent,
+	computeHypotheticalOverallScores,
+	estimateReviewerEffects,
+} from "./hypothetical-scores";
 import { type RankFields, rankParticipants } from "./ranking";
 import {
 	computeMeanPercent,
@@ -168,6 +173,52 @@ export type EvaluationResultsData = {
 	exportRows: Array<Record<string, string>>;
 };
 
+export type HypotheticalScore = {
+	score: number | null;
+	rank: number | null;
+};
+
+/**
+ * What the overall score and rank would have been with one reviewer for
+ * everyone. Context for the real results only: it never replaces them.
+ */
+export type HypotheticalResults = {
+	/** Reviewers with an estimated effect, strictest first. */
+	reviewers: Array<{
+		reviewerId: string;
+		reviewerName: string;
+		effect: number;
+		comparisonCount: number;
+	}>;
+	/** Most extreme effects among reviewers with enough comparisons. */
+	strictestReviewerId: string | null;
+	mildestReviewerId: string | null;
+	/** People with a real overall score, in the order of the real ranking. */
+	participants: Array<{
+		participantId: string;
+		name: string;
+		actualScore: number;
+		actualRank: number | null;
+		/** The real ranking shows this score with one decimal. */
+		actualShowsDecimal: boolean;
+		averageReviewer: HypotheticalScore;
+		byReviewer: Record<string, HypotheticalScore>;
+		/**
+		 * Per task: the average reviewer's score and who really rated. The
+		 * real task score minus it is the mean effect of these reviewers.
+		 */
+		tasks: Array<{
+			taskId: string;
+			averageReviewerScore: number;
+			reviewers: Array<{
+				reviewerId: string;
+				reviewerName: string;
+				effect: number | null;
+			}>;
+		}>;
+	}>;
+};
+
 export type EvaluationCalibration = {
 	reviewers: Array<ReviewerLeniency & { reviewerName: string }>;
 	criteria: Array<
@@ -177,6 +228,7 @@ export type EvaluationCalibration = {
 			name: string;
 		}
 	>;
+	hypothetical: HypotheticalResults;
 };
 
 async function fetchEvaluationResultsSourceData(acId: string) {
@@ -576,6 +628,131 @@ function requireEntry<K, V>(map: Map<K, V>, key: K, what: string): V {
 	return value;
 }
 
+/** Fewer shared ratings than this rule a reviewer out as strictest or mildest. */
+const MIN_COMPARISONS_FOR_EXTREMES = 3;
+
+/**
+ * Overall score and rank of every person under one reviewer effect, ranked
+ * like the real ranking (Sonderfall 1 and 2 from the real ratings).
+ */
+function rankHypothetical(
+	participants: ParticipantResult[],
+	scores: Map<string, number | null>,
+): Map<string, HypotheticalScore> {
+	const ranked = rankParticipants(
+		participants.map((participant) => ({
+			id: participant.id,
+			name: participant.name,
+			overallScore: scores.get(participant.id) ?? null,
+			hasStrongDeviation: participant.hasStrongDeviation,
+		})),
+	);
+	return new Map(
+		ranked.map((entry) => [
+			entry.id,
+			{ score: entry.overallScore, rank: entry.rank },
+		]),
+	);
+}
+
+function buildHypotheticalResults(
+	percents: ReviewerTaskPercent[],
+	participants: ParticipantResult[],
+	taskLookup: ReturnType<typeof buildTaskLookup>,
+	reviewerNames: Map<string, string>,
+): HypotheticalResults {
+	const { reviewers, taskScores } = estimateReviewerEffects(percents);
+	const taskWeights = new Map(
+		[...taskLookup.values()].map((task) => [task.id, task.scoreWeight]),
+	);
+	const scored = participants.filter(
+		(participant) => participant.overallScore !== null,
+	);
+	const scenario = (effect: number) =>
+		rankHypothetical(
+			scored,
+			computeHypotheticalOverallScores(taskScores, taskWeights, effect),
+		);
+
+	const estimated = reviewers
+		.flatMap((reviewer) =>
+			reviewer.effect === null
+				? []
+				: [
+						{
+							reviewerId: reviewer.reviewerId,
+							reviewerName: requireEntry(
+								reviewerNames,
+								reviewer.reviewerId,
+								"reviewer",
+							),
+							effect: reviewer.effect,
+							comparisonCount: reviewer.comparisonCount,
+						},
+					],
+		)
+		.sort((left, right) => left.effect - right.effect);
+	const candidates = estimated.filter(
+		(reviewer) => reviewer.comparisonCount >= MIN_COMPARISONS_FOR_EXTREMES,
+	);
+	const averageReviewer = scenario(0);
+	const byReviewer = new Map(
+		estimated.map((reviewer) => [
+			reviewer.reviewerId,
+			scenario(reviewer.effect),
+		]),
+	);
+	const none: HypotheticalScore = { score: null, rank: null };
+	const effects = new Map(
+		reviewers.map((reviewer) => [reviewer.reviewerId, reviewer.effect]),
+	);
+	const panels = new Map<string, ReviewerTaskPercent[]>();
+	for (const entry of percents) {
+		const key = `${entry.participantId}\u0000${entry.taskId}`;
+		panels.set(key, [...(panels.get(key) ?? []), entry]);
+	}
+	const tasksOf = (participantId: string) =>
+		taskScores
+			.filter((entry) => entry.participantId === participantId)
+			.map((entry) => ({
+				taskId: entry.taskId,
+				// The fit may leave it beyond 0–100 % next to a boundary rating.
+				averageReviewerScore: roundScore(clampPercent(entry.score)),
+				reviewers: (
+					panels.get(`${participantId}\u0000${entry.taskId}`) ?? []
+				).map((rating) => ({
+					reviewerId: rating.reviewerId,
+					reviewerName: requireEntry(
+						reviewerNames,
+						rating.reviewerId,
+						"reviewer",
+					),
+					effect: effects.get(rating.reviewerId) ?? null,
+				})),
+			}));
+
+	return {
+		reviewers: estimated,
+		strictestReviewerId: candidates[0]?.reviewerId ?? null,
+		mildestReviewerId: candidates.at(-1)?.reviewerId ?? null,
+		participants: scored.map((participant) => ({
+			participantId: participant.id,
+			name: participant.name,
+			actualScore: participant.overallScore ?? 0,
+			actualRank: participant.rank,
+			actualShowsDecimal: participant.showsDecimal,
+			averageReviewer: averageReviewer.get(participant.id) ?? none,
+			byReviewer: Object.fromEntries(
+				[...byReviewer].map(([reviewerId, scores]) => [
+					reviewerId,
+					scores.get(participant.id) ?? none,
+				]),
+			),
+			tasks: tasksOf(participant.id),
+		})),
+	};
+}
+
 type CriterionMeta = Pick<
 	EvaluationCalibration["criteria"][number],
 	"taskName" | "criteriaGroupTitle" | "name"
@@ -590,6 +767,7 @@ function buildCalibration(
 	data: QueryResult,
 	taskLookup: ReturnType<typeof buildTaskLookup>,
 	ratingScaleMax: RatingScaleMax,
+	participants: ParticipantResult[],
 ): EvaluationCalibration {
 	const percents: ReviewerTaskPercent[] = [];
 	const starRatings: CriterionStarRating[] = [];
@@ -651,6 +829,12 @@ function buildCalibration(
 			...entry,
 			...requireEntry(criterionMeta, entry.criteriaId, "criterion"),
 		})),
+		hypothetical: buildHypotheticalResults(
+			percents,
+			participants,
+			taskLookup,
+			reviewerNames,
+		),
 	};
 }
 
@@ -785,7 +969,12 @@ export async function getEvaluationResultsData(
 		participants,
 		tasks: buildTaskResults(data, participants),
 		criteria: buildCriterionResults(data),
-		calibration: buildCalibration(data, taskLookup, ratingScaleMax),
+		calibration: buildCalibration(
+			data,
+			taskLookup,
+			ratingScaleMax,
+			participants,
+		),
 		exportRows: buildExportRows(participants, taskLookup),
 	};
 }

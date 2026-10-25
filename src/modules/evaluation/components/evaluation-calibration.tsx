@@ -15,22 +15,16 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
+import { formatSignedPoints } from "@/lib/format-percent";
 import type { RatingScaleMax } from "@/lib/rating-scale";
 import { cn } from "@/lib/utils";
 import type { EvaluationCalibration as CalibrationData } from "../server/get-evaluation-results-data";
+import { HypotheticalResults } from "./hypothetical-results";
 
 /** Fewer shared ratings than this make a reviewer's tendency shaky. */
 const FEW_COMPARISONS = 3;
 /** Deviation the diverging bar spans to either side, in percentage points. */
 const BAR_RANGE_POINTS = 20;
-
-function formatSigned(value: number, unit: string): string {
-	const formatted = Math.abs(value).toLocaleString("de-DE", {
-		maximumFractionDigits: 1,
-	});
-	const sign = value > 0 ? "+" : value < 0 ? "−" : "±";
-	return `${sign}${formatted} ${unit}`;
-}
 
 function describeTendency(deviation: number): string {
 	if (Math.abs(deviation) < 1) {
@@ -131,7 +125,7 @@ function ReviewerLeniencyCard({
 								<TableCell className="text-right tabular-nums">
 									{reviewer.meanDeviation === null
 										? "–"
-										: formatSigned(reviewer.meanDeviation, "Pkt.")}
+										: formatSignedPoints(reviewer.meanDeviation)}
 								</TableCell>
 								<TableCell className="text-right tabular-nums">
 									{reviewer.comparisonCount}
@@ -142,7 +136,7 @@ function ReviewerLeniencyCard({
 											task.meanDeviation === null
 												? []
 												: [
-														`${taskNames.get(task.taskId) ?? "Aufgabe"} ${formatSigned(task.meanDeviation, "Pkt.")} (${task.comparisonCount}×)`,
+														`${taskNames.get(task.taskId) ?? "Aufgabe"} ${formatSignedPoints(task.meanDeviation)} (${task.comparisonCount}×)`,
 													],
 										)
 										.join(" · ") || "–"}
@@ -246,10 +240,12 @@ function CriterionDisagreementCard({
  * ratings of the same participant in the same task are compared.
  */
 function EvaluationCalibration({
+	acId,
 	calibration,
 	tasks,
 	ratingScaleMax,
 }: {
+	acId: string;
 	calibration: CalibrationData;
 	tasks: Array<{ id: string; name: string }>;
 	ratingScaleMax: RatingScaleMax;
@@ -268,6 +264,7 @@ function EvaluationCalibration({
 				reviewers={calibration.reviewers}
 				taskNames={new Map(tasks.map((task) => [task.id, task.name]))}
 			/>
+			<HypotheticalResults acId={acId} data={calibration.hypothetical} />
 			<CriterionDisagreementCard
 				criteria={calibration.criteria}
 				maxDistance={ratingScaleMax - 1}

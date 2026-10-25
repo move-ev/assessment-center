@@ -27,6 +27,7 @@ import type { EvaluationParticipantDetailData } from "../server/get-evaluation-p
 import { CriteriaDrilldown } from "./criteria-drilldown";
 import { DeviationBadge } from "./deviation-badge";
 import { ReviewerBreakdownCard } from "./evaluation-reviewer-breakdown";
+import { ParticipantHypothetical } from "./participant-hypothetical";
 import { ParticipantProfile } from "./participant-profile";
 import { RankingBandBadge } from "./ranking-band-badge";
 
@@ -154,6 +155,11 @@ function EvaluationParticipantDetail({
 			<TeamObservationsSection
 				groupName={data.participant.groupName}
 				teamObservations={data.teamObservations}
+			/>
+
+			<ParticipantHypothetical
+				data={data.hypothetical}
+				participant={data.participant}
 			/>
 		</div>
 	);
