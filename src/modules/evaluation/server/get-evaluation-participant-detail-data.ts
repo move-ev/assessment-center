@@ -46,7 +46,8 @@ export type ParticipantHypothetical = {
 		taskId: string;
 		taskName: string;
 		actualScore: number | null;
-		averageReviewerScore: number;
+		/** Null while the task has no scored rating yet. */
+		averageReviewerScore: number | null;
 		reviewers: Array<{ reviewerName: string; effect: number | null }>;
 	}>;
 } | null;
@@ -293,22 +294,18 @@ function buildParticipantHypothetical(
 		averageReviewer: row.averageReviewer,
 		mildest: scenario(hypothetical.mildestReviewerId),
 		// Same task order as the task scores.
-		tasks: participant.taskResults.flatMap((task) => {
+		tasks: participant.taskResults.map((task) => {
 			const entry = row.tasks.find((item) => item.taskId === task.taskId);
-			return entry
-				? [
-						{
-							taskId: task.taskId,
-							taskName: task.taskName,
-							actualScore: task.score,
-							averageReviewerScore: entry.averageReviewerScore,
-							reviewers: entry.reviewers.map(({ reviewerName, effect }) => ({
-								reviewerName,
-								effect,
-							})),
-						},
-					]
-				: [];
+			return {
+				taskId: task.taskId,
+				taskName: task.taskName,
+				actualScore: task.score,
+				averageReviewerScore: entry?.averageReviewerScore ?? null,
+				reviewers: (entry?.reviewers ?? []).map(({ reviewerName, effect }) => ({
+					reviewerName,
+					effect,
+				})),
+			};
 		}),
 	};
 }

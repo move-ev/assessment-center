@@ -164,16 +164,18 @@ function ParticipantHypothetical({
 									{formatPercent(task.averageReviewerScore)}
 								</TableCell>
 								<TableCell className="text-muted-foreground text-sm">
-									{task.reviewers
-										.map(
-											(reviewer) =>
-												`${reviewer.reviewerName} (${
-													reviewer.effect === null
-														? "kein Vergleich"
-														: formatSignedPoints(reviewer.effect)
-												})`,
-										)
-										.join(" · ")}
+									{task.reviewers.length === 0
+										? "Noch nicht bewertet"
+										: task.reviewers
+												.map(
+													(reviewer) =>
+														`${reviewer.reviewerName} (${
+															reviewer.effect === null
+																? "kein Vergleich"
+																: formatSignedPoints(reviewer.effect)
+														})`,
+												)
+												.join(" · ")}
 								</TableCell>
 							</TableRow>
 						))}

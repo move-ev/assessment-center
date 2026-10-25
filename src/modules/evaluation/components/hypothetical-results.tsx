@@ -218,8 +218,10 @@ function HypotheticalResults({
 						anderen Bewertern vergleicht. Kritischster und mildester kommen nur
 						aus Bewertern mit mindestens 3 Vergleichen. Weil ein Bewerter so
 						alle gleich verschiebt, ist die Reihenfolge bei jedem einzelnen
-						Bewerter dieselbe; sie weicht von der tatsächlichen ab, wo jemand
-						vor allem von strengen oder milden Bewertern gesehen wurde.
+						Bewerter praktisch dieselbe (Abweichungen nur an der 0- oder
+						100-%-Grenze und bei Gleichstand im ganzen Prozent); sie weicht von
+						der tatsächlichen ab, wo jemand vor allem von strengen oder milden
+						Bewertern gesehen wurde.
 					</span>
 				</CardDescription>
 			</CardHeader>

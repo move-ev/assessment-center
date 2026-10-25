@@ -48,6 +48,8 @@ export function formatSignedPoints(value: number): string {
 	const formatted = Math.abs(value).toLocaleString("de-DE", {
 		maximumFractionDigits: 1,
 	});
-	const sign = value > 0 ? "+" : value < 0 ? "−" : "±";
+	// Decided on the rounded value, so −0.04 reads "±0", not "−0".
+	const sign =
+		Math.round(Math.abs(value) * 10) === 0 ? "±" : value > 0 ? "+" : "−";
 	return `${sign}${formatted} Pkt.`;
 }

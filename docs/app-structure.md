@@ -81,12 +81,15 @@ reviewer percentage is split into the person's task score and one shift per
 reviewer across all tasks (alternating least squares, shrunk towards 0 by
 three pseudo-ratings, centred so the average reviewer has 0). Shifting the
 average reviewer's task scores by a reviewer's effect gives the overall score
-and rank had that reviewer rated everyone: the average, the strictest and the
+and rank had that reviewer rated everyone (ranked like the real ranking, with
+the person's real Sonderfall-1 status kept, so only the reviewer effect moves
+anyone): the average, the strictest and the
 mildest reviewer (at least three comparisons), or one picked. The real score
 and rank stay first and authoritative; ranking and export are unaffected.
 The detail page shows the same scenarios for one person last, below all real
-ratings, with each task's average-reviewer score and the effects of the
-reviewers who rated it (their mean is the gap to the real task score).
+ratings, with each task's average-reviewer score (kept within 0–100 %; a
+dash while unrated) and the effects of the reviewers who rated it (their mean
+is the gap to the real task score).
 
 ---
 

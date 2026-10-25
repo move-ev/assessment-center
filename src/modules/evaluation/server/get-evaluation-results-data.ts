@@ -21,6 +21,7 @@ import {
 } from "./comparison";
 import { computeReviewerSpread, isStrongDeviation } from "./deviation";
 import {
+	clampPercent,
 	computeHypotheticalOverallScores,
 	estimateReviewerEffects,
 } from "./hypothetical-scores";
@@ -715,7 +716,8 @@ function buildHypotheticalResults(
 			.filter((entry) => entry.participantId === participantId)
 			.map((entry) => ({
 				taskId: entry.taskId,
-				averageReviewerScore: roundScore(entry.score),
+				// The fit may leave it beyond 0–100 % next to a boundary rating.
+				averageReviewerScore: roundScore(clampPercent(entry.score)),
 				reviewers: (
 					panels.get(`${participantId}\u0000${entry.taskId}`) ?? []
 				).map((rating) => ({

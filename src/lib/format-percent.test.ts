@@ -31,5 +31,7 @@ describe("formatSignedPoints", () => {
 		assert.equal(formatSignedPoints(-2.68), "−2,7 Pkt.");
 		assert.equal(formatSignedPoints(3), "+3 Pkt.");
 		assert.equal(formatSignedPoints(0), "±0 Pkt.");
+		assert.equal(formatSignedPoints(-0.04), "±0 Pkt.");
+		assert.equal(formatSignedPoints(0.04), "±0 Pkt.");
 	});
 });

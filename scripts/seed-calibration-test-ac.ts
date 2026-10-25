@@ -14,7 +14,8 @@
  * - one person rated by a single reviewer per task, one with no ratings.
  * Test reviewers are fake users (@kalibrierung.test) that cannot sign in.
  * --apply refuses to run against a database that looks like production
- * (more than a handful of users) and replaces an earlier test AC.
+ * (more than 15 users besides its own) and replaces an earlier test AC it
+ * created (recognised by its id prefix).
  */
 import { PrismaNeon } from "@prisma/adapter-neon";
 import { PrismaClient } from "../generated/prisma/client";
@@ -96,15 +97,81 @@ const TASKS = [
 	},
 ] as const;
 
-const FIRST = ["Anna", "Ben", "Clara", "David", "Emma", "Felix", "Greta", "Hannes", "Ida", "Jonas", "Klara", "Lukas", "Mila", "Noah", "Olivia", "Paul", "Quirin", "Romy", "Simon", "Theresa", "Ulrich", "Vera", "Wim", "Xenia", "Yannick", "Zoe", "Anton", "Bea", "Carl", "Dana"];
-const LAST = ["Abel", "Brandt", "Conrad", "Dietz", "Ebert", "Fuchs", "Graf", "Hahn", "Iske", "Jung", "Kraus", "Lang", "Maier", "Neumann", "Otto", "Peters", "Quast", "Roth", "Sauer", "Thiel", "Ulmer", "Vogt", "Wolf", "Xander", "Yilmaz", "Zimmer", "Arndt", "Busch", "Claus", "Dorn"];
+const FIRST = [
+	"Anna",
+	"Ben",
+	"Clara",
+	"David",
+	"Emma",
+	"Felix",
+	"Greta",
+	"Hannes",
+	"Ida",
+	"Jonas",
+	"Klara",
+	"Lukas",
+	"Mila",
+	"Noah",
+	"Olivia",
+	"Paul",
+	"Quirin",
+	"Romy",
+	"Simon",
+	"Theresa",
+	"Ulrich",
+	"Vera",
+	"Wim",
+	"Xenia",
+	"Yannick",
+	"Zoe",
+	"Anton",
+	"Bea",
+	"Carl",
+	"Dana",
+];
+const LAST = [
+	"Abel",
+	"Brandt",
+	"Conrad",
+	"Dietz",
+	"Ebert",
+	"Fuchs",
+	"Graf",
+	"Hahn",
+	"Iske",
+	"Jung",
+	"Kraus",
+	"Lang",
+	"Maier",
+	"Neumann",
+	"Otto",
+	"Peters",
+	"Quast",
+	"Roth",
+	"Sauer",
+	"Thiel",
+	"Ulmer",
+	"Vogt",
+	"Wolf",
+	"Xander",
+	"Yilmaz",
+	"Zimmer",
+	"Arndt",
+	"Busch",
+	"Claus",
+	"Dorn",
+];
 
-type Person = { name: string; ability: number; panel: "strict" | "mild" | "mixed" };
+type Person = {
+	name: string;
+	ability: number;
+	panel: "strict" | "mild" | "mixed";
+};
 
 /** Ability in stars around the middle of the scale. */
 const PEOPLE: Person[] = FIRST.map((first, index) => ({
 	name: `${first} ${LAST[index]}`,
-	ability: 3.6 + ((index * 7) % 30) / 30 * 1.8 - 0.9,
+	ability: 3.6 + (((index * 7) % 30) / 30) * 1.8 - 0.9,
 	// Every fifth person sees mostly strict, every fifth+2 mostly mild reviewers.
 	panel: index % 5 === 0 ? "strict" : index % 5 === 2 ? "mild" : "mixed",
 }));
@@ -141,7 +208,10 @@ function stars(ability: number, reviewer: string): number {
 }
 
 async function main() {
-	const users = await db.user.count();
+	// Its own fake reviewers from earlier runs don't count.
+	const users = await db.user.count({
+		where: { NOT: { email: { endsWith: "@kalibrierung.test" } } },
+	});
 	if (APPLY && users > 15) {
 		throw new Error(
 			`${users} users: this looks like production, refusing to seed test data`,
@@ -158,18 +228,27 @@ async function main() {
 		});
 	});
 	for (const task of TASKS) {
-		plan.push({ person: SINGLE_REVIEWER, task: task.key, reviewers: ["Allein Bewertend"] });
+		plan.push({
+			person: SINGLE_REVIEWER,
+			task: task.key,
+			reviewers: ["Allein Bewertend"],
+		});
 		plan.push({ person: NO_RATINGS, task: task.key, reviewers: [] });
 	}
 
 	const reviewerNames = Object.keys(TRUE_LENIENCY);
-	console.log(`AC "${AC_NAME}": ${PEOPLE.length + 2} participants, ${reviewerNames.length} reviewers, ${plan.reduce((sum, entry) => sum + entry.reviewers.length, 0)} rated assignments`);
+	console.log(
+		`AC "${AC_NAME}": ${PEOPLE.length + 2} participants, ${reviewerNames.length} reviewers, ${plan.reduce((sum, entry) => sum + entry.reviewers.length, 0)} rated assignments`,
+	);
 	if (!APPLY) {
 		console.log("Dry run. Pass --apply to write.");
 		return;
 	}
 
-	const existing = await db.assessmentCenter.findMany({ where: { name: AC_NAME } });
+	// Only ACs this script created: their ids carry the "test" prefix.
+	const existing = await db.assessmentCenter.findMany({
+		where: { name: AC_NAME, id: { startsWith: "testac" } },
+	});
 	for (const ac of existing) {
 		await db.assessmentCenter.delete({ where: { id: ac.id } });
 		console.log(`Deleted earlier test AC ${ac.id}`);
@@ -200,8 +279,16 @@ async function main() {
 	const dayIds = [id("d"), id("d")];
 	await db.assessmentDay.createMany({
 		data: [
-			{ id: dayIds[0]!, assessmentCenterId: acId, date: new Date("2026-11-07") },
-			{ id: dayIds[1]!, assessmentCenterId: acId, date: new Date("2026-11-08") },
+			{
+				id: dayIds[0]!,
+				assessmentCenterId: acId,
+				date: new Date("2026-11-07"),
+			},
+			{
+				id: dayIds[1]!,
+				assessmentCenterId: acId,
+				date: new Date("2026-11-08"),
+			},
 		],
 	});
 
@@ -258,11 +345,19 @@ async function main() {
 		const reviewerId = id("r");
 		reviewerIds.set(name, reviewerId);
 		await db.reviewer.create({
-			data: { id: reviewerId, assessmentCenterId: acId, userId: userIds.get(name)! },
+			data: {
+				id: reviewerId,
+				assessmentCenterId: acId,
+				userId: userIds.get(name)!,
+			},
 		});
 	}
 
-	const allPeople = [...PEOPLE.map((person) => person.name), SINGLE_REVIEWER, NO_RATINGS];
+	const allPeople = [
+		...PEOPLE.map((person) => person.name),
+		SINGLE_REVIEWER,
+		NO_RATINGS,
+	];
 	const participantIds = new Map<string, string>();
 	await db.participant.createMany({
 		data: allPeople.map((name) => {
@@ -278,7 +373,11 @@ async function main() {
 		const groupIndex = start / groupSize;
 		const groupId = id("g");
 		await db.participantGroup.create({
-			data: { id: groupId, assessmentCenterId: acId, name: `Gruppe ${String.fromCharCode(65 + groupIndex)}` },
+			data: {
+				id: groupId,
+				assessmentCenterId: acId,
+				name: `Gruppe ${String.fromCharCode(65 + groupIndex)}`,
+			},
 		});
 		await db.participantGroupMembership.createMany({
 			data: allPeople.slice(start, start + groupSize).map((name) => ({
@@ -298,11 +397,28 @@ async function main() {
 		});
 	}
 
-	const abilities = new Map(PEOPLE.map((person) => [person.name, person.ability]));
+	const abilities = new Map(
+		PEOPLE.map((person) => [person.name, person.ability]),
+	);
 	abilities.set(SINGLE_REVIEWER, 4);
-	const assignments: Array<{ id: string; reviewerId: string; participantId: string; taskId: string }> = [];
-	const quantitative: Array<{ id: string; reviewerAssignmentId: string; criteriaId: string; value: number }> = [];
-	const qualitative: Array<{ id: string; reviewerAssignmentId: string; criteriaId: string; text: string }> = [];
+	const assignments: Array<{
+		id: string;
+		reviewerId: string;
+		participantId: string;
+		taskId: string;
+	}> = [];
+	const quantitative: Array<{
+		id: string;
+		reviewerAssignmentId: string;
+		criteriaId: string;
+		value: number;
+	}> = [];
+	const qualitative: Array<{
+		id: string;
+		reviewerAssignmentId: string;
+		criteriaId: string;
+		text: string;
+	}> = [];
 
 	for (const entry of plan) {
 		for (const reviewer of entry.reviewers) {
@@ -343,10 +459,14 @@ async function main() {
 	await db.quantitativeRating.createMany({ data: quantitative });
 	await db.qualitativeRating.createMany({ data: qualitative });
 
-	console.log(`Created AC ${acId}: ${assignments.length} assignments, ${quantitative.length} star ratings`);
+	console.log(
+		`Created AC ${acId}: ${assignments.length} assignments, ${quantitative.length} star ratings`,
+	);
 	console.log("True leniency in stars (≈ × 100 / 6 percentage points):");
 	for (const [name, value] of Object.entries(TRUE_LENIENCY)) {
-		console.log(`  ${name.padEnd(20)} ${value > 0 ? "+" : ""}${value}  (≈ ${((value * 100) / SCALE_MAX).toFixed(1)} Pkt.)`);
+		console.log(
+			`  ${name.padEnd(20)} ${value > 0 ? "+" : ""}${value}  (≈ ${((value * 100) / SCALE_MAX).toFixed(1)} Pkt.)`,
+		);
 	}
 }
 
